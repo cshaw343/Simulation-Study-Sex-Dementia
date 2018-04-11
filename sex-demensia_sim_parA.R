@@ -1,7 +1,10 @@
-#Simulation Senario A:  No anticipated bias
-#25% cumulative incidence of mortality
-#Exposure = male gender
-
+#***************************************************************
+# Simulation Senario A:  No anticipated bias
+# 25% cumulative incidence of mortality
+# Exposure = male gender
+# Based on US lifetables, sample is 51% F / 49% M at age 50
+# Remaining LE at age 50:  33.2 years for F and 29.6 years for M
+#***************************************************************
 
 #---- Time between assessments ----
 #Time is measured in years
@@ -37,3 +40,5 @@ g4 <- (0.095)*(-0.01) #Interaction effect of exposure and age on log hazard of d
 g5 <- 0       #Effect of TD cognitive slope on log hazard of death
 g6 <- 0       #Effect of TD cognitive function on log hazard of death
 
+#---- Baseline hazard of death ----
+lambda <- 0.004315
