@@ -1,1 +1,1 @@
-# Simulation-Study-Sex-Dimentia
+# Simulation-Study-Sex-Dementia
