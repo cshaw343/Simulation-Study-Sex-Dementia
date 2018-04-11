@@ -29,4 +29,11 @@ b11 <- 0      #Effect of exposure on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope
 b13 <- -0.05  #Effect of U on cognitive slope
 
+#---- Parameters for Sij (survival for person i at time j) ----
+g1 <- 0.47    #Effect of exposure on log hazard of death
+g2 <- 0.095   #Effect of TD (time of diagnosis) age on log hazard of death
+g3 <- 0       #Effect of U on log hazard of death
+g4 <- (0.095)*(-0.01) #Interaction effect of exposure and age on log hazard of death
+g5 <- 0       #Effect of TD cognitive slope on log hazard of death
+g6 <- 0       #Effect of TD cognitive function on log hazard of death
 
