@@ -19,6 +19,14 @@ var3 <- 0.70  #Variance of noise for Cij (cognitive function for person i at tim
 r1 <- 0.40    #Correlation between noise terms for Cij
 var4 <- 0.19  #Variance of measurement error of Cij
 
-
+#---- Parameters for Cij (cognitive function for person i at time j) ----
+b00 <- 0      #Cognitive intercept for unexposed
+b01 <- 0      #Effect of exposure on cognitive intercept
+b02 <- -0.05  #Effect of age on cognitive intercept
+b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
+b10 <- -0.05  #Cognitive slope for unexposed
+b11 <- 0      #Effect of exposure on cognitive slope
+b12 <- -0.005 #Effect of age on cognitive slope
+b13 <- -0.05  #Effect of U on cognitive slope
 
 
