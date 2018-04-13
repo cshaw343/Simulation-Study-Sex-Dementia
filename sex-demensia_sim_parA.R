@@ -1,5 +1,5 @@
 #***************************************************************
-# Simulation Senario A:  No anticipated bias
+# Simulation Senario A
 # 25% cumulative incidence of mortality
 # Exposure = male gender
 # Based on US lifetables, sample is 51% F / 49% M at age 50
@@ -18,16 +18,19 @@ pexp <- 0.49
 var0 <- 0.2   #Variance of random cognitive intercept
 var1 <- 0.005 #Variance of random cognitive slope
 cov <- 0.01   #Covariance of random intercept and random slope
-var3 <- 0.2  #Variance of noise for Cij (cognitive function for person i at time j)
+var3 <- 0.2   #Variance of noise for Cij 
+              #(cognitive function for person i at time j)
 r1 <- 0.40    #Correlation between noise terms for Cij
 var4 <- 0.19  #Variance of measurement error of Cij
 
 #---- Parameters for Cij (cognitive function for person i at time j) ----
+#Knots placed at ages 70 and 85
 b00 <- 0      #Cognitive intercept for unexposed
 b01 <- 0      #Effect of exposure on cognitive intercept
-b02 <- -0.05  #Effect of age on cognitive intercept
+b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
-b10 <- -0.05  #Cognitive slope for unexposed
+b10a <- -0.05  #Cognitive slope for unexposed
+
 b11 <- 0      #Effect of exposure on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope
 b13 <- -0.05  #Effect of U on cognitive slope
