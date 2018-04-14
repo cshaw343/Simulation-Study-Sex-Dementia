@@ -6,13 +6,15 @@
 # Remaining LE at age 50:  33.2 years for F and 29.6 years for M
 #***************************************************************
 
+#---- Baseline age ----
+age0 <- 50
+
 #---- Time between assessments ----
 #Time is measured in years
 int_time <- 5
 
 #---- Prevalance of exposure (sex) ----
 #Exposure = male gender
-
 psex <- 0.49
 
 #---- Variances and correlations ----
