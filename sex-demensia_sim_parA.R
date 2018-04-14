@@ -38,11 +38,11 @@ b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
 g1 <- 0.47    #Effect of sex on log hazard of death
-g2 <- 0.095   #Effect of TD (time of diagnosis) age on log hazard of death
+g2 <- 0.095   #Effect of TD age on log hazard of death (exp(0.095) = 1.10)
 g3 <- 0       #Effect of U on log hazard of death
-g4 <- (0.095)*(-0.01) #Interaction effect of exposure and age on log hazard of death
+g4 <- (0.095)*(-0.01) #Interaction effect of sex and age on log hazard of death
 g5 <- 0       #Effect of TD cognitive slope on log hazard of death
 g6 <- 0       #Effect of TD cognitive function on log hazard of death
 
 #---- Baseline hazard of death ----
-lambda <- 0.004315
+lambda <- 0.0031
