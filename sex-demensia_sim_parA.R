@@ -6,8 +6,11 @@
 # Remaining LE at age 50:  33.2 years for F and 29.6 years for M
 #***************************************************************
 
+#---- Number of observations ----
+num_obs <- 3000
+
 #---- Baseline age ----
-age0 <- 50
+age0 <- rep(50, num_obs)
 
 #---- Time between assessments ----
 #Time is measured in years
