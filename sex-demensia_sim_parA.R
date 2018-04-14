@@ -10,33 +10,34 @@
 #Time is measured in years
 int_time <- 5
 
-#---- Prevalance of exposure ----
+#---- Prevalance of exposure (sex) ----
+#Exposure = male gender
 
-pexp <- 0.49
+psex <- 0.49
 
 #---- Variances and correlations ----
 var0 <- 0.2   #Variance of random cognitive intercept
 var1 <- 0.005 #Variance of random cognitive slope
 cov <- 0.01   #Covariance of random intercept and random slope
-var3 <- 0.2   #Variance of noise for Cij 
-              #(cognitive function for person i at time j)
+var3 <- 0.2   #Variance of noise for Cij (cognitive function for person i at time j)
 r1 <- 0.40    #Correlation between noise terms for Cij
 var4 <- 0.19  #Variance of measurement error of Cij
 
-#---- Parameters for Cij (cognitive function for person i at time j) ----
+#---- Parameters for Cij ----
 #Knots placed at ages 70 and 85
-b00 <- 0      #Cognitive intercept for unexposed
-b01 <- 0      #Effect of exposure on cognitive intercept
+b00 <- 0      #Cognitive intercept for females
+b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
-b10a <- -0.05  #Cognitive slope for unexposed
-
-b11 <- 0      #Effect of exposure on cognitive slope
-b12 <- -0.005 #Effect of age on cognitive slope
+b10a <- 0     #Cognitive slope for females age 50-70
+b10b <- -0.15 #Cognitive slope for females age 70-85
+b10c <- -0.4  #Cognitive slope for females age 85+
+b11 <- 0      #Effect of sex on cognitive slope
+b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
-g1 <- 0.47    #Effect of exposure on log hazard of death
+g1 <- 0.47    #Effect of sex on log hazard of death
 g2 <- 0.095   #Effect of TD (time of diagnosis) age on log hazard of death
 g3 <- 0       #Effect of U on log hazard of death
 g4 <- (0.095)*(-0.01) #Interaction effect of exposure and age on log hazard of death
