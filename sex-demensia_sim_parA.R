@@ -12,9 +12,12 @@ num_obs <- 3000
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
 
-#---- Time between assessments ----
-#Time is measured in years
+#---- Assessment parameters ----
+#Time between assessments (measured in years)
 int_time <- 5
+
+#Number of assessments
+num_tests <- 10
 
 #---- Prevalance of exposure (sex) ----
 #Exposure = male gender
