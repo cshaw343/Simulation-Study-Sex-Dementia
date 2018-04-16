@@ -24,6 +24,7 @@ age_varnames <- vector(length = num_tests)
 for(i in 1:num_tests){
   age_varnames[i] = paste("age", i, sep = "")
 }
+age_varnames <- append("age0", age_varnames)
 
 #---- The simulation function ----
 sex_dem_sim <- function(){
@@ -33,7 +34,7 @@ sex_dem_sim <- function(){
                 "sex" = rbinom(num_obs, size = 1, prob = psex), 
                 "U" = rnorm(num_obs, mean = 0, sd = 1))
   #Creating ages at each visit
-  ages <- 
+  ages <- matrix(NA, nrow = num_obs, ncol = num_tests + 1)
   #Creating centered ages
   
   
