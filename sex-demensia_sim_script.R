@@ -40,12 +40,17 @@ sex_dem_sim <- function(){
                 "sex" = rbinom(num_obs, size = 1, prob = psex), 
                 "U" = rnorm(num_obs, mean = 0, sd = 1))
   #Creating ages at each visit
-  ages <- matrix(NA, nrow = num_obs, ncol = length(age_varnames))
+  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
+  for(i in 1:length(age_varnames)){
+    if(i == 1){
+      ages[, i] = age0
+    } else ages[, i] = ages[, (i-1)] + int_time
+  }
+  colnames(ages) <- age_varnames
   
   #Creating centered ages
-  
-  
-  
+  c_ages <- as_tibble(ages - mean(age0))
+  colnames(c_ages) <- agec_varnames
 }
 
 sex_dem_sim()
