@@ -19,9 +19,9 @@ int_time <- 5
 #Number of assessments
 num_tests <- 10
 
-#---- Prevalance of exposure (sex) ----
+#---- Prevalance of exposure (male) ----
 #Exposure = male gender
-psex <- 0.49
+pmale <- 0.49
 
 #---- Variances and correlations ----
 var0 <- 0.2   #Variance of random cognitive intercept
@@ -34,23 +34,23 @@ var4 <- 0.19  #Variance of measurement error of Cij
 #---- Parameters for Cij ----
 #Knots placed at ages 70 and 85
 b00 <- 0      #Cognitive intercept for females
-b01 <- 0      #Effect of sex on cognitive intercept
+b01 <- 0      #Effect of male on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 b10a <- 0     #Cognitive slope for females age 50-70
 b10b <- -0.15 #Cognitive slope for females age 70-85
 b10c <- -0.4  #Cognitive slope for females age 85+
-b11 <- 0      #Effect of sex on cognitive slope
+b11 <- 0      #Effect of male on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
-g1 <- 0.47    #Effect of sex on log hazard of death
-g2 <- 0.095   #Effect of TD age on log hazard of death (exp(0.095) = 1.10)
+g1 <- 0.47    #Effect of male on log hazard of death
+g2 <- 0.095   #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
 g3 <- 0       #Effect of U on log hazard of death
-g4 <- (0.095)*(-0.01) #Interaction effect of sex and age on log hazard of death
-g5 <- 0       #Effect of TD cognitive slope on log hazard of death
-g6 <- 0       #Effect of TD cognitive function on log hazard of death
+g4 <- (0.095)*(-0.01) #Interaction effect of male and age on log hazard of death
+g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
+g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death ----
 lambda <- 0.0031
