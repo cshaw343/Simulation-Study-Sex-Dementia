@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse")
+p_load("tidyverse", "MASS")
 
 #Using standard notation (as opposed to scientific), rounded to three 
 #decimal places
@@ -32,7 +32,6 @@ alpha_varnames <- vector(length = num_tests)
 for(i in 1:num_tests){
   alpha_varnames[i] = paste("alpha", i, sep = "")
 }
-
 
 #---- Generating assessment timepoint data ----
 visit_times <- seq(from = int_time, to = int_time*num_tests, by = int_time)
@@ -71,15 +70,25 @@ sex_dem_sim <- function(){
   c_ages <- as_tibble(ages - mean(age0))
   colnames(c_ages) <- agec_varnames
   
-  #---- Generating autoregressive noise term (unexplained variance in Cij) for each visit ----
-  sd_alpha <- sqrt((1 - r1*r1)*var3)
-  alphas <- as_tibble(matrix(NA, ncol = num_tests, nrow = num_obs))
-  for(i in 1:num_tests){
-    alphas[, i]
-  }
+  #---- Generating "true" and "measured" Cij ----
+  #Cij = b00 + z0i + bo1*sexi + b02*age0i + b03*Ui + (b10 + z1i + b11*sexi + 
+  #b12*age0i + b13*Ui)*timej + epsilonij
   
-  #Creating "true" and "measured" cognitive function at each study assessment
-  #measured = true + error
+    #---- Generating random terms for slope and intercept ----
+    #Generate random terms for each individual
+    noise <- mvrnorm(n = num_obs, mu = rep(0, 2), Sigma = slope_int_cov)
+    colnames(noise) <- c("z0i", "z1i")
+  
+    #---- Generating autoregressive noise term (unexplained variance in Cij) for each visit ----
+    sd_alpha <- sqrt((1 - r1*r1)*var3)
+    alphas <- as_tibble(matrix(NA, ncol = num_tests, nrow = num_obs))
+    replicate(sd_alpha*rnorm(n = num_obs), )
+    for(i in 1:num_tests){
+      alphas[, i] = 
+    }
+  
+    #Creating "true" and "measured" cognitive function at each study assessment
+    #measured = true + error
   
   
   
