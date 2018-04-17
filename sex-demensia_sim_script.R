@@ -91,7 +91,8 @@ sex_dem_sim <- function(){
     colnames(eps) <- eps_varnames
   
     #---- Creating full matrix of data for each individual ----
-    obs <- cbind(obs, cbind(slope_int_noise, eps))
+    obs <- left_join(obs, ages, by = "id") %>% left_join(c_ages, by = "id") %>%
+      left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
     cog_func <- as_tibble(matrix(NA, nrow = num_obs, 
