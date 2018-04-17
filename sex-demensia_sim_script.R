@@ -16,21 +16,22 @@ source("sex-demensia_sim_parA.R")
 
 #---- Generating variable names for each assessment timepoint ----
 #Age labels at each assessment timepoint
-age_varnames <- vector(length = num_tests)
+age_varnames <- c("id", vector(length = num_tests))
 for(i in 1:num_tests){
   age_varnames[i] = paste("age", i, sep = "")
 }
 
 #Centered age labels at each assessment timepoint
-agec_varnames <- vector(length = length(age_varnames))
+agec_varnames <- c("id", vector(length = length(age_varnames)))
 for(i in 1:length(agec_varnames)){
   agec_varnames[i] = paste(age_varnames[i], "_c50", sep = "")
 }
 
+
 #Alpha (for autoregressive noise) labels at each assessment timepoint
-eps_varnames <- vector(length = num_tests)
+eps_varnames <- c("id", vector(length = num_tests))
 for(i in 1:num_tests){
-  eps_varnames[i] = paste("eps", i, sep = "")
+  eps_varnames[i + 1] = paste("eps", i, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -40,7 +41,7 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 Cij <- function(obs, t){
   knots = c(0, 20, 35)
   if(t >= knots[1] & t < knots[2]){
-    return(b00 + z0i + boi)
+    return(b00 + z0i + boi*sex + b02*age)
   }
 }
 
