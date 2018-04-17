@@ -27,10 +27,16 @@ for(i in 1:num_tests){
   agec_varnames[i + 2] = paste(age_varnames[i + 2], "_c50", sep = "")
 }
 
-#Alpha (for autoregressive noise) labels at each assessment timepoint
+#Epsilon labels at each assessment timepoint
 eps_varnames <- c("id", "eps0", vector(length = num_tests))
 for(i in 1:num_tests){
   eps_varnames[i + 2] = paste("eps", i, sep = "")
+}
+
+#Cij labels at each assessment timepoint
+Cij_varnames <- c("id", "Ci0", vector(length = num_tests))
+for(i in 1:num_tests){
+  Cij_varnames[i + 2] = paste("Ci", i, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -116,17 +122,11 @@ sex_dem_sim <- function(){
       left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
-    cog_func <- as_tibble(matrix(NA, nrow = num_obs, 
-                                 ncol = length(visit_times)))
-    for(i in 1:length(visit_times)){
-      cog_func[, i] = apply(obs, 1, Cij)
-    }
-    
-  
-  
-  
+    Cij <- as.data.frame(cog_func(obs)) %>% 
+    colnames(Cij) <- 
 }
 
+sex_dem_sim()
 
 
 
