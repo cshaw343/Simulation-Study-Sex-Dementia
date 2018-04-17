@@ -37,10 +37,10 @@ for(i in 1:num_tests){
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Model for Cognitive Function ----
-Cij <- function(t){
+Cij <- function(obs, t){
   knots = c(0, 20, 35)
-  if(t >= 0 & t < 20){
-    
+  if(t >= knots[1] & t < knots[2]){
+    return(b00 + z0i + boi)
   }
 }
 
@@ -76,8 +76,8 @@ sex_dem_sim <- function(){
   
     #---- Generating random terms for slope and intercept ----
     #Generate random terms for each individual
-    slope_int_noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
-                               Sigma = slope_int_cov)
+    slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+                               Sigma = slope_int_cov))
     colnames(slope_int_noise) <- c("z0i", "z1i")
   
     #---- Generating noise term (unexplained variance in Cij) for each visit ----
@@ -85,12 +85,19 @@ sex_dem_sim <- function(){
     eps <- replicate(num_tests, rnorm(n = num_obs, mean = 0, sd = sd_eps))
     colnames(eps) <- eps_varnames
   
-    #Creating "true" and "measured" cognitive function at each study assessment
-    #measured = true + error
+    #---- Creating full matrix of data for each individual ----
+    obs <- cbind(obs, cbind(slope_int_noise, eps))
+    
+    #---- Calculating Cij for each individual ----
+    cog_func <- as_tibble(matrix(NA, nrow = num_obs, 
+                                 ncol = length(visit_times)))
+    for(i in 1:length(visit_times)){
+      t = visit_times[i]
+      cog_func[, i] = apply(noise, 1, Cij)
+    }
+    
   
   
   
 }
 
-
-sex_dem_sim()
