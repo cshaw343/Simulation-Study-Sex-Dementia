@@ -80,12 +80,14 @@ sex_dem_sim <- function(){
     #Generate random terms for each individual
     slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
                                Sigma = slope_int_cov)) %>% 
-    mutate("id" = seq(from = 1, to = num_obs, by = 1))
-    colnames(slope_int_noise) <- c("z0i", "z1i", "id")
+    cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
+    colnames(slope_int_noise) <- c("id", "z0i", "z1i")
   
     #---- Generating noise term (unexplained variance in Cij) for each visit ----
     sd_eps <- sqrt(var3)
-    eps <- replicate(num_tests, rnorm(n = num_obs, mean = 0, sd = sd_eps))
+    eps <- as_tibble(replicate(num_tests + 1, 
+                               rnorm(n = num_obs, mean = 0, sd = sd_eps))) %>% 
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
     colnames(eps) <- eps_varnames
   
     #---- Creating full matrix of data for each individual ----
