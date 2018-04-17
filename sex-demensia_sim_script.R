@@ -68,7 +68,8 @@ sex_dem_sim <- function(){
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0))
+  c_ages <- as_tibble(ages - mean(age0)) %>% 
+    mutate("id" = seq(from = 1, to = num_obs, by = 1))
   colnames(c_ages) <- agec_varnames
   
   #---- Generating "true" cognitive function Cij ----
