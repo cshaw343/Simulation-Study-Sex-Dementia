@@ -34,7 +34,7 @@ for(i in 1:num_tests){
 }
 
 #---- Generating assessment timepoint data ----
-visit_times <- seq(from = int_time, to = int_time*num_tests, by = int_time)
+visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Model for Cognitive Function ----
 Cij <- function(t){
@@ -76,8 +76,9 @@ sex_dem_sim <- function(){
   
     #---- Generating random terms for slope and intercept ----
     #Generate random terms for each individual
-    noise <- mvrnorm(n = num_obs, mu = rep(0, 2), Sigma = slope_int_cov)
-    colnames(noise) <- c("z0i", "z1i")
+    slope_int_noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
+                               Sigma = slope_int_cov)
+    colnames(slope_int_noise) <- c("z0i", "z1i")
   
     #---- Generating noise term (unexplained variance in Cij) for each visit ----
     sd_eps <- sqrt(var3)
