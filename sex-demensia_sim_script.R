@@ -39,9 +39,26 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 #---- Model for Cognitive Function ----
 Cij <- function(obs, t){
   knots = c(0, 20, 35)
+  test_num <- (which(visit_times == t) - 1)
+  eps <- paste("eps", test_num, sep = "")
   if(t >= knots[1] & t < knots[2]){
-    return(b00 + z0i + boi*sex + b02*age)
+    Cij = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+      b03*obs[, "U"] + obs[, eps] + 
+      (b10a + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+         b13*obs[, "U"])*t
+  } else if (t >= knots[2] & t < knots[3]){
+    Cij = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+      b03*obs[, "U"] + (b10a - b10b)*knots[2] + obs[, eps] + 
+      (b10b + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+         b13*obs[, "U"])*t
+  } else {
+    Cij = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+      b03*obs[, "U"] + (b10a - b10b)*knots[2] + (b10b - b10c)*knots[3] + 
+      obs[, eps] + 
+      (b10c + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+         b13*obs[, "U"])*t
   }
+  return("Cij" = Cij)
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -106,4 +123,12 @@ sex_dem_sim <- function(){
   
   
 }
+
+#---- Attempt to plot a sample of Cij ----
+Cij_plot <- ggplot()
+
+
+
+
+
 
