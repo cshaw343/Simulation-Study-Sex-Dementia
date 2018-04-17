@@ -28,9 +28,9 @@ for(i in 1:length(agec_varnames)){
 }
 
 #Alpha (for autoregressive noise) labels at each assessment timepoint
-alpha_varnames <- vector(length = num_tests)
+eps_varnames <- vector(length = num_tests)
 for(i in 1:num_tests){
-  alpha_varnames[i] = paste("alpha", i, sep = "")
+  eps_varnames[i] = paste("eps", i, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -70,7 +70,7 @@ sex_dem_sim <- function(){
   c_ages <- as_tibble(ages - mean(age0))
   colnames(c_ages) <- agec_varnames
   
-  #---- Generating "true" and "measured" Cij ----
+  #---- Generating "true" cognitive function Cij ----
   #Cij = b00 + z0i + bo1*sexi + b02*age0i + b03*Ui + (b10 + z1i + b11*sexi + 
   #b12*age0i + b13*Ui)*timej + epsilonij
   
@@ -79,13 +79,10 @@ sex_dem_sim <- function(){
     noise <- mvrnorm(n = num_obs, mu = rep(0, 2), Sigma = slope_int_cov)
     colnames(noise) <- c("z0i", "z1i")
   
-    #---- Generating autoregressive noise term (unexplained variance in Cij) for each visit ----
-    sd_alpha <- sqrt((1 - r1*r1)*var3)
-    alphas <- as_tibble(matrix(NA, ncol = num_tests, nrow = num_obs))
-    replicate(sd_alpha*rnorm(n = num_obs), )
-    for(i in 1:num_tests){
-      alphas[, i] = 
-    }
+    #---- Generating noise term (unexplained variance in Cij) for each visit ----
+    sd_eps <- sqrt(var3)
+    eps <- replicate(num_tests, rnorm(n = num_obs, mean = 0, sd = sd_eps))
+    colnames(eps) <- eps_varnames
   
     #Creating "true" and "measured" cognitive function at each study assessment
     #measured = true + error
