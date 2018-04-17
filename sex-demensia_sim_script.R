@@ -79,8 +79,9 @@ sex_dem_sim <- function(){
     #---- Generating random terms for slope and intercept ----
     #Generate random terms for each individual
     slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                               Sigma = slope_int_cov))
-    colnames(slope_int_noise) <- c("z0i", "z1i")
+                               Sigma = slope_int_cov)) %>% 
+    mutate("id" = seq(from = 1, to = num_obs, by = 1))
+    colnames(slope_int_noise) <- c("z0i", "z1i", "id")
   
     #---- Generating noise term (unexplained variance in Cij) for each visit ----
     sd_eps <- sqrt(var3)
