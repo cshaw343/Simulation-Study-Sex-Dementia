@@ -16,22 +16,21 @@ source("sex-demensia_sim_parA.R")
 
 #---- Generating variable names for each assessment timepoint ----
 #Age labels at each assessment timepoint
-age_varnames <- c("id", vector(length = num_tests))
+age_varnames <- c("id", "age0", vector(length = num_tests))
 for(i in 1:num_tests){
-  age_varnames[i] = paste("age", i, sep = "")
+  age_varnames[i + 2] = paste("age", i, sep = "")
 }
 
 #Centered age labels at each assessment timepoint
-agec_varnames <- c("id", vector(length = length(age_varnames)))
-for(i in 1:length(agec_varnames)){
-  agec_varnames[i] = paste(age_varnames[i], "_c50", sep = "")
+agec_varnames <- c("id", "age0_c50", vector(length = num_tests))
+for(i in 1:num_tests){
+  agec_varnames[i + 2] = paste(age_varnames[i + 2], "_c50", sep = "")
 }
 
-
 #Alpha (for autoregressive noise) labels at each assessment timepoint
-eps_varnames <- c("id", vector(length = num_tests))
+eps_varnames <- c("id", "eps0", vector(length = num_tests))
 for(i in 1:num_tests){
-  eps_varnames[i + 1] = paste("eps", i, sep = "")
+  eps_varnames[i + 2] = paste("eps", i, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -59,7 +58,10 @@ sex_dem_sim <- function(){
   #Creating ages at each timepoint j
   ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
   for(i in 1:length(age_varnames)){
-    if(i == 1){
+    if(i == 2){
+      ages[, i] = seq(from = 1, to = num_obs, by = 1)
+    }
+    if(i == 2){
       ages[, i] = age0
     } else ages[, i] = ages[, (i-1)] + int_time
   }
