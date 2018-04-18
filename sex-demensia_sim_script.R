@@ -15,27 +15,14 @@ set.seed(10789)
 source("sex-demensia_sim_parA.R")
 
 #---- Generating variable names for each assessment timepoint ----
-#Age labels at each assessment timepoint
-age_varnames <- c("id", "age0", vector(length = num_tests))
+age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
+agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
+eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
+Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
 for(i in 1:num_tests){
   age_varnames[i + 2] = paste("age", i, sep = "")
-}
-
-#Centered age labels at each assessment timepoint
-agec_varnames <- c("id", "age0_c50", vector(length = num_tests))
-for(i in 1:num_tests){
   agec_varnames[i + 2] = paste(age_varnames[i + 2], "_c50", sep = "")
-}
-
-#Epsilon labels at each assessment timepoint
-eps_varnames <- c("id", "eps0", vector(length = num_tests))
-for(i in 1:num_tests){
   eps_varnames[i + 2] = paste("eps", i, sep = "")
-}
-
-#Cij labels at each assessment timepoint
-Cij_varnames <- c("id", "Ci0", vector(length = num_tests))
-for(i in 1:num_tests){
   Cij_varnames[i + 2] = paste("Ci", i, sep = "")
 }
 
