@@ -93,7 +93,7 @@ sex_dem_sim <- function(){
   ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
   for(j in 1:length(age_varnames)){
     if(j == 1){
-      ages[, i] = seq(from = 1, to = num_obs, by = 1) #Creates column of ids
+      ages[, j] = seq(from = 1, to = num_obs, by = 1) #Creates column of ids
     } else if(j == 2){
       ages[, j] = age0 #Creates column of baseline ages
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
