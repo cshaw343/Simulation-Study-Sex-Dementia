@@ -173,9 +173,9 @@ Cij_plot_samp <- ggplot(samp_Cij, aes(t, value)) +
   geom_line(data = subset(samp_Cij, variable != "female" & variable != "male"), 
             aes(group = variable), color = "gray") +
   geom_line(data = subset(samp_Cij, variable == "female"), 
-            aes(color = variable)) + 
+            aes(color = variable), size = 1.25) + 
   geom_line(data = subset(samp_Cij, variable == "male"), 
-            aes(color = variable)) + 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
   labs(y = "Cognitive function", 
        x = "Visit Time", 
        color = "Mean Cognitive \n Function") + 
@@ -184,9 +184,9 @@ Cij_plot_samp <- ggplot(samp_Cij, aes(t, value)) +
 #Creating a plot without random sample in the background
 Cij_plot<- ggplot(samp_Cij, aes(t, value)) + 
   geom_line(data = subset(samp_Cij, variable == "female"), 
-            aes(color = variable)) + 
+            aes(color = variable), size = 1.25) + 
   geom_line(data = subset(samp_Cij, variable == "male"), 
-            aes(color = variable)) + ylim(-15, 5) +
+            aes(color = variable), size = 1.25, alpha = 0.6) + ylim(-15, 5) +
   labs(y = "Cognitive function", 
        x = "Visit Time", 
        color = "Mean Cognitive \n Function") + 
