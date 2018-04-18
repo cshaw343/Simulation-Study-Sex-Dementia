@@ -20,11 +20,11 @@ age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
-for(i in 1:num_tests){
-  age_varnames[i + 2] = paste("age", i, sep = "")
-  agec_varnames[i + 2] = paste(age_varnames[i + 2], "_c50", sep = "")
-  eps_varnames[i + 2] = paste("eps", i, sep = "")
-  Cij_varnames[i + 2] = paste("Ci", i, sep = "")
+for(j in 1:num_tests){
+  age_varnames[j + 2] = paste("age", j, sep = "")
+  agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
+  eps_varnames[j + 2] = paste("eps", j, sep = "")
+  Cij_varnames[j + 2] = paste("Ci", j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -133,16 +133,16 @@ sex_dem_sim <- function(){
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
-#Function returns a list of 
-    #(1) matrix of observations 
-    #(2) matrix of Cij
-results_list <- list("Cij" = Cij, "obs" = obs) 
-return(results_list)
+  #Function returns a list of 
+      #(1) matrix of observations 
+      #(2) matrix of Cij
+  results_list <- list("Cij" = Cij, "obs" = obs) 
+  return(results_list)
 }
 
 #---- Running the simulation----
 #Storing the results of the simulation
-sim_results <- sex_dem_sim()
+sim_results <- replicate(2, sex_dem_sim())
 
 #---- Find mean Cij by sex ----
 obs <- as_tibble(sim_results$obs)
