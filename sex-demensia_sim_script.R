@@ -193,8 +193,10 @@ Cij_plot<- ggplot(samp_Cij, aes(t, value)) +
   theme_minimal()
 
 #Saving plot output
-ggsave(filename = "mean_Cij_samp_sim", ,".jpeg", width = 10, height = 7, 
+ggsave(filename = paste("mean_Cij_samp_plot", str_extract(par_file, ".\\."), 
+                        "jpeg", sep = ""), width = 10, height = 7, 
        plot = Cij_plot_samp)
 
-ggsave(filename = "mean_Cij.jpeg", width = 10, height = 7, plot = Cij_plot)
+ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), "jpeg", 
+                        sep = ""), width = 10, height = 7, plot = Cij_plot)
 
