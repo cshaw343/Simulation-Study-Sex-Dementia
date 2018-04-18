@@ -129,25 +129,20 @@ sex_dem_sim <- function(){
       left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
-    Cij <- as.data.frame(cog_func(obs)) %>% 
+    Cij <- as.data.frame(cog_func_1(obs)) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
-  #Function returns a list of 
-      #(1) matrix of observations 
-      #(2) matrix of Cij
-  results_list <- list("Cij" = Cij, "obs" = obs) 
-  return(results_list)
+    #---- Calculating mean Cij by sex ----
+    mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
+      mutate_at("sex", as.factor) %>% group_by(sex) %>% 
+      dplyr::select(-id) %>% summarise_all(mean)
+    
+  return(mean_Cij)
 }
 
 #---- Running the simulation----
 #Storing the results of the simulation
-sim_results <- replicate(2, sex_dem_sim())
+sim_results <- unlist(replicate(2, sex_dem_sim()))
 
-#---- Find mean Cij by sex ----
-obs <- as_tibble(sim_results$obs)
-Cij <- as_tibble(sim_results$Cij) %>% mutate("sex" = obs$sex) %>% 
-  mutate_at("sex", as.factor) 
-
-mean_Cij <- Cij %>% group_by(sex) %>% summarise_all(mean)
 
