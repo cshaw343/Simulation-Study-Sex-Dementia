@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "MASS")
+p_load("tidyverse", "MASS", "reshape")
 
 #Using standard notation (as opposed to scientific), rounded to three 
 #decimal places
@@ -123,12 +123,61 @@ sex_dem_sim <- function(){
     
     #---- Calculating Cij for each individual ----
     Cij <- as.data.frame(cog_func(obs)) %>% 
-    colnames(Cij) <- 
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
+    colnames(Cij) <- Cij_varnames
+
+results_list <- list("Cij" = Cij, "obs" = obs)
+return(results_list)
 }
 
-sex_dem_sim()
+#---- Running the simulation----
+#Storing the results of the simulation
+sim_results <- sex_dem_sim()
 
+#---- Find mean Cij by sex ----
+obs <- as_tibble(sim_results$obs)
+Cij <- as_tibble(sim_results$Cij) %>% mutate("sex" = obs$sex) %>% 
+  mutate_at("sex", as.factor) 
 
+mean_Cij <- Cij %>% group_by(sex) %>% summarise_all(mean)
 
+female_meanCij <- mean_Cij %>% filter(sex == 1) %>% dplyr::select(-id, -sex) %>% 
+  t() %>% as.data.frame() %>% mutate("female" = V1) %>% dplyr::select(-V1) %>% 
+  cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
 
+male_meanCij <- mean_Cij %>% filter(sex == 0) %>% dplyr::select(-id, -sex) %>% 
+  t() %>% as.data.frame() %>% mutate("male" = V1) %>% dplyr::select(-V1) %>% 
+  cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
+
+#---- Plot a sample of Cij ----
+samp_Cij <- sample_n(Cij, 10) %>% dplyr::select(-id, -sex) %>% t() %>%
+  cbind(., "t" = visit_times) %>% as.data.frame() %>% 
+  melt(., id.vars = "t") %>% rbind(., female_meanCij) %>% rbind(., male_meanCij)
+  
+Cij_plot_samp <- ggplot(samp_Cij, aes(t, value)) + 
+  geom_line(data = subset(samp_Cij, variable != "female" & variable != "male"), 
+            aes(group = variable), color = "gray") +
+  geom_line(data = subset(samp_Cij, variable == "female"), 
+            aes(color = variable)) + 
+  geom_line(data = subset(samp_Cij, variable == "male"), 
+            aes(color = variable)) + 
+  labs(y = "Cognitive function", 
+       x = "Visit Time", 
+       color = "Mean Cognitive \n Function") + 
+  theme_minimal()
+
+Cij_plot<- ggplot(samp_Cij, aes(t, value)) + 
+  geom_line(data = subset(samp_Cij, variable == "female"), 
+            aes(color = variable)) + 
+  geom_line(data = subset(samp_Cij, variable == "male"), 
+            aes(color = variable)) + ylim(-15, 5) +
+  labs(y = "Cognitive function", 
+       x = "Visit Time", 
+       color = "Mean Cognitive \n Function") + 
+  theme_minimal()
+
+ggsave(filename = "mean_Cij_samp.jpeg", width = 10, height = 7, 
+       plot = Cij_plot_samp)
+
+ggsave(filename = "mean_Cij.jpeg", width = 10, height = 7, plot = Cij_plot)
 
