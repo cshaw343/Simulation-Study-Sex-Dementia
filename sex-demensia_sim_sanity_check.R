@@ -1,5 +1,5 @@
 #---- Specify source file ----
-source("sex-demensia_sim_sript.R")
+source("sex-demensia_sim_script.R")
 
 #---- The simulation function ----
 sex_dem_sim_check <- function(){
@@ -49,7 +49,7 @@ sex_dem_sim_check <- function(){
     left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
   
   #---- Calculating Cij for each individual ----
-  Cij <- as.data.frame(cog_func(obs)) %>% 
+  Cij <- as.data.frame(cog_func_1(obs)) %>% 
     cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
   colnames(Cij) <- Cij_varnames
   
@@ -62,15 +62,17 @@ sex_dem_sim_check <- function(){
 
 #---- Checking the simulated data----
 #Storing the results of the simulation
-sim_check <- sex_dem_sim_check
+sim_check <- sex_dem_sim_check()
+obs_check <- as_tibble(sim_check$obs)
+Cij_check <- as_tibble(sim_check$Cij)
+
+#Check means: proportion of males, U
+means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
 #---- Checking by plots ----
   #---- Find mean Cij by sex ----
-  obs_check <- as_tibble(sim_results$obs)
-  Cij_check <- as_tibble(sim_results$Cij) %>% mutate("sex" = obs$sex) %>% 
-    mutate_at("sex", as.factor) 
-
-  mean_Cij <- Cij %>% group_by(sex) %>% summarise_all(mean)
+  mean_Cij <- Cij_check %>% mutate("sex" = obs_check$sex) %>% group_by(sex) %>% 
+  summarise_all(mean)
 
   #---- Creating plot data ----
   #Defining mean Cij plot data for females
@@ -85,7 +87,7 @@ sim_check <- sex_dem_sim_check
   cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
 
   #Combine all plot data into one dataframe (includes random sample of Cij)
-  samp_Cij <- sample_n(Cij, 10) %>% dplyr::select(-id, -sex) %>% t() %>%
+  samp_Cij <- sample_n(Cij_check, 10) %>% dplyr::select(-id) %>% t() %>%
     cbind(., "t" = visit_times) %>% as.data.frame() %>% 
     melt(., id.vars = "t") %>% rbind(., female_meanCij) %>% 
     rbind(., male_meanCij)
