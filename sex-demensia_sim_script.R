@@ -92,17 +92,17 @@ sex_dem_sim <- function(){
   ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
   for(i in 1:length(age_varnames)){
     if(i == 1){
-      ages[, i] = seq(from = 1, to = num_obs, by = 1)
+      ages[, i] = seq(from = 1, to = num_obs, by = 1) #Creates column of ids
     } else if(i == 2){
-      ages[, i] = age0
-    } else ages[, i] = ages[, (i-1)] + int_time
+      ages[, i] = age0 #Creates column of baseline ages
+    } else ages[, i] = ages[, (i-1)] + int_time #Creates ages at following timepoints
   }
   colnames(ages) <- age_varnames
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
   c_ages <- as_tibble(ages - mean(age0)) %>% 
-    mutate("id" = seq(from = 1, to = num_obs, by = 1))
+    mutate("id" = seq(from = 1, to = num_obs, by = 1)) #Creates column of ids
   colnames(c_ages) <- agec_varnames
   
   #---- Generating "true" cognitive function Cij ----
@@ -113,26 +113,29 @@ sex_dem_sim <- function(){
     #Generate random terms for each individual
     slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
                                Sigma = slope_int_cov)) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
+    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
     colnames(slope_int_noise) <- c("id", "z0i", "z1i")
   
     #---- Generating noise term (unexplained variance in Cij) for each visit ----
     sd_eps <- sqrt(var3)
     eps <- as_tibble(replicate(num_tests + 1, 
                                rnorm(n = num_obs, mean = 0, sd = sd_eps))) %>% 
-      cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
     colnames(eps) <- eps_varnames
   
-    #---- Creating full matrix of data for each individual ----
+    #---- Creating complete matrix of observation data ----
     obs <- left_join(obs, ages, by = "id") %>% left_join(c_ages, by = "id") %>%
       left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
     Cij <- as.data.frame(cog_func(obs)) %>% 
-      cbind("id" = seq(from = 1, to = num_obs, by = 1), .)
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
-
-results_list <- list("Cij" = Cij, "obs" = obs)
+    
+#Function returns a list of 
+    #(1) matrix of observations 
+    #(2) matrix of Cij
+results_list <- list("Cij" = Cij, "obs" = obs) 
 return(results_list)
 }
 
@@ -147,19 +150,24 @@ Cij <- as_tibble(sim_results$Cij) %>% mutate("sex" = obs$sex) %>%
 
 mean_Cij <- Cij %>% group_by(sex) %>% summarise_all(mean)
 
+#---- Creating plot data ----
+#Defining mean Cij plot data for females
 female_meanCij <- mean_Cij %>% filter(sex == 1) %>% dplyr::select(-id, -sex) %>% 
   t() %>% as.data.frame() %>% mutate("female" = V1) %>% dplyr::select(-V1) %>% 
   cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
 
+#Defining mean Cij plot data for males
 male_meanCij <- mean_Cij %>% filter(sex == 0) %>% dplyr::select(-id, -sex) %>% 
   t() %>% as.data.frame() %>% mutate("male" = V1) %>% dplyr::select(-V1) %>% 
   cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
 
-#---- Plot a sample of Cij ----
+#Combine all plot data into one dataframe (includes random sample of Cij)
 samp_Cij <- sample_n(Cij, 10) %>% dplyr::select(-id, -sex) %>% t() %>%
   cbind(., "t" = visit_times) %>% as.data.frame() %>% 
   melt(., id.vars = "t") %>% rbind(., female_meanCij) %>% rbind(., male_meanCij)
-  
+
+#---- Plot a sample of Cij ----
+#Creating a plot with random sample in the background
 Cij_plot_samp <- ggplot(samp_Cij, aes(t, value)) + 
   geom_line(data = subset(samp_Cij, variable != "female" & variable != "male"), 
             aes(group = variable), color = "gray") +
@@ -172,6 +180,7 @@ Cij_plot_samp <- ggplot(samp_Cij, aes(t, value)) +
        color = "Mean Cognitive \n Function") + 
   theme_minimal()
 
+#Creating a plot without random sample in the background
 Cij_plot<- ggplot(samp_Cij, aes(t, value)) + 
   geom_line(data = subset(samp_Cij, variable == "female"), 
             aes(color = variable)) + 
@@ -182,6 +191,7 @@ Cij_plot<- ggplot(samp_Cij, aes(t, value)) +
        color = "Mean Cognitive \n Function") + 
   theme_minimal()
 
+#Saving plot output
 ggsave(filename = "mean_Cij_samp.jpeg", width = 10, height = 7, 
        plot = Cij_plot_samp)
 
