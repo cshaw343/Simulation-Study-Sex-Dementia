@@ -30,7 +30,7 @@ for(i in 1:num_tests){
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Model for Cognitive Function ----
-cog_func <- function(obs){
+cog_func_1 <- function(obs){
   knots = c(0, 20, 35)
   Cij <- vector(length = length(visit_times))
   for(i in 1:length(Cij)){
@@ -54,6 +54,25 @@ cog_func <- function(obs){
         (b10c + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
            b13*obs[, "U"])*t
     }
+  }
+  return(Cij)
+}
+
+cog_func_2 <- function(obs){
+  knots = c(0, 20, 35)
+  Cij <- vector(length = length(visit_times))
+  for(i in 1:length(Cij)){
+    t = visit_times[i]
+    test_num = i - 1
+    eps <- paste("eps", test_num, sep = "")
+    Cij[i] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+      b03*obs[, "U"] + obs[, eps] + 
+      (b10a - b10b)*knots[2]*(t >= knots[2]) + 
+      (b10b - b10c)*knots[3]*(t >= knots[3]) + 
+      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + b13*obs[, "U"] + 
+         b10a*(t >= knots[1] & t< knots[2]) + 
+         b10b*(t >= knots[2] & t< knots[3]) +
+         b10c*(t >= knots[3]))*t
   }
   return(Cij)
 }
