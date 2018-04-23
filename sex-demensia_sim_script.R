@@ -152,8 +152,8 @@ sex_dem_sim <- function(){
   #See Additional notes in README file
     
     #---- Generating uniform random variables per interval for Sij ----
-    Ujj1 <- replicate(num_tests, rnorm(1, mean = 0, sd = 1))
-    names(Ujj1) <- Ujj1_varnames
+    Ujj1 <- as_tibble(replicate(num_tests, rnorm(num_obs, mean = 0, sd = 1)))
+    colnames(Ujj1) <- Ujj1_varnames
     
     #---- Calculating Sij for each individual ----
     
