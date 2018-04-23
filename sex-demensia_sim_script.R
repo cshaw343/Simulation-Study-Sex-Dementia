@@ -20,11 +20,13 @@ age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
+Ujj1_varnames <- c(vector(length = num_tests)) #Uj,j+1 labels
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
+  Ujj1_varnames[j] = paste("U",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -70,12 +72,17 @@ cog_func_2 <- function(obs){
       b03*obs[, "U"] + obs[, eps] + 
       (b10a - b10b)*knots[2]*(t >= knots[2]) + 
       (b10b - b10c)*knots[3]*(t >= knots[3]) + 
-      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + b13*obs[, "U"] + 
-         b10a*(t >= knots[1] & t< knots[2]) + 
-         b10b*(t >= knots[2] & t< knots[3]) +
-         b10c*(t >= knots[3]))*t
+      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+         b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
+                          b10b*(t >= knots[2] & t< knots[3]) +
+                          b10c*(t >= knots[3]))*t
   }
   return(Cij)
+}
+
+#---- Model for Survival Time ----
+survival <- function(){
+  
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -137,6 +144,18 @@ sex_dem_sim <- function(){
     mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
       mutate_at("sex", as.factor) %>% group_by(sex) %>% 
       dplyr::select(-id) %>% summarise_all(mean)
+    
+  #---- Generate survival time for each person ----
+  #Individual hazard functions
+  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
+  #g5*slopeij + g6Cij)
+  #See Additional notes in README file
+    
+    #---- Generating uniform random variables per interval for Sij ----
+    Ujj1 <- replicate(num_tests, rnorm(1, mean = 0, sd = 1))
+    names(Ujj1) <- Ujj1_varnames
+    
+    #---- Calculating Sij for each individual ----
     
   return(list("mean_Cij" = mean_Cij))
 }
