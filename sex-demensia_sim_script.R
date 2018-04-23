@@ -138,11 +138,15 @@ sex_dem_sim <- function(){
       mutate_at("sex", as.factor) %>% group_by(sex) %>% 
       dplyr::select(-id) %>% summarise_all(mean)
     
-  return(mean_Cij)
+  return(list("mean_Cij" = mean_Cij))
 }
 
 #---- Running the simulation----
 #Storing the results of the simulation
-sim_results <- unlist(replicate(2, sex_dem_sim()))
+sim_results <- replicate(10, sex_dem_sim())
 
+#---- Looking at simulation results ----
+#Finding the mean Cij by sex across all simulations
+mean_Cij_sim <- as_tibble(do.call(rbind, sim_results)) %>% group_by(sex) %>% 
+  summarise_all(mean)
 
