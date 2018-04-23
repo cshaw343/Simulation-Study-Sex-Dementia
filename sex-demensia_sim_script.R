@@ -33,35 +33,7 @@ for(j in 1:num_tests){
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Model for Cognitive Function ----
-cog_func_1 <- function(obs){
-  knots = c(0, 20, 35)
-  Cij <- vector(length = length(visit_times))
-  for(j in 1:length(Cij)){
-    t = visit_times[j]
-    test_num = j - 1
-    eps <- paste("eps", test_num, sep = "")
-    if(t >= knots[1] & t < knots[2]){
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
-        b03*obs[, "U"] + obs[, eps] + 
-        (b10a + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
-           b13*obs[, "U"])*t
-    } else if (t >= knots[2] & t < knots[3]){
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
-        b03*obs[, "U"] + (b10a - b10b)*knots[2] + obs[, eps] + 
-        (b10b + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
-           b13*obs[, "U"])*t
-    } else {
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
-        b03*obs[, "U"] + (b10a - b10b)*knots[2] + (b10b - b10c)*knots[3] + 
-        obs[, eps] + 
-        (b10c + obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
-           b13*obs[, "U"])*t
-    }
-  }
-  return(Cij)
-}
-
-cog_func_2 <- function(obs){
+cog_func <- function(obs){
   knots = c(0, 20, 35)
   Cij <- vector(length = length(visit_times))
   for(j in 1:length(Cij)){
@@ -136,7 +108,7 @@ sex_dem_sim <- function(){
       left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
-    Cij <- as.data.frame(cog_func_1(obs)) %>% 
+    Cij <- as.data.frame(cog_func(obs)) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
@@ -156,6 +128,7 @@ sex_dem_sim <- function(){
     colnames(Ujj1) <- Ujj1_varnames
     
     #---- Calculating Sij for each individual ----
+    
     
   return(list("mean_Cij" = mean_Cij))
 }
