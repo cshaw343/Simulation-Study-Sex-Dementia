@@ -20,15 +20,18 @@ age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
-Ujj1_varnames <- c("id", vector(length = num_tests)) #Uj,j+1 labels
 slopejj1_varnames <- c("id", vector(length = num_tests)) #slopej,j+1 labels
+Ujj1_varnames <- c("id", vector(length = num_tests)) #Uj,j+1 labels
+deathjj1_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
+
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
-  Ujj1_varnames[j + 1] = paste("U",j-1, j, sep = "")
   slopejj1_varnames[j + 1] = paste("slope",j-1, j, sep = "")
+  Ujj1_varnames[j + 1] = paste("U",j-1, j, sep = "")
+  deathjj1_varnames[j + 1] = paste("death",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -60,7 +63,6 @@ cog_func <- function(obs){
   }
   return(list("Cij" = Cij, "slopes" = slopes))
 }
-
 
 #---- Model for Survival Time ----
 survival <- function(){
