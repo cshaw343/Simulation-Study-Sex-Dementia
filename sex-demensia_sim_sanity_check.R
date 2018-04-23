@@ -104,7 +104,8 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
                               (female_meanCij[8, "t"] - female_meanCij[5, "t"]), 
                             "b0c" = (female_meanCij[11, "value"] - 
                                        female_meanCij[8, "value"])/
-                              (female_meanCij[11, "t"] - female_meanCij[8, "t"]))
+                              (female_meanCij[11, "t"] - 
+                                 female_meanCij[8, "t"]))
   #Combine all plot data into one dataframe (includes random sample of Cij)
   samp_Cij <- sample_n(Cij_check, 10) %>% dplyr::select(-id) %>% t() %>%
     cbind(., "t" = visit_times) %>% as.data.frame() %>% 
