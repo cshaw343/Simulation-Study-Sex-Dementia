@@ -20,13 +20,15 @@ age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
-Ujj1_varnames <- c(vector(length = num_tests)) #Uj,j+1 labels
+Ujj1_varnames <- c("id", vector(length = num_tests)) #Uj,j+1 labels
+slopejj1_varnames <- c("id", vector(length = num_tests)) #slopej,j+1 labels
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
-  Ujj1_varnames[j] = paste("U",j-1, j, sep = "")
+  Ujj1_varnames[j + 1] = paste("U",j-1, j, sep = "")
+  slopejj1_varnames[j + 1] = paste("slope",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -49,12 +51,20 @@ cog_func <- function(obs){
                           b10b*(t >= knots[2] & t< knots[3]) +
                           b10c*(t >= knots[3]))*t
   }
-  return(Cij)
+  slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
+  #Cij is stored as a list in this function environment so use list indexing
+  for(j in 1:ncol(slopes)){
+    b <- Cij[[j + 1]] 
+    a <- Cij[[j]]
+    slopes[, j] = (b-a)/int_time
+  }
+  return(list("Cij" = Cij, "slopes" = slopes))
 }
+
 
 #---- Model for Survival Time ----
 survival <- function(){
-  
+ NA 
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -108,9 +118,15 @@ sex_dem_sim <- function(){
       left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
     
     #---- Calculating Cij for each individual ----
-    Cij <- as.data.frame(cog_func(obs)) %>% 
+    #Store Cij values
+    Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
+    
+    #Store slope values per interval per individual
+    slopejj1 <- as.data.frame(cog_func(obs)$slopes) %>% 
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
+    colnames(slopejj1) <- slopejj1_varnames
     
     #---- Calculating mean Cij by sex ----
     mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
