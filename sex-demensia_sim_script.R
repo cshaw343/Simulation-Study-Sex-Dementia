@@ -69,6 +69,7 @@ cog_func <- function(obs){
 #---- Model for Survival Time ----
 survival <- function(obs){
   Sij <- vector(length = (length(visit_times) - 1))
+  deathij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
     t = visit_times[j]
     test_num = j - 1
@@ -162,16 +163,11 @@ sex_dem_sim <- function(){
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(USij) <- USij_varnames
     
-    #---- Creating blank matrix for death indicators ----
-    deathij <- as_tibble(matrix(NA, nrow = num_obs, ncol = num_tests)) %>% 
-      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-    colnames(deathij) <- deathij_varnames
+    #---- Merging Cij and USij with observation data ----
+    #Used as input for survival function
+    obs <- left_join(obs, Cij, by = "id") %>% left_join(USij, by = "id")
     
-    #---- Merging Cij, blank deathij, and USij with observation data ----
-    obs <- left_join(obs, Cij, by = "id") %>% left_join(USij, by = "id") %>%
-      left_join(deathij, by = "id") 
-    
-    #---- Calculating Sij for each individual ----
+    #---- Calculating Sij and deathij for each individual ----
     
     
   return(list("mean_Cij" = mean_Cij))
