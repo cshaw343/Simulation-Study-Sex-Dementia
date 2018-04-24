@@ -69,24 +69,26 @@ cog_func <- function(obs){
 #---- Model for Survival Time ----
 survival <- function(obs){
   Sij <- vector(length = (length(visit_times) - 1))
-  deathij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
     test_num = j - 1
     US <- paste("U", test_num, test_num + 1, sep = "")
     agec <- paste("age", test_num, "_c50", sep = "")
     slope <- paste("slope", test_num, test_num + 1, sep = "")
     C <- paste("Ci", test_num, sep = "")
-    Sij[j] = -log(obs[, US])/
-      (lambda*exp(g1*obs[, "sex"] + g2*obs[, agec] + g3*obs[, "U"] + 
-                    g4*obs[, "sex"]*obs[, agec] + g5*obs[, slope] + 
-                    g6*obs[, C]))
-    if(Sij[j] > int_time){
-      deathij[j] = 0
-      j = j + 1
-    } else{
-      deathij[j:10] = 1
+    Sij[j] = -log(obs[US])/
+      (lambda*exp(g1*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
+                    g4*obs["sex"]*obs[agec] + g5*obs[slope] + 
+                    g6*obs[C]))
+  }
+  Sij <- do.call(cbind, Sij)
+  deathij <- (Sij < int_time)*1
+  for(i in 1:nrow(deathij)){
+    death <- min(which(deathij[i, ] == 1))
+    if(is.finite(death)){
+      deathij[i, death:ncol(deathij)] = 1
     }
   }
+  return(list("Sij" = Sij, "deathij" = deathij))
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -163,7 +165,7 @@ sex_dem_sim <- function(){
     
     #---- Generating uniform random variables per interval for Sij ----
     USij <- as_tibble(replicate(num_tests, 
-                                rnorm(num_obs, mean = 0, sd = 1))) %>%
+                                runif(num_obs, min = 0, max = 1))) %>%
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(USij) <- USij_varnames
     
@@ -183,7 +185,7 @@ sex_dem_sim <- function(){
 
 #---- Running the simulation----
 #Storing the results of the simulation
-sim_results <- replicate(10, sex_dem_sim())
+sim_results <- replicate(1, sex_dem_sim())
 
 #---- Looking at simulation results ----
 #Finding the mean Cij by sex across all simulations
