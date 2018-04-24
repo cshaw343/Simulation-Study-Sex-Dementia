@@ -20,20 +20,20 @@ age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
-slopejj1_varnames <- c("id", vector(length = num_tests)) #slopej,j+1 labels
-Ujj1_varnames <- c("id", vector(length = num_tests)) #Uj,j+1 labels
-deathjj1_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
-Sjj1_varnames <- c("id", vector(length = num_tests))
+slopeij_varnames <- c("id", vector(length = num_tests)) #interval slope labels
+USij_varnames <- c("id", vector(length = num_tests)) #Uniform survival noise labels
+deathij_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
+Sij_varnames <- c("id", vector(length = num_tests)) #Survival time labels
 
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
-  slopejj1_varnames[j + 1] = paste("slope",j-1, j, sep = "")
-  Ujj1_varnames[j + 1] = paste("U",j-1, j, sep = "")
-  deathjj1_varnames[j + 1] = paste("death",j-1, j, sep = "")
-  Sjj1_varnames[j + 1] = paste("survtime",j-1, j, sep = "")
+  slopeij_varnames[j + 1] = paste("slope",j-1, j, sep = "")
+  USij_varnames[j + 1] = paste("U",j-1, j, sep = "")
+  deathij_varnames[j + 1] = paste("death",j-1, j, sep = "")
+  Sij_varnames[j + 1] = paste("survtime",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -69,7 +69,7 @@ cog_func <- function(obs){
 #---- Model for Survival Time ----
 survival <- function(obs){
   Sij <- vector(length = (length(visit_times) - 1))
-  for(j in 1:length(Cij)){
+  for(j in 1:length(Sij)){
     t = visit_times[j]
     test_num = j - 1
     eps <- paste("eps", test_num, sep = "")
@@ -141,9 +141,9 @@ sex_dem_sim <- function(){
     colnames(Cij) <- Cij_varnames
     
     #Store slope values per interval per individual
-    slopejj1 <- as.data.frame(cog_func(obs)$slopes) %>% 
+    slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-    colnames(slopejj1) <- slopejj1_varnames
+    colnames(slopeij) <- slopeij_varnames
     
     #---- Calculating mean Cij by sex ----
     mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
@@ -157,19 +157,19 @@ sex_dem_sim <- function(){
   #See Additional notes in README file
     
     #---- Generating uniform random variables per interval for Sij ----
-    Ujj1 <- as_tibble(replicate(num_tests, 
+    USij <- as_tibble(replicate(num_tests, 
                                 rnorm(num_obs, mean = 0, sd = 1))) %>%
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-    colnames(Ujj1) <- Ujj1_varnames
+    colnames(USij) <- USij_varnames
     
     #---- Creating blank matrix for death indicators ----
-    deathjj1 <- as_tibble(matrix(NA, nrow = num_obs, ncol = num_tests)) %>% 
+    deathij <- as_tibble(matrix(NA, nrow = num_obs, ncol = num_tests)) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-    colnames(deathjj1) <- deathjj1_varnames
+    colnames(deathij) <- deathij_varnames
     
-    #---- Merging Cij, blank deathjj1, and Ujj1 with observation data ----
-    obs <- left_join(obs, Cij, by = "id") %>% left_join(Ujj1, by = "id") %>%
-      left_join(deathjj1, by = "id") 
+    #---- Merging Cij, blank deathij, and USij with observation data ----
+    obs <- left_join(obs, Cij, by = "id") %>% left_join(USij, by = "id") %>%
+      left_join(deathij, by = "id") 
     
     #---- Calculating Sij for each individual ----
     
