@@ -71,17 +71,21 @@ survival <- function(obs){
   Sij <- vector(length = (length(visit_times) - 1))
   deathij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
-    t = visit_times[j]
     test_num = j - 1
-    eps <- paste("eps", test_num, sep = "")
-    Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
-      b03*obs[, "U"] + obs[, eps] + 
-      (b10a - b10b)*knots[2]*(t >= knots[2]) + 
-      (b10b - b10c)*knots[3]*(t >= knots[3]) + 
-      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
-         b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
-         b10b*(t >= knots[2] & t< knots[3]) +
-         b10c*(t >= knots[3]))*t
+    US <- paste("U", test_num, test_num + 1, sep = "")
+    agec <- paste("age", test_num, "_c50", sep = "")
+    slope <- paste("slope", test_num, test_num + 1, sep = "")
+    C <- paste("Ci", test_num, sep = "")
+    Sij[j] = -log(obs[, US])/
+      (lambda*exp(g1*obs[, "sex"] + g2*obs[, agec] + g3*obs[, "U"] + 
+                    g4*obs[, "sex"]*obs[, agec] + g5*obs[, slope] + 
+                    g6*obs[, C]))
+    if(Sij[j] > int_time){
+      deathij[j] = 0
+      j = j + 1
+    } else{
+      deathij[j:10] = 1
+    }
   }
 }
 
@@ -163,11 +167,15 @@ sex_dem_sim <- function(){
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(USij) <- USij_varnames
     
-    #---- Merging Cij and USij with observation data ----
+    #---- Merging Cij, slopeij, and USij with observation data ----
     #Used as input for survival function
-    obs <- left_join(obs, Cij, by = "id") %>% left_join(USij, by = "id")
+    obs <- left_join(obs, Cij, by = "id") %>% left_join(slopeij, by = "id") %>% 
+      left_join(USij, by = "id")
     
-    #---- Calculating Sij and deathij for each individual ----
+    #---- Calculating Sij for each individual ----
+    #Store Sij values
+    
+    #Store deathij values
     
     
   return(list("mean_Cij" = mean_Cij))
