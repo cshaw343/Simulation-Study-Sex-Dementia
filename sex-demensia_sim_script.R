@@ -81,31 +81,7 @@ survival <- function(obs){
                     g4*obs["sex"]*obs[agec] + g5*obs[slope] + 
                     g6*obs[C]))
   }
-  Sij <- do.call(cbind, Sij)
-  
-  #Compute death indicator for each interval
-  deathij <- (Sij < int_time)*1
-  for(i in 1:nrow(deathij)){
-    death <- min(which(deathij[i, ] == 1))
-    if(is.finite(death)){
-      deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
-    }
-  }
-  
-  #Compute study death indicators
-  study_death <- (rowSums(deathij) > 0)*1
-  
-  #Compute overall survival times
-  survtime <- vector(length = num_obs)
-  survtime[which(study_death == 0)] = num_tests*int_time
-  for(i in 1:length(survtime)){
-    if(survtime[i] == 0){
-      death_int <- min(which(deathij[i, ] == 1)) 
-      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
-    } 
-  }
-  
-  return(list("Sij" = Sij, "deathij" = deathij))
+  return("Sij" = Sij)
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -193,8 +169,33 @@ sex_dem_sim <- function(){
     
     #---- Calculating Sij for each individual ----
     #Store Sij values
+    Sij <- as.data.frame(survival(obs)) %>% 
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
+    colnames(Sij) <- Sij_varnames
     
-    #Store deathij values
+    #Compute death indicator for each interval
+    deathij <- (Sij < int_time)*1
+    for(i in 1:nrow(deathij)){
+      death <- min(which(deathij[i, ] == 1))
+      if(is.finite(death)){
+        deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
+      }
+    }
+    
+    #Compute study death indicators
+    study_death <- (rowSums(deathij) > 0)*1
+    
+    #Compute overall survival times
+    survtime <- vector(length = num_obs)
+    survtime[which(study_death == 0)] = num_tests*int_time
+    for(i in 1:length(survtime)){
+      if(survtime[i] == 0){
+        death_int <- min(which(deathij[i, ] == 1)) 
+        survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
+      } 
+    }
+    
+    return(list("Sij" = Sij, "deathij" = deathij))
     
     
   return(list("mean_Cij" = mean_Cij))
