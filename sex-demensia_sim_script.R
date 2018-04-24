@@ -65,8 +65,8 @@ cog_func <- function(obs){
 }
 
 #---- Model for Survival Time ----
-survival <- function(){
- NA 
+survival <- function(obs){
+  Sij <- 
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
@@ -142,8 +142,19 @@ sex_dem_sim <- function(){
   #See Additional notes in README file
     
     #---- Generating uniform random variables per interval for Sij ----
-    Ujj1 <- as_tibble(replicate(num_tests, rnorm(num_obs, mean = 0, sd = 1)))
+    Ujj1 <- as_tibble(replicate(num_tests, 
+                                rnorm(num_obs, mean = 0, sd = 1))) %>%
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Ujj1) <- Ujj1_varnames
+    
+    #---- Creating blank matrix for death indicators ----
+    deathjj1 <- as_tibble(matrix(NA, nrow = num_obs, ncol = num_tests)) %>% 
+      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
+    colnames(deathjj1) <- deathjj1_varnames
+    
+    #---- Merging Cij, blank deathjj1, and Ujj1 with observation data ----
+    obs <- left_join(obs, Cij, by = "id") %>% left_join(Ujj1, by = "id") %>%
+      left_join(deathjj1, by = "id") 
     
     #---- Calculating Sij for each individual ----
     
