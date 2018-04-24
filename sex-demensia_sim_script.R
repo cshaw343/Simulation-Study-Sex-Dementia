@@ -68,7 +68,7 @@ cog_func <- function(obs){
 
 #---- Model for Survival Time ----
 survival <- function(obs){
-  #Generating survival times for each interval
+  #Calculate survival times for each interval
   Sij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
     test_num = j - 1
@@ -83,7 +83,7 @@ survival <- function(obs){
   }
   Sij <- do.call(cbind, Sij)
   
-  #Generating death indicator for each interval
+  #Compute death indicator for each interval
   deathij <- (Sij < int_time)*1
   for(i in 1:nrow(deathij)){
     death <- min(which(deathij[i, ] == 1))
@@ -92,8 +92,18 @@ survival <- function(obs){
     }
   }
   
-  #Generating study death indicators
+  #Compute study death indicators
   study_death <- (rowSums(deathij) > 0)*1
+  
+  #Compute overall survival times
+  survtime <- vector(length = num_obs)
+  survtime[which(study_death == 0)] = num_tests*int_time
+  for(i in 1:length(survtime)){
+    if(survtime[i] == 0){
+      death_int <- min(which(deathij[i, ] == 1)) 
+      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
+    } 
+  }
   
   return(list("Sij" = Sij, "deathij" = deathij))
 }
