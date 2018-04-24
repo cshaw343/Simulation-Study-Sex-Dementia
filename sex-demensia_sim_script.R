@@ -23,6 +23,7 @@ Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
 slopejj1_varnames <- c("id", vector(length = num_tests)) #slopej,j+1 labels
 Ujj1_varnames <- c("id", vector(length = num_tests)) #Uj,j+1 labels
 deathjj1_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
+Sjj1_varnames <- c("id", vector(length = num_tests))
 
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
@@ -32,6 +33,7 @@ for(j in 1:num_tests){
   slopejj1_varnames[j + 1] = paste("slope",j-1, j, sep = "")
   Ujj1_varnames[j + 1] = paste("U",j-1, j, sep = "")
   deathjj1_varnames[j + 1] = paste("death",j-1, j, sep = "")
+  Sjj1_varnames[j + 1] = paste("survtime",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -66,7 +68,20 @@ cog_func <- function(obs){
 
 #---- Model for Survival Time ----
 survival <- function(obs){
-  Sij <- 
+  Sij <- vector(length = (length(visit_times) - 1))
+  for(j in 1:length(Cij)){
+    t = visit_times[j]
+    test_num = j - 1
+    eps <- paste("eps", test_num, sep = "")
+    Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+      b03*obs[, "U"] + obs[, eps] + 
+      (b10a - b10b)*knots[2]*(t >= knots[2]) + 
+      (b10b - b10c)*knots[3]*(t >= knots[3]) + 
+      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+         b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
+         b10b*(t >= knots[2] & t< knots[3]) +
+         b10c*(t >= knots[3]))*t
+  }
 }
 
 #---- Generate Covariance Matrix for random slope and intercept terms ----
