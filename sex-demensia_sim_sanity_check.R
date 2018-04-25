@@ -137,7 +137,7 @@ sex_dem_sim_check <- function(){
     }
   }
   
-  return(list("mean_Cij" = mean_Cij))
+  return(list("obs" = obs, "mean_Cij" = mean_Cij))
 }
 
 
@@ -145,16 +145,12 @@ sex_dem_sim_check <- function(){
 #Storing the results of the simulation
 sim_check <- sex_dem_sim_check()
 obs_check <- as_tibble(sim_check$obs)
-Cij_check <- as_tibble(sim_check$Cij)
+Cij_check <- as_tibble(sim_check$mean_Cij)
 
 #Check means: proportion of males, U
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
 #---- Checking by plots ----
-  #---- Find mean Cij by sex ----
-  mean_Cij <- Cij_check %>% mutate("sex" = obs_check$sex) %>% group_by(sex) %>% 
-  summarise_all(mean)
-
   #---- Creating plot data ----
   #Defining mean Cij plot data for females
   female_meanCij <- mean_Cij %>% filter(sex == 1) %>% 
