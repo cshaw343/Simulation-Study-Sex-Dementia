@@ -49,16 +49,97 @@ sex_dem_sim_check <- function(){
     left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
   
   #---- Calculating Cij for each individual ----
-  Cij <- as.data.frame(cog_func_1(obs)) %>% 
+  #Store Cij values
+  Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
     cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
   colnames(Cij) <- Cij_varnames
   
-  #Function returns a list of 
-  #(1) matrix of observations 
-  #(2) matrix of Cij
-  results_list <- list("Cij" = Cij, "obs" = obs) 
-  return(results_list)
+  #Store slope values per interval per individual
+  slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
+    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
+  colnames(slopeij) <- slopeij_varnames
+  
+  #---- Calculating mean Cij by sex ----
+  mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
+    mutate_at("sex", as.factor) %>% group_by(sex) %>% 
+    dplyr::select(-id) %>% summarise_all(mean)
+  
+  #---- Generate survival time for each person ----
+  #Individual hazard functions
+  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
+  #g5*slopeij + g6Cij)
+  #See Additional notes in README file
+  
+  #---- Generating uniform random variables per interval for Sij ----
+  USij <- as_tibble(replicate(num_tests, 
+                              runif(num_obs, min = 0, max = 1))) %>%
+    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
+  colnames(USij) <- USij_varnames
+  
+  #---- Merging Cij, slopeij, and USij with observation data ----
+  #Used as input for survival function
+  obs <- left_join(obs, Cij, by = "id") %>% left_join(slopeij, by = "id") %>% 
+    left_join(USij, by = "id")
+  
+  #---- Calculating Sij for each individual ----
+  #Store Sij values
+  Sij <- as.data.frame(survival(obs)) 
+  
+  #---- Calculating death data for each individual ----
+  #Compute death indicator for each interval
+  deathij <- (Sij < int_time)*1 
+  for(i in 1:nrow(deathij)){
+    death <- min(which(deathij[i, ] == 1))
+    if(is.finite(death)){
+      deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
+    }
+  }
+  
+  #Compute study death indicators
+  study_death <- (rowSums(deathij) > 0)*1
+  
+  #Compute overall survival times
+  survtime <- vector(length = num_obs)
+  survtime[which(study_death == 0)] = num_tests*int_time
+  for(i in 1:length(survtime)){
+    if(survtime[i] == 0){
+      death_int <- min(which(deathij[i, ] == 1)) 
+      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
+    } 
+  }
+  
+  #Computing age at death
+  age_death <- age0 + survtime
+  
+  #Labelling datasets and appending IDs
+  Sij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), Sij) #Creating column of ids
+  colnames(Sij) <- Sij_varnames
+  
+  deathij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), deathij) #Creating column of ids
+  colnames(deathij) <- deathij_varnames
+  
+  survtime <- cbind("id" = seq(from = 1, to = num_obs, by = 1), survtime) #Creating column of ids
+  colnames(survtime) <- c("id", "survtime")
+  
+  age_death <- cbind("id" = seq(from = 1, to = num_obs, by = 1), age_death) #Creating column of ids
+  colnames(age_death) <- c("id", "age_death")
+  
+  #---- Censor Cij based on death data ----
+  for(i in 1:num_obs){
+    death_int <- min(which(deathij[i, ] == 1))
+    if(is.finite(death_int)){
+      Cs <- vector(length = num_tests)
+      for(j in death_int:num_tests){
+        Cs[j] <- paste("Ci", j, sep = "")
+      }
+      Cs <- Cs[Cs != "FALSE"]
+      obs[i, dput(Cs)] <- NA
+    }
+  }
+  
+  return(list("mean_Cij" = mean_Cij))
 }
+
 
 #---- Checking the simulated data----
 #Storing the results of the simulation
