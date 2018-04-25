@@ -126,7 +126,7 @@ sex_dem_sim_check <- function(){
   
   #---- Censor Cij based on death data ----
   for(i in 1:num_obs){
-    death_int <- min(which(deathij[i, ] == 1))
+    death_int <- (min(which(deathij[i, ] == 1)) - 1) 
     if(is.finite(death_int)){
       Cs <- vector(length = num_tests)
       for(j in death_int:num_tests){
@@ -136,7 +136,6 @@ sex_dem_sim_check <- function(){
       obs[i, dput(Cs)] <- NA
     }
   }
-  
   return(list("obs" = obs, "mean_Cij" = mean_Cij))
 }
 
@@ -223,4 +222,11 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), 
                           "jpeg", sep = ""), width = 10, height = 7, 
          plot = Cij_plot)
+
+#---- Comparing with life-table data ----
+#Based on 2014 life table found in 
+#National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
+
+
+
 

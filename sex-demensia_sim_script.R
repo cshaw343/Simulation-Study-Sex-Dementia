@@ -212,7 +212,7 @@ sex_dem_sim <- function(){
     
     #---- Censor Cij based on death data ----
     for(i in 1:num_obs){
-      death_int <- min(which(deathij[i, ] == 1))
+      death_int <- (min(which(deathij[i, ] == 1)) - 1)
       if(is.finite(death_int)){
         Cs <- vector(length = num_tests)
         for(j in death_int:num_tests){
@@ -222,10 +222,6 @@ sex_dem_sim <- function(){
         obs[i, dput(Cs)] <- NA
       }
     }
-    
-    
-    
-    
     
   return(list("mean_Cij" = mean_Cij))
 }
