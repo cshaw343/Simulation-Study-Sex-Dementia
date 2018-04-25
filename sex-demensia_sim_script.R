@@ -197,7 +197,6 @@ sex_dem_sim <- function(){
     #Computing age at death
     age_death <- age0 + survtime
     
-    
     #Labelling datasets and appending IDs
     Sij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), Sij) #Creating column of ids
     colnames(Sij) <- Sij_varnames
@@ -211,6 +210,18 @@ sex_dem_sim <- function(){
     age_death <- cbind("id" = seq(from = 1, to = num_obs, by = 1), age_death) #Creating column of ids
     colnames(age_death) <- c("id", "age_death")
     
+    #---- Censor Cij based on death data ----
+    for(i in 1:num_obs){
+      death_int <- min(which(deathij[i, ] == 1))
+      if(is.finite(death_int)){
+        Cs <- vector(length = num_tests)
+        for(j in death_int:num_tests){
+          Cs[j] <- paste("Ci", j, sep = "")
+        }
+        Cs <- Cs[Cs != "FALSE"]
+        obs[i, dput(Cs)] <- NA
+      }
+    }
     
     
     
