@@ -144,7 +144,7 @@ sex_dem_sim_check <- function(){
 #Storing the results of the simulation
 sim_check <- sex_dem_sim_check()
 obs_check <- as_tibble(sim_check$obs)
-Cij_check <- as_tibble(sim_check$mean_Cij)
+mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 
 #Check means: proportion of males, U
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
@@ -152,15 +152,16 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #---- Checking by plots ----
   #---- Creating plot data ----
   #Defining mean Cij plot data for females
-  female_meanCij <- mean_Cij %>% filter(sex == 1) %>% 
-    dplyr::select(-id, -sex) %>% t() %>% as.data.frame() %>% 
+  female_meanCij <- mean_Cij_check %>% filter(sex == 1) %>% 
+    dplyr::select(-sex) %>% t() %>% as.data.frame() %>% 
     mutate("female" = V1) %>% dplyr::select(-V1) %>% 
     cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
 
   #Defining mean Cij plot data for males
-  male_meanCij <- mean_Cij %>% filter(sex == 0) %>% dplyr::select(-id, -sex) %>% 
-  t() %>% as.data.frame() %>% mutate("male" = V1) %>% dplyr::select(-V1) %>% 
-  cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
+  male_meanCij <- mean_Cij_check %>% filter(sex == 0) %>% 
+    dplyr::select(-sex) %>% t() %>% as.data.frame() %>% mutate("male" = V1) %>% 
+    dplyr::select(-V1) %>% cbind(., "t" = visit_times) %>% 
+    melt(., id.vars = "t")
 
   #Checking the mean slopes by sex
   male_slopes <- data_frame("b0a" = (male_meanCij[5, "value"] - 
