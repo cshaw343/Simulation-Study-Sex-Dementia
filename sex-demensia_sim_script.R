@@ -169,12 +169,11 @@ sex_dem_sim <- function(){
     
     #---- Calculating Sij for each individual ----
     #Store Sij values
-    Sij <- as.data.frame(survival(obs)) %>% 
-      cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-    colnames(Sij) <- Sij_varnames
+    Sij <- as.data.frame(survival(obs)) 
     
+    #---- Calculating death data for each individual ----
     #Compute death indicator for each interval
-    deathij <- (Sij < int_time)*1
+    deathij <- (Sij < int_time)*1 
     for(i in 1:nrow(deathij)){
       death <- min(which(deathij[i, ] == 1))
       if(is.finite(death)){
@@ -195,7 +194,26 @@ sex_dem_sim <- function(){
       } 
     }
     
-    return(list("Sij" = Sij, "deathij" = deathij))
+    #Computing age at death
+    age_death <- age0 + survtime
+    
+    
+    #Labelling datasets and appending IDs
+    Sij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), Sij) #Creating column of ids
+    colnames(Sij) <- Sij_varnames
+    
+    deathij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), deathij) #Creating column of ids
+    colnames(deathij) <- deathij_varnames
+    
+    survtime <- cbind("id" = seq(from = 1, to = num_obs, by = 1), survtime) #Creating column of ids
+    colnames(survtime) <- c("id", "survtime")
+    
+    age_death <- cbind("id" = seq(from = 1, to = num_obs, by = 1), age_death) #Creating column of ids
+    colnames(age_death) <- c("id", "age_death")
+    
+    
+    
+    
     
     
   return(list("mean_Cij" = mean_Cij))
