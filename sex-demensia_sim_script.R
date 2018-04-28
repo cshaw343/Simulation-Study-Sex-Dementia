@@ -23,8 +23,8 @@ dem_varnames <- c("id", "dem0", vector(length = num_tests)) #Dementia labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
 slopeij_varnames <- c("id", vector(length = num_tests)) #interval slope labels
 USij_varnames <- c("id", vector(length = num_tests)) #Uniform survival noise labels
-deathij_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
-Sij_varnames <- c("id", vector(length = num_tests)) #Survival time labels
+deathij_varnames <- vector(length = num_tests) #Death indicator labels
+Sij_varnames <- vector(length = num_tests) #Survival time labels
 
 
 for(j in 1:num_tests){
@@ -35,8 +35,8 @@ for(j in 1:num_tests){
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
   slopeij_varnames[j + 1] = paste("slope",j-1, j, sep = "")
   USij_varnames[j + 1] = paste("U",j-1, j, sep = "")
-  deathij_varnames[j + 1] = paste("death",j-1, j, sep = "")
-  Sij_varnames[j + 1] = paste("survtime",j-1, j, sep = "")
+  deathij_varnames[j] = paste("death",j-1, j, sep = "")
+  Sij_varnames[j] = paste("survtime",j-1, j, sep = "")
 }
 
 #---- Generating assessment timepoint data ----
@@ -172,7 +172,8 @@ sex_dem_sim <- function(){
     
     #---- Calculating Sij for each individual ----
     #Store Sij values
-    Sij <- as.data.frame(survival(obs)) 
+    Sij <- as.data.frame(survival(obs))
+    colnames(Sij) <- Sij_varnames
     
     #---- Calculating death data for each individual ----
     #Compute death indicator for each interval
@@ -183,6 +184,7 @@ sex_dem_sim <- function(){
         deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
       }
     }
+    colnames(deathij) <- deathij_varnames
     
     #Compute study death indicators
     study_death <- (rowSums(deathij) > 0)*1
@@ -199,13 +201,6 @@ sex_dem_sim <- function(){
     
     #Computing age at death
     age_death <- age0 + survtime
-    
-    #Labelling datasets and appending IDs
-    Sij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), Sij) #Creating column of ids
-    colnames(Sij) <- Sij_varnames
-    
-    deathij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), deathij) #Creating column of ids
-    colnames(deathij) <- deathij_varnames
     
     #---- Censor Cij based on death data ----
     for(i in 1:num_obs){
