@@ -227,7 +227,20 @@ sex_dem_sim <- function(){
     }
     
     #---- Create a competing risk outcome ----
-    #Generate dementia variable based on Cij
+    #Generate dementia variable based on Cij: try Cij < -0.321 as the cutpoint
+    #Based on 5th percentile from sex-demensia_sim_sanity_check
+    #This actually resulted in 30% demensia incidence at baseline for one dataset =/
+    dem_cut = -0.321
+    demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
+      mutate_all(funs((. < dem_cut)*1))
+    for(i in 1:nrow(demij)){
+      dem <- min(which(demij[i, ] == 1))
+        if(is.finite(dem)){
+          demij[i, dem:ncol(demij)] = 1 #Changes dementia indicators to 1 after initial diagnosis
+        }
+    }
+    demij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), demij) #Creating column of ids
+    colnames(demij) <- dem_varnames
     
     
   return(list("mean_Cij" = mean_Cij))
