@@ -207,12 +207,6 @@ sex_dem_sim <- function(){
     deathij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), deathij) #Creating column of ids
     colnames(deathij) <- deathij_varnames
     
-    survtime <- cbind("id" = seq(from = 1, to = num_obs, by = 1), survtime) #Creating column of ids
-    colnames(survtime) <- c("id", "survtime")
-    
-    age_death <- cbind("id" = seq(from = 1, to = num_obs, by = 1), age_death) #Creating column of ids
-    colnames(age_death) <- c("id", "age_death")
-    
     #---- Censor Cij based on death data ----
     for(i in 1:num_obs){
       death_int <- (min(which(deathij[i, ] == 1)) - 1)
