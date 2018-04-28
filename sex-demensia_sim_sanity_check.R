@@ -136,7 +136,9 @@ sex_dem_sim_check <- function(){
       obs[i, dput(Cs)] <- NA
     }
   }
-  return(list("obs" = obs, "mean_Cij" = mean_Cij))
+  #---- Set function return values ----
+  #return(list("obs" = obs, "mean_Cij" = mean_Cij)) #Use to check simulated data
+  return(Ci0 = obs$Ci0) #Use to check for dementia cut-point
 }
 
 
@@ -226,6 +228,14 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), 
                           "jpeg", sep = ""), width = 10, height = 7, 
          plot = Cij_plot)
+
+#---- Quantiles of Average Cij ----
+#Looking for a reasonable dementia cut point
+#Use 10 simulated datasets and average over baseline Cij values
+#Uses the dementia cut-point return values of sex_dem_sim_check function
+Ci0s <- replicate(10, sex_dem_sim_check()) 
+mean_Ci0s <- rowMeans(Ci0s)
+fifth_percentile <- quantile(mean_Ci0s, 0.05)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
