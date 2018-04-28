@@ -19,16 +19,19 @@ source(par_file)
 age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
+dem_varnames <- c("id", "dem0", vector(length = num_tests)) #Dementia labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
 slopeij_varnames <- c("id", vector(length = num_tests)) #interval slope labels
 USij_varnames <- c("id", vector(length = num_tests)) #Uniform survival noise labels
 deathij_varnames <- c("id", vector(length = num_tests)) #Death indicator labels
 Sij_varnames <- c("id", vector(length = num_tests)) #Survival time labels
 
+
 for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
+  dem_varnames[j + 2] = paste("dem", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
   slopeij_varnames[j + 1] = paste("slope",j-1, j, sep = "")
   USij_varnames[j + 1] = paste("U",j-1, j, sep = "")
@@ -222,6 +225,10 @@ sex_dem_sim <- function(){
         obs[i, dput(Cs)] <- NA
       }
     }
+    
+    #---- Create a competing risk outcome ----
+    #Generate dementia variable based on Cij
+    
     
   return(list("mean_Cij" = mean_Cij))
 }
