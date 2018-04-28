@@ -233,14 +233,26 @@ sex_dem_sim <- function(){
     dem_cut = -0.321
     demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
       mutate_all(funs((. < dem_cut)*1))
+    dem_wave <- vector(length = num_obs) #Wave at which dementia was diagnosed
+    dem <- vector(length = num_obs)      #Dementia diagnosis indicator
     for(i in 1:nrow(demij)){
-      dem <- min(which(demij[i, ] == 1))
-        if(is.finite(dem)){
-          demij[i, dem:ncol(demij)] = 1 #Changes dementia indicators to 1 after initial diagnosis
+      dem_time <- min(which(demij[i, ] == 1))
+        if(is.finite(dem_time)){
+          demij[i, dem_time:ncol(demij)] = 1 #Changes dementia indicators to 1 after initial diagnosis
+          dem_wave[i] = dem_time - 1              #Fills in wave of dementia diagnosis
+          dem[i] = 1                         #Indicates dementia diagnosis
+        } else{
+          dem_wave[i] = NA
+          dem[i] = 0
         }
     }
+    
+    #Labeling variables and creating IDs
     demij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), demij) #Creating column of ids
     colnames(demij) <- dem_varnames
+    
+    
+    
     
     
   return(list("mean_Cij" = mean_Cij))
