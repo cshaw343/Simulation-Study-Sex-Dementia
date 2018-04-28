@@ -242,7 +242,19 @@ sex_dem_sim <- function(){
     timetodem[which(is.na(timetodem))] = survtime[which(is.na(timetodem))]
     
     #Age at dementia diagnosis
-    ageatdem <- age0 + timetodem  
+    ageatdem <- age0 + timetodem
+    
+    #Dementia Death
+    dem_death <- as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
+      mutate("dem_death" = 
+               case_when(dem == 1 & timetodem <= survtime ~ 1, 
+                         study_death == 1 & 
+                           (dem == 0 | (dem == 1 & timetodem > survtime)) ~ 
+                           2)) %>% 
+      mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
+      dplyr::select("dem_death")
+    
+  
     
     
     
