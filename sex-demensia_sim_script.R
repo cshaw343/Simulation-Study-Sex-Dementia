@@ -19,7 +19,7 @@ source(par_file)
 age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
-dem_varnames <- c("id", "dem0", vector(length = num_tests)) #Dementia labels
+dem_varnames <- c("dem0", vector(length = num_tests)) #Dementia labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
 slopeij_varnames <- c("id", vector(length = num_tests)) #interval slope labels
 USij_varnames <- c("id", vector(length = num_tests)) #Uniform survival noise labels
@@ -31,7 +31,7 @@ for(j in 1:num_tests){
   age_varnames[j + 2] = paste("age", j, sep = "")
   agec_varnames[j + 2] = paste(age_varnames[j + 2], "_c50", sep = "")
   eps_varnames[j + 2] = paste("eps", j, sep = "")
-  dem_varnames[j + 2] = paste("dem", j, sep = "")
+  dem_varnames[j + 1] = paste("dem", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
   slopeij_varnames[j + 1] = paste("slope",j-1, j, sep = "")
   USij_varnames[j + 1] = paste("U",j-1, j, sep = "")
@@ -222,6 +222,7 @@ sex_dem_sim <- function(){
     dem_cut = -0.321
     demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
       mutate_all(funs((. < dem_cut)*1))
+    colnames(demij) <- dem_varnames
     dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
     for(i in 1:nrow(demij)){
       dem_time <- min(which(demij[i, ] == 1))
@@ -238,15 +239,11 @@ sex_dem_sim <- function(){
       
     #Time to dementia
     timetodem <- dem_wave*int_time
-    timetodem[which(is.na(timetodem))] = 
-      survtime[which(is.na(timetodem)), "survtime"]
+    timetodem[which(is.na(timetodem))] = survtime[which(is.na(timetodem))]
     
     #Age at dementia diagnosis
     ageatdem <- age0 + timetodem  
     
-    #Labeling variables and creating IDs
-    demij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), demij) #Creating column of ids
-    colnames(demij) <- dem_varnames
     
     
     
