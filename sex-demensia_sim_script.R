@@ -244,7 +244,7 @@ sex_dem_sim <- function(){
     #Age at dementia diagnosis
     ageatdem <- age0 + timetodem
     
-    #Dementia Death
+    #Dementia at death??
     dem_death <- as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
       mutate("dem_death" = 
                case_when(dem == 1 & timetodem <= survtime ~ 1, 
@@ -254,14 +254,25 @@ sex_dem_sim <- function(){
       mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
       dplyr::select("dem_death")
     
-  
+    timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
+      mutate("timetodem_death" = 
+               ifelse(dem == 1, pmin(timetodem, survtime), survtime)) %>%
+      dplyr::select("timetodem_death")
     
+    ageatdem_death <- age0 + timetodem_death %>% 
+      mutate("ageatdem_death" = timetodem_death) %>% 
+      dplyr::select("ageatdem_death")
     
+    dem_alive <- as_tibble((dem_death == 1)*1) %>% 
+      mutate("dem_alive" = dem_death) %>% dplyr::select("dem_alive")
     
+#---- Combine all variables ----
+obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
+                       demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
+                       timetodem_death, ageatdem_death, dem_alive) %>%
+      filter(dem_wave != 0)
     
-    
-    
-  return(list("mean_Cij" = mean_Cij))
+return(list("mean_Cij" = mean_Cij))
 }
 
 #---- Running the simulation----
