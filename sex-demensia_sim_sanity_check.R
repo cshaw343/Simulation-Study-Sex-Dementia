@@ -287,7 +287,7 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #Use 4 simulated datasets and find quantiles of baseline Cij
 #Uses the dementia cut-point return values of sex_dem_sim_check function
 Ci0s <- replicate(4, sex_dem_sim_check()) 
-fifth_percentile <- quantile(Ci0s, 0.05)
+fifth_percentile <- quantile(unlist(Ci0s), 0.05)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
