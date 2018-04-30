@@ -5,7 +5,7 @@ if (!require("pacman"))
 p_load("tidyverse", "MASS", "reshape")
 
 #---- Specify source file ----
-source("sex-demensia_sim_parA.R")
+source("sex-demensia_sim_script.R")
 
 #---- The simulation function ----
 sex_dem_sim_check <- function(){
@@ -89,7 +89,8 @@ sex_dem_sim_check <- function(){
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs)) 
+  Sij <- as.data.frame(survival(obs))
+  colnames(Sij) <- Sij_varnames
   
   #---- Calculating death data for each individual ----
   #Compute death indicator for each interval
@@ -100,6 +101,7 @@ sex_dem_sim_check <- function(){
       deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
     }
   }
+  colnames(deathij) <- deathij_varnames
   
   #Compute study death indicators
   study_death <- (rowSums(deathij) > 0)*1
@@ -117,22 +119,9 @@ sex_dem_sim_check <- function(){
   #Computing age at death
   age_death <- age0 + survtime
   
-  #Labelling datasets and appending IDs
-  Sij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), Sij) #Creating column of ids
-  colnames(Sij) <- Sij_varnames
-  
-  deathij <- cbind("id" = seq(from = 1, to = num_obs, by = 1), deathij) #Creating column of ids
-  colnames(deathij) <- deathij_varnames
-  
-  survtime <- cbind("id" = seq(from = 1, to = num_obs, by = 1), survtime) #Creating column of ids
-  colnames(survtime) <- c("id", "survtime")
-  
-  age_death <- cbind("id" = seq(from = 1, to = num_obs, by = 1), age_death) #Creating column of ids
-  colnames(age_death) <- c("id", "age_death")
-  
   #---- Censor Cij based on death data ----
   for(i in 1:num_obs){
-    death_int <- (min(which(deathij[i, ] == 1)) - 1) 
+    death_int <- (min(which(deathij[i, ] == 1)) - 1)
     if(is.finite(death_int)){
       Cs <- vector(length = num_tests)
       for(j in death_int:num_tests){
@@ -142,6 +131,64 @@ sex_dem_sim_check <- function(){
       obs[i, dput(Cs)] <- NA
     }
   }
+  
+  #---- Create a competing risk outcome ----
+  #Generate dementia variable based on Cij: try Cij < -0.321 as the cutpoint
+  #Based on 5th percentile from sex-demensia_sim_sanity_check
+  #This actually resulted in 30% demensia incidence at baseline for one dataset =/
+  dem_cut = -0.321
+  demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
+    mutate_all(funs((. < dem_cut)*1))
+  colnames(demij) <- dem_varnames
+  dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
+  for(i in 1:nrow(demij)){
+    dem_time <- min(which(demij[i, ] == 1))
+    if(is.finite(dem_time)){
+      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
+    } else{
+      dem_wave[i] = NA
+    }
+  }
+  
+  #Dementia diagnosis indicator
+  dem <- (1 - is.na(dem_wave))
+  
+  #Time to dementia
+  timetodem <- dem_wave*int_time
+  timetodem[which(is.na(timetodem))] = survtime[which(is.na(timetodem))]
+  
+  #Age at dementia diagnosis
+  ageatdem <- age0 + timetodem
+  
+  #Dementia at death??
+  dem_death <- as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
+    mutate("dem_death" = 
+             case_when(dem == 1 & timetodem <= survtime ~ 1, 
+                       study_death == 1 & 
+                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~ 
+                         2)) %>% 
+    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
+    dplyr::select("dem_death")
+  
+  timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
+    mutate("timetodem_death" = 
+             ifelse(dem == 1, pmin(timetodem, survtime), survtime)) %>%
+    dplyr::select("timetodem_death")
+  
+  ageatdem_death <- age0 + timetodem_death %>% 
+    mutate("ageatdem_death" = timetodem_death) %>% 
+    dplyr::select("ageatdem_death")
+  
+  dem_alive <- as_tibble((dem_death == 1)*1) %>% 
+    mutate("dem_alive" = dem_death) %>% dplyr::select("dem_alive")
+  
+  #---- Combine all variables ----
+  obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
+               demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
+               timetodem_death, ageatdem_death, dem_alive) %>%
+    filter(dem_wave != 0)
+  
   #---- Set function return values ----
   #return(list("obs" = obs, "mean_Cij" = mean_Cij)) #Use to check simulated data
   return(Ci0 = obs$Ci0) #Use to check for dementia cut-point
