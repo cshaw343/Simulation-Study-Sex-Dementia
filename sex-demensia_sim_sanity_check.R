@@ -290,6 +290,8 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 Ci0s <- replicate(4, sex_dem_sim_check()) 
 fifth_percentile <- quantile(unlist(Ci0s), 0.05)
 
+check_demcut <- mean((sex_dem_sim_check() < -1.05)*1)
+
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
