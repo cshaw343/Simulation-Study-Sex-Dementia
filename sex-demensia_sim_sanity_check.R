@@ -186,8 +186,9 @@ sex_dem_sim_check <- function(){
   #---- Combine all variables ----
   obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
                demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
-               timetodem_death, ageatdem_death, dem_alive) %>%
-    filter(dem_wave != 0)
+               timetodem_death, ageatdem_death, dem_alive) 
+  #%>%
+    #filter(dem_wave != 0)
   
   #---- Set function return values ----
   #return(list("obs" = obs, "mean_Cij" = mean_Cij)) #Use to check simulated data
