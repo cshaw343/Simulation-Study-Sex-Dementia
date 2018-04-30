@@ -1,5 +1,5 @@
 #---- Specify source file ----
-source("sex-demensia_sim_script.R")
+source("sex-demensia_sim_parA.R")
 
 #---- The simulation function ----
 sex_dem_sim_check <- function(){
@@ -229,13 +229,12 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
                           "jpeg", sep = ""), width = 10, height = 7, 
          plot = Cij_plot)
 
-#---- Quantiles of Average Cij ----
+#---- Quantiles Cij Distribution ----
 #Looking for a reasonable dementia cut point
-#Use 10 simulated datasets and average over baseline Cij values
+#Use 4 simulated datasets and find quantiles of baseline Cij
 #Uses the dementia cut-point return values of sex_dem_sim_check function
-Ci0s <- replicate(10, sex_dem_sim_check()) 
-mean_Ci0s <- rowMeans(Ci0s)
-fifth_percentile <- quantile(mean_Ci0s, 0.05)
+Ci0s <- replicate(4, sex_dem_sim_check()) 
+fifth_percentile <- quantile(Ci0s, 0.05)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
