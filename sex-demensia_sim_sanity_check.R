@@ -6,6 +6,7 @@ p_load("tidyverse", "MASS", "reshape")
 
 #---- Specify source file ----
 source("sex-demensia_sim_script.R")
+source("life_table2014.R")
 
 #---- The simulation function ----
 sex_dem_sim_check <- function(){
@@ -295,7 +296,6 @@ check_demcut <- mean((sex_dem_sim_check() < -1.05)*1)
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
-
 
 
 
