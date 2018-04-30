@@ -1,3 +1,9 @@
+#---- Package loading, options, seed ----
+if (!require("pacman")) 
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+
+p_load("tidyverse", "MASS", "reshape")
+
 #---- Specify source file ----
 source("sex-demensia_sim_parA.R")
 
