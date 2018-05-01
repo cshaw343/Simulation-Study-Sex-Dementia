@@ -1,9 +1,3 @@
-#---- Package loading, options, seed ----
-if (!require("pacman")) 
-  install.packages("pacman", repos='http://cran.us.r-project.org')
-
-p_load("tidyverse", "MASS", "reshape")
-
 #---- Specify source file ----
 source("sex-demensia_sim_script.R")
 source("life_table2014.R")
@@ -193,7 +187,8 @@ sex_dem_sim_check <- function(){
   
   #---- Set function return values ----
   #return(list("obs" = obs, "mean_Cij" = mean_Cij)) #Use to check simulated data
-  return(Ci0 = obs$Ci0) #Use to check for dementia cut-point
+  #return(Ci0 = obs$Ci0) #Use to check for dementia cut-point
+  return(obs[, c("sex", dput(deathij_varnames))]) #Use to check number of deaths
 }
 
 
@@ -296,6 +291,16 @@ check_demcut <- mean((sex_dem_sim_check() < -1.05)*1)
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
+#Uses the number of death return value of sex_dem_check function
+deaths <- sex_dem_sim_check() 
+
+#Returns conditional probability of death a each study timepoint
+death_check_male <- deaths %>% filter(sex == 1) %>% dplyr::select(-sex) %>%
+  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
+death_check_female <- deaths %>% filter(sex == 0) %>% dplyr::select(-sex) %>%
+  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
+
+
 
 
 
