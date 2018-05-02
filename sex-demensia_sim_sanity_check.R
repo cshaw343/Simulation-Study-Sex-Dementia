@@ -209,10 +209,9 @@ sex_dem_sim_check <- function(){
   #return(cbind("male" = death_check_male, "female" = death_check_female)) 
 }
 
-
 #---- Checking the simulated data----
 #Storing the results of the simulation
-sim_check <- sex_dem_sim_check()
+sim_check <- sex_dem_sim()
 obs_check <- as_tibble(sim_check$obs)
 mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 
