@@ -53,4 +53,5 @@ g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death ----
+#Should vary by time j
 lambda <- 0.0031
