@@ -8,7 +8,7 @@ p_load("ggplot2")
 source("sex-demensia_sim_script.R")
 source("life_table2014.R")
 
-#---- Checking the simulated data----
+#---- Checking one simulated dataset----
 #Storing the results of the simulation
 sim_check <- sex_dem_sim()
 obs_check <- as_tibble(sim_check$obs)
@@ -17,7 +17,7 @@ mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 #Check means: proportion of males, U
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
-#---- Checking by plots ----
+#---- Checking one simulation by plots ----
   #---- Creating plot data ----
   #Defining mean Cij plot data for females
   female_meanCij <- mean_Cij_check %>% filter(sex == 1) %>% 
