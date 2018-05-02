@@ -17,7 +17,7 @@ agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age l
 eps_varnames <- c("id", "eps0", vector(length = num_tests)) #Epsilon labels
 dem_varnames <- c("dem0", vector(length = num_tests)) #Dementia labels
 Cij_varnames <- c("id", "Ci0", vector(length = num_tests)) #Cij labels
-mean_Cij_varnames <- c("id", "meanCi0", vector(length = num_tests)) #Mean Cij labels
+mean_Cij_varnames <- c("meanCi0", vector(length = num_tests)) #Mean Cij labels
 slopeij_varnames <- c("id", vector(length = num_tests)) #interval slope labels
 USij_varnames <- c("id", vector(length = num_tests)) #Uniform survival noise labels
 deathij_varnames <- vector(length = num_tests) #Death indicator labels
@@ -30,7 +30,7 @@ for(j in 1:num_tests){
   eps_varnames[j + 2] = paste("eps", j, sep = "")
   dem_varnames[j + 1] = paste("dem", j, sep = "")
   Cij_varnames[j + 2] = paste("Ci", j, sep = "")
-  mean_Cij_varnames[j + 2] = paste("meanCi", j, sep = "")
+  mean_Cij_varnames[j + 1] = paste("meanCi", j, sep = "")
   slopeij_varnames[j + 1] = paste("slope",j-1, j, sep = "")
   USij_varnames[j + 1] = paste("U",j-1, j, sep = "")
   deathij_varnames[j] = paste("death",j-1, j, sep = "")
@@ -150,6 +150,7 @@ sex_dem_sim <- function(){
     mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
       mutate_at("sex", as.factor) %>% group_by(sex) %>% 
       dplyr::select(-id) %>% summarise_all(mean)
+    colnames(mean_Cij) <- mean_Cij_varnames
     
   #---- Generate survival time for each person ----
   #Individual hazard functions
