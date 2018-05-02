@@ -55,3 +55,8 @@ g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 #---- Baseline hazard of death ----
 #Should vary by time j
 lambda <- 0.0031
+
+#---- Dementia Cut Point ----
+#Initially set to a value
+#Choose reasonable value based on find_dem_cut script
+dem_cut <- -3
