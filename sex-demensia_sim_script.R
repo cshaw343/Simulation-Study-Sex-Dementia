@@ -264,15 +264,17 @@ sex_dem_sim <- function(){
 #---- Combine all variables ----
 obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
                        demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
-                       timetodem_death, ageatdem_death, dem_alive) %>%
-      filter(dem_wave != 0)
+                       timetodem_death, ageatdem_death, dem_alive) 
+    
+#---- Edit for actual simulation ----
+#Comment out for simulation checks
+#obs <- obs %>% filter(dem_wave != 0)
 
-#---- Specify values to return ----
 #Desired simulation return values    
 #return(list("mean_Cij" = mean_Cij))
     
 #Alternative return function for code checking
-return(list("obs" = obs))
+return(list("obs" = obs, "mean_Cij" = mean_Cij))
 }
 
 
