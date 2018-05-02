@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "MASS", "reshape")
+p_load("ggplot2")
 
 #---- Specify source file ----
 source("sex-demensia_sim_script.R")
