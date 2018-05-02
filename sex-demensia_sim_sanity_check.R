@@ -5,6 +5,8 @@ if (!require("pacman"))
 p_load("ggplot2")
 
 #---- Specify source file ----
+par_file <- "sex-demensia_sim_parA.R" #This syntax is used for file naming later
+source(par_file)
 source("sex-demensia_sim_script.R")
 source("life_table2014.R")
 
