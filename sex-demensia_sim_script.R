@@ -11,10 +11,6 @@ options(digits = 3)
 
 set.seed(10789)
 
-#---- Specify the parameter file ----
-par_file <- "sex-demensia_sim_parA.R"
-source(par_file)
-
 #---- Generating variable names for each assessment timepoint ----
 age_varnames <- c("id", "age0", vector(length = num_tests)) #Age labels
 agec_varnames <- c("id", "age0_c50", vector(length = num_tests)) #Centered age labels
@@ -270,16 +266,14 @@ obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death,
                        demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
                        timetodem_death, ageatdem_death, dem_alive) %>%
       filter(dem_wave != 0)
+
+#---- Specify values to return ----
+#Desired simulation return values    
+#return(list("mean_Cij" = mean_Cij))
     
-return(list("mean_Cij" = mean_Cij))
+#Alternative return function for code checking
+return(list("obs" = obs))
 }
 
-#---- Running the simulation----
-#Storing the results of the simulation
-sim_results <- replicate(1, sex_dem_sim())
 
-#---- Looking at simulation results ----
-#Finding the mean Cij by sex across all simulations
-mean_Cij_sim <- as_tibble(do.call(rbind, sim_results)) %>% group_by(sex) %>% 
-  summarise_all(mean)
 
