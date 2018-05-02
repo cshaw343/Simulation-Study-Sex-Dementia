@@ -11,5 +11,8 @@ p_load("tidyverse")
 
 #---- Specify source files ----
 source("sex-demensia_sim_parA.R")
-source("sex-demensia_sim_sanity_check.R")
+source("sex-demensia_sim_script.R")
 source("life_table2014.R")
+
+#---- Search Function ----
+
