@@ -1,9 +1,8 @@
-#---- Specify the source file ----
+#---- Specify the simulation script ----
 source("sex-demensia_sim_script.R")
 
 #---- Specify the parameter file ----
-par_file <- "sex-demensia_sim_parA.R"
-source(par_file)
+source("sex-demensia_sim_parA.R")
 
 #---- Running the simulation----
 #Storing the results of the simulation
