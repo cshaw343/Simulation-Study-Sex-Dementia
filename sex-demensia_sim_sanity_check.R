@@ -19,7 +19,6 @@ mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 #Check means: proportion of males, U
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
-#---- Checking one simulation by plots ----
   #---- Creating plot data ----
   #Defining mean Cij plot data for females
   female_meanCij <- mean_Cij_check %>% filter(sex == 1) %>% 
@@ -100,11 +99,8 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #---- Quantiles Cij Distribution ----
 #Looking for a reasonable dementia cut point
 #Use 4 simulated datasets and find quantiles of baseline Cij
-#Uses the dementia cut-point return values of sex_dem_sim function
-Ci0s <- replicate(4, sex_dem_sim()) 
-fifth_percentile <- quantile(unlist(Ci0s), 0.05)
-
-check_demcut <- mean((sex_dem_sim() < -1.05)*1)
+dem_cut <- replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
+    quantile(0.05)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
