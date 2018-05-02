@@ -100,17 +100,17 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #---- Quantiles Cij Distribution ----
 #Looking for a reasonable dementia cut point
 #Use 4 simulated datasets and find quantiles of baseline Cij
-#Uses the dementia cut-point return values of sex_dem_sim_check function
-Ci0s <- replicate(4, sex_dem_sim_check()) 
+#Uses the dementia cut-point return values of sex_dem_sim function
+Ci0s <- replicate(4, sex_dem_sim()) 
 fifth_percentile <- quantile(unlist(Ci0s), 0.05)
 
-check_demcut <- mean((sex_dem_sim_check() < -1.05)*1)
+check_demcut <- mean((sex_dem_sim() < -1.05)*1)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
 
-death_check <- replicate(5, sex_dem_sim_check())
+death_check <- replicate(5, sex_dem_sim())
 
 #Conditional probability of survival at each timepoint by sex
 death_check_male <- obs[, c("sex", dput(deathij_varnames))] %>% 
