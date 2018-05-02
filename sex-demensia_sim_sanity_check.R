@@ -8,207 +8,6 @@ p_load("tidyverse", "MASS", "reshape")
 source("sex-demensia_sim_script.R")
 source("life_table2014.R")
 
-#---- The simulation function ----
-sex_dem_sim_check <- function(){
-  #---- Generating IDs, sex, U ----
-  obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1), 
-                "sex" = rbinom(num_obs, size = 1, prob = psex), 
-                "U" = rnorm(num_obs, mean = 0, sd = 1))
-  
-  #---- Generating age data ----
-  #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
-  for(j in 1:length(age_varnames)){
-    if(j == 1){
-      ages[, j] = seq(from = 1, to = num_obs, by = 1) #Creates column of ids
-    } else if(j == 2){
-      ages[, j] = age0 #Creates column of baseline ages
-    } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
-  }
-  colnames(ages) <- age_varnames
-  
-  #---- Generating centered age data ----
-  #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% 
-    mutate("id" = seq(from = 1, to = num_obs, by = 1)) #Creates column of ids
-  colnames(c_ages) <- agec_varnames
-  
-  #---- Generating "true" cognitive function Cij ----
-  #Cij = b00 + z0i + bo1*sexi + b02*age0i + b03*Ui + (b10 + z1i + b11*sexi + 
-  #b12*age0i + b13*Ui)*timej + epsilonij
-  
-  #---- Generating random terms for slope and intercept ----
-  #Generate random terms for each individual
-  slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                       Sigma = slope_int_cov)) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
-  colnames(slope_int_noise) <- c("id", "z0i", "z1i")
-  
-  #---- Generating noise term (unexplained variance in Cij) for each visit ----
-  sd_eps <- sqrt(var3)
-  eps <- as_tibble(replicate(num_tests + 1, 
-                             rnorm(n = num_obs, mean = 0, sd = sd_eps))) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
-  colnames(eps) <- eps_varnames
-  
-  #---- Creating complete matrix of observation data ----
-  obs <- left_join(obs, ages, by = "id") %>% left_join(c_ages, by = "id") %>%
-    left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
-  
-  #---- Calculating Cij for each individual ----
-  #Store Cij values
-  Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(Cij) <- Cij_varnames
-  
-  #Store slope values per interval per individual
-  slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(slopeij) <- slopeij_varnames
-  
-  #---- Calculating mean Cij by sex ----
-  mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
-    mutate_at("sex", as.factor) %>% group_by(sex) %>% 
-    dplyr::select(-id) %>% summarise_all(mean)
-  
-  #---- Generate survival time for each person ----
-  #Individual hazard functions
-  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
-  #g5*slopeij + g6Cij)
-  #See Additional notes in README file
-  
-  #---- Generating uniform random variables per interval for Sij ----
-  USij <- as_tibble(replicate(num_tests, 
-                              runif(num_obs, min = 0, max = 1))) %>%
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(USij) <- USij_varnames
-  
-  #---- Merging Cij, slopeij, and USij with observation data ----
-  #Used as input for survival function
-  obs <- left_join(obs, Cij, by = "id") %>% left_join(slopeij, by = "id") %>% 
-    left_join(USij, by = "id")
-  
-  #---- Calculating Sij for each individual ----
-  #Store Sij values
-  Sij <- as.data.frame(survival(obs))
-  colnames(Sij) <- Sij_varnames
-  
-  #---- Calculating death data for each individual ----
-  #Compute death indicator for each interval
-  deathij <- (Sij < int_time)*1 
-  for(i in 1:nrow(deathij)){
-    death <- min(which(deathij[i, ] == 1))
-    if(is.finite(death)){
-      deathij[i, death:ncol(deathij)] = 1 #Changes death indicators to 1 after death
-    }
-  }
-  colnames(deathij) <- deathij_varnames
-  
-  #Compute study death indicators
-  study_death <- (rowSums(deathij) > 0)*1
-  
-  #Compute overall survival times
-  survtime <- vector(length = num_obs)
-  survtime[which(study_death == 0)] = num_tests*int_time
-  for(i in 1:length(survtime)){
-    if(survtime[i] == 0){
-      death_int <- min(which(deathij[i, ] == 1)) 
-      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
-    } 
-  }
-  
-  #Computing age at death
-  age_death <- age0 + survtime
-  
-  #---- Censor Cij based on death data ----
-  for(i in 1:num_obs){
-    death_int <- (min(which(deathij[i, ] == 1)) - 1)
-    if(is.finite(death_int)){
-      Cs <- vector(length = num_tests)
-      for(j in death_int:num_tests){
-        Cs[j] <- paste("Ci", j, sep = "")
-      }
-      Cs <- Cs[Cs != "FALSE"]
-      obs[i, dput(Cs)] <- NA
-    }
-  }
-  
-  #---- Create a competing risk outcome ----
-  #Generate dementia variable based on Cij: try Cij < -1.05 as the cutpoint
-  #Based on 5th percentile from sex-demensia_sim_sanity_check
-  #This actually resulted in 30% demensia incidence at baseline for one dataset =/
-  dem_cut = -1.05
-  demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
-    mutate_all(funs((. < dem_cut)*1))
-  colnames(demij) <- dem_varnames
-  dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
-  for(i in 1:nrow(demij)){
-    dem_time <- min(which(demij[i, ] == 1))
-    if(is.finite(dem_time)){
-      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
-      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
-    } else{
-      dem_wave[i] = NA
-    }
-  }
-  
-  #Dementia diagnosis indicator
-  dem <- (1 - is.na(dem_wave))
-  
-  #Time to dementia
-  timetodem <- dem_wave*int_time
-  timetodem[which(is.na(timetodem))] = survtime[which(is.na(timetodem))]
-  
-  #Age at dementia diagnosis
-  ageatdem <- age0 + timetodem
-  
-  #Dementia at death??
-  dem_death <- as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
-    mutate("dem_death" = 
-             case_when(dem == 1 & timetodem <= survtime ~ 1, 
-                       study_death == 1 & 
-                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~ 
-                         2)) %>% 
-    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
-    dplyr::select("dem_death")
-  
-  timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
-    mutate("timetodem_death" = 
-             ifelse(dem == 1, pmin(timetodem, survtime), survtime)) %>%
-    dplyr::select("timetodem_death")
-  
-  ageatdem_death <- age0 + timetodem_death %>% 
-    mutate("ageatdem_death" = timetodem_death) %>% 
-    dplyr::select("ageatdem_death")
-  
-  dem_alive <- as_tibble((dem_death == 1)*1) %>% 
-    mutate("dem_alive" = dem_death) %>% dplyr::select("dem_alive")
-  
-  #---- Combine all variables ----
-  obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
-               demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
-               timetodem_death, ageatdem_death, dem_alive) 
-  #%>%
-    #filter(dem_wave != 0)
-  
-  #---- Conditional Probabilities ----
-  #Returns conditional probability of death a each study timepoint
-  death_check_male <- obs[, c("sex", dput(deathij_varnames))] %>% 
-    filter(sex == 1) %>% dplyr::select(-sex) %>% 
-    map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
-  death_check_female <- obs[, c("sex", dput(deathij_varnames))] %>% 
-    filter(sex == 0) %>% dplyr::select(-sex) %>% 
-    map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
-  
-  #---- Set function return values ----
-  #Use to check simulated data
-  #return(list("obs" = obs, "mean_Cij" = mean_Cij))
-  #Use to check for dementia cut-point
-  return(Ci0 = obs$Ci0) 
-  #Used conditional prob of death
-  #return(cbind("male" = death_check_male, "female" = death_check_female)) 
-}
-
 #---- Checking the simulated data----
 #Storing the results of the simulation
 sim_check <- sex_dem_sim()
@@ -308,8 +107,16 @@ check_demcut <- mean((sex_dem_sim_check() < -1.05)*1)
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
-#Uses the number of death return value of sex_dem_check function
-death_check <- replicate(5, sex_dem_sim_check()) 
+
+death_check <- replicate(5, sex_dem_sim_check())
+
+#Conditional probability of survival at each timepoint by sex
+death_check_male <- obs[, c("sex", dput(deathij_varnames))] %>% 
+  filter(sex == 1) %>% dplyr::select(-sex) %>% 
+  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
+death_check_female <- obs[, c("sex", dput(deathij_varnames))] %>% 
+  filter(sex == 0) %>% dplyr::select(-sex) %>% 
+  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
 
 
 
