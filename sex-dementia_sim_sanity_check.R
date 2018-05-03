@@ -5,9 +5,9 @@ if (!require("pacman"))
 p_load("ggplot2")
 
 #---- Specify source file ----
-par_file <- "sex-demensia_sim_parA.R" #This syntax is used for file naming later
+par_file <- "sex-dementia_sim_parA.R" #This syntax is used for file naming later
 source(par_file)
-source("sex-demensia_sim_script.R")
+source("sex-dementia_sim_script.R")
 source("life_table2014.R")
 
 #---- Checking one simulated dataset----
@@ -95,12 +95,6 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), 
                           "jpeg", sep = ""), width = 10, height = 7, 
          plot = Cij_plot)
-
-#---- Quantiles Cij Distribution ----
-#Looking for a reasonable dementia cut point
-#Use 4 simulated datasets and find quantiles of baseline Cij
-dem_cut <- replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
-    quantile(0.05)
 
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
