@@ -20,9 +20,9 @@ cond_prob <- function(x){
 male_life <- tibble("MAge" = seq(from = 50, to = 100, by = 5), 
                     "MSurvivors" = c(67553, 62965, 56917, 49218, 39668, 28316, 
                                     17128, 7920, 2527, 556, 62)) %>% 
-  mutate("MCond Probs" = cond_prob(MSurvivors))
+  mutate("CP" = cond_prob(MSurvivors))
 
 female_life <- tibble("FAge" = seq(from = 50, to = 100, by = 5), 
                       "FSurvivors" = c(69452, 65099, 59438, 52126, 42741, 31344, 
                                       19613, 9515, 3314, 728, 72)) %>% 
-  mutate("FCond Probs" = cond_prob(FSurvivors))
+  mutate("CP" = cond_prob(FSurvivors))
