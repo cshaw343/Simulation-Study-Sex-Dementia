@@ -9,13 +9,15 @@ if (!require("pacman"))
 
 p_load("tidyverse", "magrittr")
 
+set.seed(5318)
+
 #---- Specify source files ----
 source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
 source("life_table2014.R")
 
 #---- Search for Baseline Hazard ----
-#Create dataset for search
+#Function that creates the dataset for the search
 data_gen <- function(){
   #---- Generating IDs, sex, U ----
   obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1), 
@@ -87,11 +89,6 @@ data_gen <- function(){
   return("obs" = obs)
 }
 
-#Storing the test data
-data <- data_gen()
-male_data <- data %>% filter(sex == "1")
-female_data <- data %>% filter(sex == "0")
-
 #Function we are trying to optimize
 survivors <- function(L, obs, cp){
     time_left = -log(obs[US])/(L*exp(g1*obs["sex"] + g2*obs[agec] + 
@@ -101,7 +98,8 @@ survivors <- function(L, obs, cp){
   return(abs(mean(alive) - cp))
 }
 
-lambda_search <- function(obs_bysex, cp_bysex){
+#function for finding lambdas
+lambdas <- function(obs_bysex, cp_bysex){
   lambdas <- vector(length = num_tests)
   Sij <- vector(length = num_tests)
   for(j in 1:length(lambdas)){
@@ -130,9 +128,22 @@ lambda_search <- function(obs_bysex, cp_bysex){
   return(lambdas)
 }
 
-male_basehaz <- lambda_search(male_data, male_life)
-female_basehaz <- lambda_search(female_data, female_life)
+#---- Averaging over baseline hazard searches----
+find_lambda <- function(num_obs = 100000){
+  #Generating and grouping the data by sex
+  data <- data_gen()
+  #male_data <- data %>% filter(sex == "1")
+  #female_data <- data %>% filter(sex == "0")
+  
+  #Calculating baseline hazards by sex
+  # male_basehaz <- lambda_search(male_data, male_life)
+  # female_basehaz <- lambda_search(female_data, female_life)
+  
+  #return(c(male_basehaz, female_basehaz))
+  return(lambda_search(data, life))
+}
 
+bhazards <- rowMeans(replicate(10, find_lambda()))
 
 #---- Quantiles of Cij Distribution ----
 #Looking for a reasonable dementia cut point
