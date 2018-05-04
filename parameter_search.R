@@ -7,7 +7,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse")
+p_load("tidyverse", "magrittr")
 
 #---- Specify source files ----
 source("sex-dementia_sim_parA.R")
@@ -87,26 +87,52 @@ data_gen <- function(){
   return("obs" = obs)
 }
 
-#Creating the test data
+#Storing the test data
 data <- data_gen()
+male_data <- data %>% filter(sex == "1")
+female_data <- data %>% filter(sex == "0")
 
-cp_survival <- function(L, obs){#Calculate survival times for each interval
-  Sij <- vector(length = (length(visit_times) - 1))
-  for(j in 1:length(Sij)){
+#Function we are trying to optimize
+survivors <- function(L, obs, cp){
+    time_left = -log(obs[US])/(L*exp(g1*obs["sex"] + g2*obs[agec] + 
+                                       g3*obs["U"] + g4*obs["sex"]*obs[agec] + 
+                                       g5*obs[slope] + g6*obs[C]))
+    alive <- (time_left > 5) * 1
+  return(abs(mean(alive) - cp))
+}
+
+lambda_search <- function(obs_bysex, cp_bysex){
+  lambdas <- vector(length = num_tests)
+  Sij <- vector(length = num_tests)
+  for(j in 1:length(lambdas)){
     test_num = j - 1
     US <- paste("U", test_num, test_num + 1, sep = "")
     agec <- paste("age", test_num, "_c50", sep = "")
     slope <- paste("slope", test_num, test_num + 1, sep = "")
     C <- paste("Ci", test_num, sep = "")
-    Sij[j] = -log(obs[US])/
-      (L*exp(g1*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
-                    g4*obs["sex"]*obs[agec] + g5*obs[slope] + 
-                    g6*obs[C]))
+    cp = as.double(cp_bysex[j + 1, "CP"])
+    if(test_num == 0){
+      lambdas[j] = optimise(survivors, interval = c(0, 0.0065), 
+                            obs = obs_bysex, cp = cp)$minimum
+      Sij <- survival(obs_bysex, lambdas[j])
+      alive_now <- (Sij[[j]] > 5)*1
+      obs_bysex %<>% cbind(., (Sij[[j]] > 5)*1)
+    } else {
+      alive <- paste(names(obs_bysex)[ncol(obs_bysex)], " == '1'", sep = "")
+      obs_bysex %<>% filter_(alive)
+      lambdas[j] = optimise(survivors, interval = c(0, 0.0065), 
+                            obs = obs_bysex, cp = cp)$minimum
+      Sij <- survival(obs_bysex, lambdas[j])
+      alive_now <- (Sij[[j]] > 5)*1
+      obs_bysex[, ncol(obs_bysex)] = alive_now
+    }
   }
-  return("Sij" = Sij)
+  return(lambdas)
 }
 
-test <- cp_survival(-0.02, obs_check)
+male_basehaz <- lambda_search(male_data, male_life)
+female_basehaz <- lambda_search(female_data, female_life)
+
 
 #---- Quantiles of Cij Distribution ----
 #Looking for a reasonable dementia cut point
