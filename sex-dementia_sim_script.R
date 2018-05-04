@@ -68,7 +68,7 @@ cog_func <- function(obs){
 }
 
 #---- Model for Survival Time ----
-survival <- function(obs){
+survival <- function(obs, lambda){
   #Calculate survival times for each interval
   Sij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
