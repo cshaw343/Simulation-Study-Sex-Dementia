@@ -53,9 +53,10 @@ g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death ----
-#Should vary by time j
-lambda <- 0.0031
+#Computed in parameter_search.R script
+Flambdas <- rep(0.00646, 10)
+Mlambdas <- c(0.00546, rep(0.00646, 6), 0.00644, 0.00632, 0.00641)
 
 #---- Dementia Cut Point ----
-#Chosen using from dem_cut portion of parameter search file
+#Chosen using from dem_cut portion of parameter_search.R script
 dem_cut <- -1.05
