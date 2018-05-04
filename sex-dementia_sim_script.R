@@ -78,7 +78,7 @@ survival <- function(obs, lambda){
     slope <- paste("slope", test_num, test_num + 1, sep = "")
     C <- paste("Ci", test_num, sep = "")
     Sij[j] = -log(obs[US])/
-      (lambda*exp(g1*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
+      (lambda[j]*exp(g1*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
                     g4*obs["sex"]*obs[agec] + g5*obs[slope] + 
                     g6*obs[C]))
   }
@@ -171,7 +171,7 @@ sex_dem_sim <- function(){
     
     #---- Calculating Sij for each individual ----
     #Store Sij values
-    Sij <- as.data.frame(survival(obs))
+    Sij <- as.data.frame(survival(obs, lambda))
     colnames(Sij) <- Sij_varnames
     
     #---- Calculating death data for each individual ----
