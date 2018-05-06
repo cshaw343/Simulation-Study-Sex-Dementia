@@ -99,7 +99,10 @@ survivors <- function(L, obs, cp){
 }
 
 #function for finding lambdas
-lambdas <- function(obs_bysex, cp_bysex){
+lambdas <- function(obs, cp){
+  cp_alive <- vector(length = num_tests)
+  live_bysex <-data_frame("male" = rep(NA, num_tests), 
+                          "female" = rep(NA, num_tests))
   lambdas <- vector(length = num_tests)
   Sij <- vector(length = num_tests)
   for(j in 1:length(lambdas)){
@@ -108,42 +111,45 @@ lambdas <- function(obs_bysex, cp_bysex){
     agec <- paste("age", test_num, "_c50", sep = "")
     slope <- paste("slope", test_num, test_num + 1, sep = "")
     C <- paste("Ci", test_num, sep = "")
-    cp = as.double(cp_bysex[j + 1, "CP"])
-    if(test_num == 0){
-      lambdas[j] = optimise(survivors, interval = c(0, 0.0065), 
-                            obs = obs_bysex, cp = cp)$minimum
-      Sij <- survival(obs_bysex, lambdas[j])
+    life_prob = as.double(cp[j + 1, "CP"])
+    if(j == 1){
+      lambdas[j] = optimise(survivors, interval = c(0, 0.005), 
+                            obs = obs, cp = life_prob)$minimum
+      Sij <- survival(obs, lambdas)
       alive_now <- (Sij[[j]] > 5)*1
-      obs_bysex %<>% cbind(., (Sij[[j]] > 5)*1)
+      obs %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
+      cp_alive[j] = mean(alive_now)
+      alive_bysex = obs %>% group_by(sex) %>% 
+        summarise_at("alive", mean)
+      live_bysex[j, ] = alive_bysex$alive
     } else {
-      alive <- paste(names(obs_bysex)[ncol(obs_bysex)], " == '1'", sep = "")
-      obs_bysex %<>% filter_(alive)
-      lambdas[j] = optimise(survivors, interval = c(0, 0.0065), 
-                            obs = obs_bysex, cp = cp)$minimum
-      Sij <- survival(obs_bysex, lambdas[j])
+      obs %<>% filter(alive == 1)
+      lambdas[j] = optimise(survivors, 
+                            interval = c(lambdas[j - 1], 1.025*lambdas[j - 1]), 
+                            obs = obs, cp = life_prob)$minimum
+      Sij <- survival(obs, lambdas)
       alive_now <- (Sij[[j]] > 5)*1
-      obs_bysex[, ncol(obs_bysex)] = alive_now
+      obs %<>% mutate("alive" = alive_now)
+      cp_alive[j] = mean(alive_now)
+      alive_bysex = obs %>% group_by(sex) %>% 
+        summarise_at("alive", mean)
+      live_bysex[j, ] = alive_bysex$alive
     }
   }
-  return(lambdas)
+  return(list("lambdas" = lambdas, "cp_alive" = cp_alive, 
+              "live_bysex" = live_bysex))
 }
 
 #---- Averaging over baseline hazard searches----
-find_lambda <- function(num_obs = 100000){
-  #Generating and grouping the data by sex
+find_lambda <- function(){
   data <- data_gen()
-  #male_data <- data %>% filter(sex == "1")
-  #female_data <- data %>% filter(sex == "0")
-  
-  #Calculating baseline hazards by sex
-  # male_basehaz <- lambda_search(male_data, male_life)
-  # female_basehaz <- lambda_search(female_data, female_life)
-  
-  #return(c(male_basehaz, female_basehaz))
-  return(lambda_search(data, life))
+  search <- lambdas(data, life)
+  return("search_results" = search)
 }
 
-bhazards <- rowMeans(replicate(10, find_lambda()))
+#---- Check conditional probabilities using baseline hazards ----
+#Make sure to rerun parameter file with desired baseline hazards
+test <- 
 
 #---- Quantiles of Cij Distribution ----
 #Looking for a reasonable dementia cut point
