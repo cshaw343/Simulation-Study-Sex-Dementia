@@ -89,34 +89,33 @@ data_gen <- function(){
   return("obs" = obs)
 }
 
-#Function we are trying to optimize
-survivors <- function(L, obs, cp, US, agec, slope, C){
+#Function for finding lambdas
+lambdas <- function(sim_data, cp){
+  #Function we are trying to optimize
+  survivors <- function(L, obs, cp){
     time_left = -log(obs[US])/(L*exp(g1*obs["sex"] + g2*obs[agec] + 
                                        g3*obs["U"] + g4*obs["sex"]*obs[agec] + 
                                        g5*obs[slope] + g6*obs[C]))
     alive <- (time_left > 5) * 1
-  return(abs(mean(alive) - cp))
-}
-
-#function for finding lambdas
-lambdas <- function(sim_data, cp){
+    return(abs(mean(alive) - cp))
+  }
+  #Create dataframes to return
   cp_alive <- vector(length = num_tests)
   live_bysex <-data_frame("male" = rep(NA, num_tests), 
                           "female" = rep(NA, num_tests))
   lambdas <- vector(length = num_tests)
   Sij <- vector(length = num_tests)
+  #Begin search
   for(j in 1:length(lambdas)){
     test_num = j - 1
-    US_loc <- paste("U", test_num, test_num + 1, sep = "")
-    agec_loc <- paste("age", test_num, "_c50", sep = "")
-    slope_loc <- paste("slope", test_num, test_num + 1, sep = "")
-    C_loc <- paste("Ci", test_num, sep = "")
+    US <- paste("U", test_num, test_num + 1, sep = "")
+    agec <- paste("age", test_num, "_c50", sep = "")
+    slope <- paste("slope", test_num, test_num + 1, sep = "")
+    C <- paste("Ci", test_num, sep = "")
     life_prob = as.double(cp[j + 1, "CP"])
     if(j == 1){
       lambdas[j] = optimise(survivors, interval = c(0, 0.005), 
-                            obs = sim_data, cp = life_prob, US = US_loc, 
-                            agec = agec_loc, slope = slope_loc, 
-                            C = C_loc)$minimum
+                            obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
       sim_data %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
