@@ -90,7 +90,7 @@ data_gen <- function(){
 }
 
 #Function we are trying to optimize
-survivors <- function(L, obs, cp){
+survivors <- function(L, obs, cp, US, agec, slope, C){
     time_left = -log(obs[US])/(L*exp(g1*obs["sex"] + g2*obs[agec] + 
                                        g3*obs["U"] + g4*obs["sex"]*obs[agec] + 
                                        g5*obs[slope] + g6*obs[C]))
@@ -99,7 +99,7 @@ survivors <- function(L, obs, cp){
 }
 
 #function for finding lambdas
-lambdas <- function(obs, cp){
+lambdas <- function(sim_data, cp){
   cp_alive <- vector(length = num_tests)
   live_bysex <-data_frame("male" = rep(NA, num_tests), 
                           "female" = rep(NA, num_tests))
@@ -107,31 +107,33 @@ lambdas <- function(obs, cp){
   Sij <- vector(length = num_tests)
   for(j in 1:length(lambdas)){
     test_num = j - 1
-    US <- paste("U", test_num, test_num + 1, sep = "")
-    agec <- paste("age", test_num, "_c50", sep = "")
-    slope <- paste("slope", test_num, test_num + 1, sep = "")
-    C <- paste("Ci", test_num, sep = "")
+    US_loc <- paste("U", test_num, test_num + 1, sep = "")
+    agec_loc <- paste("age", test_num, "_c50", sep = "")
+    slope_loc <- paste("slope", test_num, test_num + 1, sep = "")
+    C_loc <- paste("Ci", test_num, sep = "")
     life_prob = as.double(cp[j + 1, "CP"])
     if(j == 1){
       lambdas[j] = optimise(survivors, interval = c(0, 0.005), 
-                            obs = obs, cp = life_prob)$minimum
-      Sij <- survival(obs, lambdas)
+                            obs = sim_data, cp = life_prob, US = US_loc, 
+                            agec = agec_loc, slope = slope_loc, 
+                            C = C_loc)$minimum
+      Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
-      obs %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
+      sim_data %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
       cp_alive[j] = mean(alive_now)
-      alive_bysex = obs %>% group_by(sex) %>% 
+      alive_bysex = sim_data %>% group_by(sex) %>% 
         summarise_at("alive", mean)
       live_bysex[j, ] = alive_bysex$alive
     } else {
-      obs %<>% filter(alive == 1)
+      sim_data %<>% filter(alive == 1)
       lambdas[j] = optimise(survivors, 
                             interval = c(lambdas[j - 1], 1.025*lambdas[j - 1]), 
-                            obs = obs, cp = life_prob)$minimum
-      Sij <- survival(obs, lambdas)
+                            obs = sim_data, cp = life_prob)$minimum
+      Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
-      obs %<>% mutate("alive" = alive_now)
+      sim_data %<>% mutate("alive" = alive_now)
       cp_alive[j] = mean(alive_now)
-      alive_bysex = obs %>% group_by(sex) %>% 
+      alive_bysex = sim_data %>% group_by(sex) %>% 
         summarise_at("alive", mean)
       live_bysex[j, ] = alive_bysex$alive
     }
@@ -142,14 +144,24 @@ lambdas <- function(obs, cp){
 
 #---- Averaging over baseline hazard searches----
 find_lambda <- function(){
-  data <- data_gen()
-  search <- lambdas(data, life)
-  return("search_results" = search)
+  simdata <- data_gen()
+  search <- lambdas(sim_data = simdata, cp = life)
+  return(search)
 }
 
 #---- Check conditional probabilities using baseline hazards ----
-#Make sure to rerun parameter file with desired baseline hazards
-test <- 
+#Make sure to rerun parameter file with desired baseline hazards before running 
+#actual simulation
+lambda_searches <- replicate(5, find_lambda())
+
+avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
+  colMeans()
+avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
+  colMeans()
+avg_cps_bysex <- as_tibble(matrix(unlist(lambda_searches["live_bysex", ]), 
+                           ncol = 5, byrow = FALSE)) %>% rowMeans() %>% 
+  matrix(., ncol = 2, byrow = FALSE)
+colnames(avg_cps_bysex) <- c("Males", "Females")
 
 #---- Quantiles of Cij Distribution ----
 #Looking for a reasonable dementia cut point
