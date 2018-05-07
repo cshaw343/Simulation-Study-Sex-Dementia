@@ -142,8 +142,8 @@ lambdas <- function(sim_data, cp){
 }
 
 #---- Averaging over baseline hazard searches----
-find_lambda <- function(life_table){
-  simdata <- data_gen()
+find_lambda <- function(unexposed, life_table){
+  simdata <- data_gen() %>% filter(sex == unexposed)
   search <- lambdas(sim_data = simdata, cp = life_table)
   return(search)
 }
@@ -151,7 +151,9 @@ find_lambda <- function(life_table){
 #---- Check conditional probabilities using baseline hazards ----
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
-lambda_searches <- replicate(5, find_lambda(life_table = female_life))
+
+lambda_searches <- replicate(5, find_lambda(unexposed = 0, 
+                                            life_table = female_life))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
