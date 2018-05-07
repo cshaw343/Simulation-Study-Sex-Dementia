@@ -5,6 +5,12 @@
 # Birth cohort:  1919 - 1921
 #***************************************************************
 
+#---- Package Loading and Options ----
+if (!require("pacman")) 
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+
+p_load("tidyverse")
+
 #---- Conditional Probabilities Function ----
 cond_prob <- function(x){
   probs <- vector(length = length(x))
