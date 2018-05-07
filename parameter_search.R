@@ -142,16 +142,16 @@ lambdas <- function(sim_data, cp){
 }
 
 #---- Averaging over baseline hazard searches----
-find_lambda <- function(){
+find_lambda <- function(life_table){
   simdata <- data_gen()
-  search <- lambdas(sim_data = simdata, cp = life)
+  search <- lambdas(sim_data = simdata, cp = life_table)
   return(search)
 }
 
 #---- Check conditional probabilities using baseline hazards ----
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
-lambda_searches <- replicate(5, find_lambda())
+lambda_searches <- replicate(5, find_lambda(life_table = female_life))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
@@ -162,7 +162,8 @@ avg_cps_bysex <- as_tibble(matrix(unlist(lambda_searches["live_bysex", ]),
   matrix(., ncol = 2, byrow = FALSE)
 colnames(avg_cps_bysex) <- c("Males", "Females")
 
-#---- Quantiles of Cij Distribution ----
+#---- Search for dementia cut-point ----
+
 #Looking for a reasonable dementia cut point
 #Use 4 simulated datasets and find quantiles of baseline Cij
 dem_cut <- replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
