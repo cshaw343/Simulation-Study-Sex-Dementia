@@ -101,8 +101,6 @@ lambdas <- function(sim_data, cp){
   }
   #Create dataframes to return
   cp_alive <- vector(length = num_tests)
-  live_bysex <-data_frame("male" = rep(NA, num_tests), 
-                          "female" = rep(NA, num_tests))
   lambdas <- vector(length = num_tests)
   Sij <- vector(length = num_tests)
   #Begin search
@@ -114,15 +112,12 @@ lambdas <- function(sim_data, cp){
     C <- paste("Ci", test_num, sep = "")
     life_prob = as.double(cp[j + 1, "CP"])
     if(j == 1){
-      lambdas[j] = optimise(survivors, interval = c(0, 0.005), 
+      lambdas[j] = optimise(survivors, interval = c(0, 0.0005), 
                             obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
       sim_data %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
       cp_alive[j] = mean(alive_now)
-      alive_bysex = sim_data %>% group_by(sex) %>% 
-        summarise_at("alive", mean)
-      live_bysex[j, ] = alive_bysex$alive
     } else {
       sim_data %<>% filter(alive == 1)
       lambdas[j] = optimise(survivors, 
@@ -132,13 +127,9 @@ lambdas <- function(sim_data, cp){
       alive_now <- (Sij[[j]] > 5)*1
       sim_data %<>% mutate("alive" = alive_now)
       cp_alive[j] = mean(alive_now)
-      alive_bysex = sim_data %>% group_by(sex) %>% 
-        summarise_at("alive", mean)
-      live_bysex[j, ] = alive_bysex$alive
     }
   }
-  return(list("lambdas" = lambdas, "cp_alive" = cp_alive, 
-              "live_bysex" = live_bysex))
+  return(list("lambdas" = lambdas, "cp_alive" = cp_alive))
 }
 
 #---- Averaging over baseline hazard searches----
@@ -159,10 +150,7 @@ avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
 avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
-avg_cps_bysex <- as_tibble(matrix(unlist(lambda_searches["live_bysex", ]), 
-                           ncol = 5, byrow = FALSE)) %>% rowMeans() %>% 
-  matrix(., ncol = 2, byrow = FALSE)
-colnames(avg_cps_bysex) <- c("Males", "Females")
+
 
 #---- Search for dementia cut-point ----
 
