@@ -48,7 +48,7 @@ male_life <- tibble("MAge" = ages,
                                      28316, 17128, 7920, 2527, 556, 62)) %>% 
   mutate("MProb" = MSurvivors/100000,
          "MlogProb" = log(MProb),
-         "MCP" = cond_prob(MSurvivors), 
+         "CP" = cond_prob(MSurvivors), 
          "MHaz" = haz(age = MAge, logprobs = MlogProb))
 
 female_life <- tibble("FAge" = ages, 
@@ -56,7 +56,7 @@ female_life <- tibble("FAge" = ages,
                                        31344, 19613, 9515, 3314, 728, 72)) %>% 
   mutate("FProb" = FSurvivors/100000,
          "FlogProb" = log(FProb),
-         "FCP" = cond_prob(FSurvivors), 
+         "CP" = cond_prob(FSurvivors), 
          "FHaz" = haz(age = FAge, logprobs = FlogProb))
 
 Hratio <- male_life$MHaz/female_life$FHaz %>% as.data.frame()
