@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("ggplot2")
+p_load("ggplot2", "tidyverse")
 
 #---- Specify source file ----
 par_file <- "sex-dementia_sim_parA.R" #This syntax is used for file naming later
@@ -99,16 +99,22 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
+#Make sure the appropriate return values are "turned on" in the simulation script
 
-death_check <- replicate(5, sex_dem_sim())
+sample_sim <- replicate(5, sex_dem_sim())
+all_obs <- sample_sim[1, ] %>% do.call(rbind, .)
 
 #Conditional probability of survival at each timepoint by sex
-death_check_male <- obs[, c("sex", dput(deathij_varnames))] %>% 
-  filter(sex == 1) %>% dplyr::select(-sex) %>% 
-  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
-death_check_female <- obs[, c("sex", dput(deathij_varnames))] %>% 
-  filter(sex == 0) %>% dplyr::select(-sex) %>% 
-  map_dbl(.f = ~ length(.) - sum(.)) %>% cond_prob()
+all_alive <- all_obs[, dput(deathij_varnames)] %>% 
+  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
+
+female_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
+  filter(sex == 0) %>% dplyr::select(-sex) %>%
+  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
+
+male_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
+  filter(sex == 1) %>% dplyr::select(-sex) %>%
+  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
 
 
 
