@@ -54,9 +54,10 @@ g4 <- 0       #Interaction effect of sex and age on log hazard of death
 g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
-#---- Baseline hazard of death ----
+#---- Baseline hazard of death for unexposed ----
 #Computed in parameter_search.R script
-
+lambda <- c(0.0128, 0.018, 0.0261, 0.04, 0.0632, 0.0952, 0.1451, 0.2066, 
+            0.2884, 0.4716)
 
 #---- Dementia Cut Point ----
 #Chosen using from dem_cut portion of parameter_search.R script
