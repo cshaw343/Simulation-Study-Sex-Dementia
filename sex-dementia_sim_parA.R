@@ -45,7 +45,7 @@ b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age 
 b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
-#Effect of sex on log hazard of death; chosen using parameter_search R script
+#Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
 g1 <- log(c(1.081, 1.087, 1.11, 1.107, 1.087, 1.087, 1.072, 1.066, 1.083, 
             0.999, 0.948)) 
 g2 <- 0       #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
@@ -56,8 +56,9 @@ g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #Computed in parameter_search.R script
-lambda <- c(0.0128, 0.018, 0.0261, 0.04, 0.0632, 0.0952, 0.1451, 0.2066, 
-            0.2884, 0.4716)
+#Based on 35x3000 = 105000 observations
+lambda <- c(0.0134, 0.0187, 0.0266, 0.0392, 0.0622, 0.0946, 0.1439, 0.2072, 
+            0.2903, 0.4571)
 
 #---- Dementia Cut Point ----
 #Chosen using from dem_cut portion of parameter_search.R script
