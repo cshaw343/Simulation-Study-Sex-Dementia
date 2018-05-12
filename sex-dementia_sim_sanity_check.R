@@ -101,7 +101,7 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
 #Make sure the appropriate return values are "turned on" in the simulation script
 
-sample_sim <- replicate(5, sex_dem_sim())
+sample_sim <- replicate(35, sex_dem_sim())
 all_obs <- sample_sim[1, ] %>% do.call(rbind, .)
 
 #Conditional probability of survival at each timepoint by sex
