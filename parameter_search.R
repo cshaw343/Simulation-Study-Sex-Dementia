@@ -112,7 +112,7 @@ lambdas <- function(sim_data, cp){
     C <- paste("Ci", test_num, sep = "")
     life_prob = as.double(cp[j + 1, "CP"])
     if(j == 1){
-      lambdas[j] = optimise(survivors, interval = c(0, 0.0005), 
+      lambdas[j] = optimise(survivors, interval = c(0, 1), 
                             obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
@@ -121,7 +121,7 @@ lambdas <- function(sim_data, cp){
     } else {
       sim_data %<>% filter(alive == 1)
       lambdas[j] = optimise(survivors, 
-                            interval = c(lambdas[j - 1], 1.025*lambdas[j - 1]), 
+                            interval = c(lambdas[j - 1], 1.75*lambdas[j - 1]), 
                             obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
@@ -144,13 +144,12 @@ find_lambda <- function(unexposed, life_table){
 #actual simulation
 
 lambda_searches <- replicate(5, find_lambda(unexposed = 0, 
-                                            life_table = female_life))
+                                            life_table = female_life[-1, ]))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
 avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
-
 
 #---- Search for dementia cut-point ----
 
