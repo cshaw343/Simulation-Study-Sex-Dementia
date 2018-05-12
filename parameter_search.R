@@ -16,8 +16,7 @@ source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
 source("life_table2014.R")
 
-#---- Search for Baseline Hazard ----
-#Function that creates the dataset for the search
+#---- Create datsets for the search ----
 data_gen <- function(){
   #---- Generating IDs, sex, U ----
   obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1), 
@@ -89,6 +88,7 @@ data_gen <- function(){
   return("obs" = obs)
 }
 
+#---- Search for Baseline Hazard ----
 #Function for finding lambdas
 lambdas <- function(sim_data, cp){
   #Function we are trying to optimize
@@ -143,7 +143,7 @@ find_lambda <- function(unexposed, life_table){
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
 
-lambda_searches <- replicate(5, find_lambda(unexposed = 0, 
+lambda_searches <- replicate(35, find_lambda(unexposed = 0, 
                                             life_table = female_life[-1, ]))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
@@ -152,8 +152,8 @@ avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
 
 #---- Search for dementia cut-point ----
+demcut_search <- replicate(5, )
 
-#Looking for a reasonable dementia cut point
-#Use 4 simulated datasets and find quantiles of baseline Cij
-dem_cut <- replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
+  
+  replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
   quantile(0.05)
