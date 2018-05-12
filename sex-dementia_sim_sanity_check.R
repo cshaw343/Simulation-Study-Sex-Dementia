@@ -106,15 +106,20 @@ all_obs <- sample_sim[1, ] %>% do.call(rbind, .)
 
 #Conditional probability of survival at each timepoint by sex
 all_alive <- all_obs[, dput(deathij_varnames)] %>% 
-  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
+  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob() 
+all_alive[1] <- 1 - sum(all_obs$death01)/nrow(all_obs)
 
 female_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
   filter(sex == 0) %>% dplyr::select(-sex) %>%
   map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
-
+female_alive[1] <- filter(all_obs, sex == 0) %>% dplyr::select(death01) %>%
+  map_dbl(.f = ~1 - sum(.)/length(.)) 
+  
 male_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
   filter(sex == 1) %>% dplyr::select(-sex) %>%
   map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
+male_alive[1] <- filter(all_obs, sex == 1) %>% dplyr::select(death01) %>%
+  map_dbl(.f = ~1 - sum(.)/length(.)) 
 
 
 
