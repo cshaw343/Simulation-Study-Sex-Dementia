@@ -9,6 +9,6 @@
 #We will start with calibrating to Whites as a first attempt
 
 dem_rates_whites <- 
-  data_frame("Low Age" = c(64, 70, 75, 80, 85, 90), 
-             "High Age" = c(69, 74, 79, 84, 89, 1000), 
+  data_frame("LowAge" = c(64, 70, 75, 80, 85, 90), 
+             "HighAge" = c(69, 74, 79, 84, 89, 1000), 
              "Rate" = c(3.45, 8.44, 17.35, 34.51, 61.35, 99.26))
