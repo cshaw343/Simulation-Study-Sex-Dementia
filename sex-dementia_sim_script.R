@@ -215,9 +215,6 @@ sex_dem_sim <- function(){
     }
     
     #---- Create a competing risk outcome ----
-    #Generate dementia variable based on Cij: try Cij < -1.05 as the cutpoint
-    #Based on 5th percentile from sex-demensia_sim_sanity_check
-    dem_cut = -1.05
     demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
       mutate_all(funs((. < dem_cut)*1))
     colnames(demij) <- dem_varnames
