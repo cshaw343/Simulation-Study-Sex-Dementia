@@ -9,8 +9,6 @@ if (!require("pacman"))
 
 p_load("tidyverse", "magrittr")
 
-set.seed(5318)
-
 #---- Specify source files ----
 source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
@@ -143,7 +141,6 @@ find_lambda <- function(unexposed, life_table){
 #---- Check conditional probabilities using baseline hazards ----
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
-
 lambda_searches <- replicate(35, find_lambda(unexposed = 0, 
                                             life_table = female_life[-1, ]))
 
@@ -168,33 +165,38 @@ demcut <- function(sim_data, demrates){
     test_num = j - 1
     age <- paste("age", test_num, sep = "")
     C <- paste("Ci", test_num, sep = "")
-    index <- which(demrates$LowAge <= obs[1, age] & 
-                     demrates$HighAge > obs[1, age])
+    index <- which(demrates$LowAge <= sim_data[1, age] & 
+                     demrates$HighAge > sim_data[1, age])
     if(length(index) > 0){
-      alive_now <- filter(test_obs, !is.na(test_obs[, C])) %>% dplyr::select(C)
+      alive_now <- filter(sim_data, !is.na(sim_data[, C])) %>% dplyr::select(C)
       match_dem <- as.double(demrates[index, "Rate"])
       dem_cuts[j] = optimise(dementia, 
-                             interval = c(min(alive_now), max(alive_now)),
+                             interval = c(min(alive_now), max(alive_now)), 
                              cogfunc = alive_now, rate = match_dem)$minimum
+      
       dem_1000py[j] = 
         1000*sum((alive_now < dem_cuts[j])*1)/(int_time*nrow(alive_now))
     }
   }
+  zeros <- which(dem_cuts == 0)
+  dem_cuts[zeros] = dem_cuts[max(zeros) + 1]
   return(list("dem_cuts" = dem_cuts, "dem_1000py" = dem_1000py))
 }
 
 find_demcut <- function(dem_table){
   simdata <- sex_dem_sim()
-  age_Cijs <- simdata$obs[, c(dput(age_varnames[-1]), dput(Cij_varnames[-1]))]
+  age_Cijs <- simdata$obs %>% 
+    dplyr::select(c(dput(age_varnames[-1]), dput(Cij_varnames[-1])))
   search <- demcut(sim_data = age_Cijs, demrates = dem_table)
   return(search)
 }
 
-demcut_searches <- replicate(35, find_demcut(dem_rates_whites))
+#This occassionally gives a weird error that I haven't figured out yet
+#If it breaks during the search, rerun it
+demcut_searches <- replicate(5, find_demcut(dem_rates_whites))
 
-dem_cuts <- as_tibble(do.call(rbind, demcut_searches["dem_cuts", ]))
-avg_demcuts <- dem_cuts[, colSums(dem_cuts != 0) > 0] %>% unlist() %>% mean()
-
+dem_cut <- as_tibble(do.call(rbind, demcut_searches["dem_cuts", ])) %>% 
+  unlist() %>% mean() 
 avg_matches <- as_tibble(do.call(rbind, demcut_searches["dem_1000py", ])) %>%
   colMeans()
 
