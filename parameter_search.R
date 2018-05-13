@@ -153,38 +153,45 @@ avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
 
 #---- Search for dementia cut-point ----
-
-test <- sex_dem_sim()
-test_obs <- test$obs[, c(dput(age_varnames[-1]), dput(Cij_varnames[-1]))]
-
-#Function we are trying to optimize
-dementia <- function(demcut, cogfunc, rate){
-  cases = (cogfunc < demcut)*1
-  cases_1000py = 1000*sum(cases)/(int_time*length(cases))
-  return(abs(cases_1000py - rate))
-}
-
-dem_cuts <- vector(length = num_tests + 1)
-for(j in 1:length(dem_cuts)){
-  test_num = j - 1
-  age <- paste("age", test_num, sep = "")
-  C <- paste("Ci", test_num, sep = "")
-  index <- which(demrates$LowAge <= obs[1, age] & 
-                   demrates$HighAge > obs[1, age])
-  if(index != 0){
-    alive_now <- filter(test_obs, !is.na(test_obs[, C])) %>% dplyr::select(C)
-    match_dem <- demrates[index, "Rate"]
-    dem_cuts[j] = optimise(dementia, interval = c(-3, 3),
-                           cogfunc = alive_now, rate = match_dem)$minimum
+demcut <- function(sim_data, demrates){
+  #Function we are trying to optimize
+  dementia <- function(demcut, cogfunc, rate){
+    cases = (cogfunc < demcut)*1
+    cases_1000py = 1000*sum(cases)/(int_time*length(cases))
+    return(abs(cases_1000py - rate))
   }
+  #Dataframes to return
+  dem_cuts <- vector(length = num_tests + 1)
+  dem_1000py <- vector(length = num_tests + 1)
+  #Begin search
+  for(j in 1:length(dem_cuts)){
+    test_num = j - 1
+    age <- paste("age", test_num, sep = "")
+    C <- paste("Ci", test_num, sep = "")
+    index <- which(demrates$LowAge <= obs[1, age] & 
+                     demrates$HighAge > obs[1, age])
+    if(length(index) > 0){
+      alive_now <- filter(test_obs, !is.na(test_obs[, C])) %>% dplyr::select(C)
+      match_dem <- as.double(demrates[index, "Rate"])
+      dem_cuts[j] = optimise(dementia, 
+                             interval = c(min(alive_now), max(alive_now)),
+                             cogfunc = alive_now, rate = match_dem)$minimum
+      dem_1000py[j] = 
+        1000*sum((alive_now < dem_cuts[j])*1)/(int_time*nrow(alive_now))
+    }
+  }
+  return(list("dem_cuts" = dem_cuts, "dem_1000py" = dem_1000py))
 }
-
 
 find_demcut <- function(dem_table){
-  simdata <- data_gen() %>% select(dput(Cij_varnames[-1]))
-  search <- demcut(sim_data = simdata, demrates = dem_table)
+  simdata <- sex_dem_sim()
+  age_Cijs <- simdata$obs[, c(dput(age_varnames[-1]), dput(Cij_varnames[-1]))]
+  search <- demcut(sim_data = age_Cijs, demrates = dem_table)
   return(search)
 }
+
+demcut_searches <- replicate(35, find_demcut(dem_rates_whites))
+
 
   
   
