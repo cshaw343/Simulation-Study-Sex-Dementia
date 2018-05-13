@@ -9,6 +9,7 @@ par_file <- "sex-dementia_sim_parA.R" #This syntax is used for file naming later
 source(par_file)
 source("sex-dementia_sim_script.R")
 source("life_table2014.R")
+source("dementia_incidence2000-2013.R")
 
 #---- Checking one simulated dataset----
 #Storing the results of the simulation
@@ -100,9 +101,8 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
 #Make sure the appropriate return values are "turned on" in the simulation script
-
-sample_sim <- replicate(35, sex_dem_sim())
-all_obs <- sample_sim[1, ] %>% do.call(rbind, .)
+sample_sim <- replicate(35, sex_dem_sim()) 
+all_obs <- sample_sim["obs", ] %>% do.call(rbind, .)
 
 #Conditional probability of survival at each timepoint by sex
 all_alive <- all_obs[, dput(deathij_varnames)] %>% 
@@ -121,7 +121,13 @@ male_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>%
 male_alive[1] <- filter(all_obs, sex == 1) %>% dplyr::select(death01) %>%
   map_dbl(.f = ~1 - sum(.)/length(.)) 
 
-
+#---- Comparing with dementia incidence data ----
+#Make sure the appropriate return values are "turned on" in the simulation script
+sample_sim <- replicate(35, sex_dem_sim())
+dem_1000py <- sample_sim["obs", ] %>% do.call(rbind, .) %>% 
+  dplyr::select(dput(dem_varnames)) %>% 
+  map_dbl(.f = 
+            ~1000*sum(., na.rm = TRUE)/(int_time*(length(.) - sum(is.na(.)))))
 
 
 
