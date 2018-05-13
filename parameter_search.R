@@ -15,6 +15,7 @@ set.seed(5318)
 source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
 source("life_table2014.R")
+source("dementia_incidence2000-2013.R")
 
 #---- Create datsets for the search ----
 data_gen <- function(){
@@ -152,8 +153,38 @@ avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
 
 #---- Search for dementia cut-point ----
-demcut_search <- replicate(5, )
+
+test <- sex_dem_sim()
+test_obs <- test$obs[, c(dput(age_varnames[-1]), dput(Cij_varnames[-1]))]
+
+#Function we are trying to optimize
+dementia <- function(demcut, cogfunc, rate){
+  cases = (cogfunc < demcut)*1
+  cases_1000py = 1000*sum(cases)/(int_time*length(cases))
+  return(abs(cases_1000py - rate))
+}
+
+dem_cuts <- vector(length = num_tests + 1)
+for(j in 1:length(dem_cuts)){
+  test_num = j - 1
+  age <- paste("age", test_num, sep = "")
+  C <- paste("Ci", test_num, sep = "")
+  index <- which(demrates$LowAge <= obs[1, age] & 
+                   demrates$HighAge > obs[1, age])
+  if(index != 0){
+    alive_now <- filter(test_obs, !is.na(test_obs[, C])) %>% dplyr::select(C)
+    match_dem <- demrates[index, "Rate"]
+    dem_cuts[j] = optimise(dementia, interval = c(-3, 3),
+                           cogfunc = alive_now, rate = match_dem)$minimum
+  }
+}
+
+
+find_demcut <- function(dem_table){
+  simdata <- data_gen() %>% select(dput(Cij_varnames[-1]))
+  search <- demcut(sim_data = simdata, demrates = dem_table)
+  return(search)
+}
 
   
-  replicate(4, sex_dem_sim()) %>% map("Ci0") %>% unlist() %>% 
-  quantile(0.05)
+  
