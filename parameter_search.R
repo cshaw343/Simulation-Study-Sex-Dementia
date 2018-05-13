@@ -192,6 +192,12 @@ find_demcut <- function(dem_table){
 
 demcut_searches <- replicate(35, find_demcut(dem_rates_whites))
 
+dem_cuts <- as_tibble(do.call(rbind, demcut_searches["dem_cuts", ]))
+avg_demcuts <- dem_cuts[, colSums(dem_cuts != 0) > 0] %>% unlist() %>% mean()
+
+avg_matches <- as_tibble(do.call(rbind, demcut_searches["dem_1000py", ])) %>%
+  colMeans()
+
 
   
   
