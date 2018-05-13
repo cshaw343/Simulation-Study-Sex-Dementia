@@ -62,4 +62,4 @@ lambda <- c(0.0134, 0.0187, 0.0266, 0.0392, 0.0622, 0.0946, 0.1439, 0.2072,
 
 #---- Dementia Cut Point ----
 #Chosen using from dem_cut portion of parameter_search.R script
-dem_cut <- -4.46
+dem_cut <- -3.28
