@@ -9,6 +9,9 @@ if (!require("pacman"))
 
 p_load("tidyverse", "magrittr")
 
+#Suppress warnings
+options(warn = -1)
+
 #---- Specify source files ----
 source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
