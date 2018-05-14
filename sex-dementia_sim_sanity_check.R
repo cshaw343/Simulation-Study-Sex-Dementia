@@ -1,8 +1,11 @@
-#---- Package Loading ----
+#---- Package Loading and Options ----
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
 p_load("ggplot2", "tidyverse")
+
+#Suppress warnings
+options(warn = -1)
 
 #---- Specify source file ----
 par_file <- "sex-dementia_sim_parA.R" #This syntax is used for file naming later
@@ -101,7 +104,7 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
 #Make sure the appropriate return values are "turned on" in the simulation script
-sample_sim <- replicate(35, sex_dem_sim()) 
+sample_sim <- replicate(1, sex_dem_sim()) 
 all_obs <- sample_sim["obs", ] %>% do.call(rbind, .)
 
 #Conditional probability of survival at each timepoint by sex

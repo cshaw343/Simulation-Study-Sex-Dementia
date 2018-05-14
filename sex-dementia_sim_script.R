@@ -4,10 +4,9 @@ if (!require("pacman"))
 
 p_load("tidyverse", "MASS", "reshape")
 
-#Using standard notation (as opposed to scientific), rounded to three 
-#decimal places
-options(scipen = 999)
-options(digits = 3)
+options(scipen = 999) #Standard Notation
+options(digits = 3)   #Round to 3 decimal places
+options(warn = -1)    #Suppress warnings
 
 set.seed(10789)
 
