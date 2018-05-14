@@ -152,14 +152,14 @@ avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
 avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
   colMeans()
 
+
+#---- Scratch work ----
+cogsurv <- simdata$obs %>% dplyr::select(c("Ci0", "survtime01"))
+
+
+
 #---- Search for dementia cut-point ----
 demcut <- function(sim_data, demrates){
-  #Function we are trying to optimize
-  dementia <- function(demcut, cogfunc, rate){
-    cases = (cogfunc < demcut)*1
-    cases_1000py = 1000*sum(cases)/(int_time*length(cases))
-    return(abs(cases_1000py - rate))
-  }
   #Dataframes to return
   dem_cuts <- vector(length = num_tests + 1)
   dem_1000py <- vector(length = num_tests + 1)
@@ -168,14 +168,34 @@ demcut <- function(sim_data, demrates){
     test_num = j - 1
     age <- paste("age", test_num, sep = "")
     C <- paste("Ci", test_num, sep = "")
+    S <- paste("survtime", test_num, test_num + 1, sep = "")
     index <- which(demrates$LowAge <= sim_data[1, age] & 
                      demrates$HighAge > sim_data[1, age])
+    #Function we are trying to optimize
+    dementia <- function(demcut, cog_surv, rate){
+      cases = (cogsurv$C < demcut)*1
+      
+      #Figure out how person years calc!!
+      
+      person_years <- cogsurv %>% 
+        mutate(dput(S) = replace(dput(S), dput(S) > 5, 5))
+      mutate("S" = if_else(S <= 5, "S", 5)) %>% 
+        dplyr::select(S)
+      
+      
+      
+      
+      cases_1000py = 1000*sum(cases)/(sum(person_years))
+      return(abs(cases_1000py - rate))
+    }
     if(length(index) > 0){
-      alive_now <- filter(sim_data, !is.na(sim_data[, C])) %>% dplyr::select(C)
+      alive_now <- filter(sim_data, !is.na(sim_data[, C])) %>% 
+        dplyr::select(c(C, S))
       match_dem <- as.double(demrates[index, "Rate"])
       dem_cuts[j] = optimise(dementia, 
-                             interval = c(min(alive_now), max(alive_now)), 
-                             cogfunc = alive_now, rate = match_dem)$minimum
+                             interval = c(min(alive_now$C), max(alive_now$C)), 
+                             cog_surv = alive_now, 
+                             rate = match_dem)$minimum
       
       dem_1000py[j] = 
         1000*sum((alive_now < dem_cuts[j])*1)/(int_time*nrow(alive_now))
@@ -189,7 +209,9 @@ demcut <- function(sim_data, demrates){
 find_demcut <- function(dem_table){
   simdata <- sex_dem_sim()
   age_Cijs <- simdata$obs %>% 
-    dplyr::select(c(dput(age_varnames[-1]), dput(Cij_varnames[-1])))
+    dplyr::select(c(dput(age_varnames[-1]), 
+                    dput(Sij_varnames), 
+                    dput(Cij_varnames[-1])))
   search <- demcut(sim_data = age_Cijs, demrates = dem_table)
   return(search)
 }
