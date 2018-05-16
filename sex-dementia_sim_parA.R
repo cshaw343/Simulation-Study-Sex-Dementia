@@ -34,7 +34,7 @@ var4 <- 0.19  #Variance of measurement error of Cij
 #---- Parameters for Cij ----
 #Knots placed at ages 70 and 85
 b00 <- 0      #Cognitive intercept for females
-b01 <- 0      #Effect of sez on cognitive intercept
+b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 b10a <- 0     #Cognitive slope for females age 50-70
