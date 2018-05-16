@@ -16,7 +16,6 @@ options(warn = -1)
 source("sex-dementia_sim_parA.R")
 source("sex-dementia_sim_script.R")
 source("life_table2014.R")
-source("dementia_incidence2000-2013.R")
 
 #---- Create datsets for the search ----
 data_gen <- function(){
