@@ -1,6 +1,6 @@
 #***************************************************************
-# Performs a parameter search using a specified function and 
-# specified file containing reference data
+# Performs a search for baseline hazards 
+# Reference data found in life_table2014.R
 #***************************************************************
 
 #---- Package Loading and Options ----
