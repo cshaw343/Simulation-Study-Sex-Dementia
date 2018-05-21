@@ -44,6 +44,8 @@ b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
 
+slopechange <- -0.25 #Test method for hardcoding relationship between slopes in intervals
+
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
 g1 <- log(c(1.081, 1.087, 1.11, 1.107, 1.087, 1.087, 1.072, 1.066, 1.083, 
