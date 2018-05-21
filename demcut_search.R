@@ -25,7 +25,7 @@ find_demcut <- function(dem_table){
     CslopeC <- parameters[2]
     dem_cut <- parameters[3]
   #---- Model for Cognitive Function ----
-  opt_cog_func <- function(CslopeB, CslopeC, obs){
+  opt_cog_func <- function(CslopeB, delta, obs){
     knots = c(0, 20, 35)
     Cij <- vector(length = length(visit_times))
     for(j in 1:length(Cij)){
@@ -35,11 +35,11 @@ find_demcut <- function(dem_table){
       Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
         b03*obs[, "U"] + obs[, eps] + 
         (b10a - CslopeB)*knots[2]*(t >= knots[2]) + 
-        (CslopeB - CslopeC)*knots[3]*(t >= knots[3]) + 
+        (CslopeB - (CslopeB + delta))*knots[3]*(t >= knots[3]) + 
         (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
           b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
           CslopeB*(t >= knots[2] & t< knots[3]) +
-          CslopeC*(t >= knots[3]))*t
+          (CslopeB + delta)*(t >= knots[3]))*t
     }
     slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
     #Cij is stored as a list in this function environment so use list indexing
@@ -201,10 +201,20 @@ find_demcut <- function(dem_table){
     index <- (which(dem_table$LowAge <= age & dem_table$HighAge > age)) - 1
     if(length(index) > 0){
       if(index > 0){
-        val_match <- as.double(dem_table[index, "Rate"])
-        dem_cut_vals[[j]] <- optim(par = c(-0.15, -0.4, -1.5), 
-                                   fn = dem_rates, J = j, dem_val = val_match, 
-                                   upper = c(0, 0, 0))
+        if(is.null(dem_cut_vals[[j - 1]])){
+          val_match <- as.double(dem_table[index, "Rate"])
+          dem_cut_vals[[j]] <- optim(par = c(-0.15, -0.4, -1), 
+                                     fn = dem_rates, J = j, dem_val = val_match, 
+                                     upper = c(0, 0, 0))
+        } else{
+          val_match <- as.double(dem_table[index, "Rate"])
+          dem_cut_vals[[j]] <- optim(par = dem_cut_vals[[j - 1]]$par, 
+                                     fn = dem_rates, J = j, 
+                                     dem_val = val_match, 
+                                     upper = c(
+                                       rep(dem_cut_vals[[j - 1]]$par[1], 2), 
+                                       dem_cut_vals[[j - 1]]$par[3]))
+        }
       }
     }
   }
