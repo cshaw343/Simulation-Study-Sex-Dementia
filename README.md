@@ -6,6 +6,10 @@ Cij:   Cognitive function for person i at time j<br />
 U:     Unmeasured/underlying variable<br />
 Sij:   Survival for person i at time j<br />
 
+**Model for Cognitive Function**
+
+![Cij Equation](https://latex.codecogs.com/gif.latex?Cij%20%3D%20%5Cbegin%7Bcases%7D%20b00%20&plus;%20z0i%20&plus;%20b01sex%20&plus;%20b02age0c50%20&plus;%20b03U%20&plus;%20%5C%5C%28b10a%20&plus;%20z1i%20&plus;%20b11sex%20&plus;%20b12age0c50%20&plus;%20b13U%29j%20&plus;%20%5Cvarepsilon_%7Bij%7D%20%26%200%20%5Cleq%20j%20%3C%2020%5C%5C%20%26%5C%5C%20b00%20&plus;%20z0i%20&plus;%20b01sex%20&plus;%20b02age0c50%20&plus;%20b03U%20&plus;%2020%28b10a%20-%20b10b%29%20%5C%5C%28b10b%20&plus;%20z1i%20&plus;%20b11sex%20&plus;%20b12age0c50%20&plus;%20b13U%29j%20&plus;%20%5Cvarepsilon_%7Bij%7D%20%26%2020%20%5Cleq%20j%20%3C%2035%5C%5C%20%26%5C%5C%20b00%20&plus;%20z0i%20&plus;%20b01sex%20&plus;%20b02age0c50%20&plus;%20b03U%20&plus;%2020%28b10a%20-%20b10b%29%20&plus;%2035%28b10b%20-%20b10c%29%20%5C%5C%28b10c%20&plus;%20z1i%20&plus;%20b11sex%20&plus;%20b12age0c50%20&plus;%20b13U%29j%20&plus;%20%5Cvarepsilon_%7Bij%7D%26%2035%20%5Cleq%20j%20%5Cend%7Bcases%7D)
+
 **Definitions of regression parameters used to generate models for Cij**
 
 b00:   Group mean cognitive intercept (baseline level of cognitive function) for females<br />
