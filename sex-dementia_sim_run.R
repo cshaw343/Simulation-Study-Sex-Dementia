@@ -14,7 +14,5 @@ sim_results_compare <- replicate(1, sex_dem_sim_test())
 
 #---- Looking at simulation results ----
 #Finding the mean Cij by sex across all simulations
-mean_Cij_sim <- as_tibble(do.call(rbind, sim_results$mean_Cij)) 
-
-mean_Cij_sim_compare <- as_tibble(do.call(rbind, sim_results_compare)) %>% 
-  group_by(sex) %>% summarise_all(mean)
+mean_Cij_sim <- sim_results[[2]]
+mean_Cij_sim_compare <- sim_results_compare[[2]]
