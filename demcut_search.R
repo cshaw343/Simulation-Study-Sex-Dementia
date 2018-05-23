@@ -103,7 +103,7 @@ find_demcut <- function(dem_table){
     
     #---- Calculating Cij for each individual ----
     #Store Cij values
-    Cij <- as.data.frame(opt_cog_func(CslopeB, CslopeC, obs)$Cij) %>% 
+    Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
@@ -111,6 +111,12 @@ find_demcut <- function(dem_table){
     slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(slopeij) <- slopeij_varnames
+    
+    #---- Calculating mean Cij by sex ----
+    mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
+      mutate_at("sex", as.factor) %>% group_by(sex) %>% 
+      dplyr::select(-id) %>% summarise_all(mean)
+    colnames(mean_Cij) <- mean_Cij_varnames
     
     #---- Generate survival time for each person ----
     #Individual hazard functions
@@ -173,17 +179,40 @@ find_demcut <- function(dem_table){
         obs[i, dput(Cs)] <- NA
       }
     }
+    
     #---- Create a competing risk outcome ----
     demij <- obs %>% dplyr::select(dput(Cij_varnames[-1])) %>% 
       mutate_all(funs((. < dem_cut)*1))
     colnames(demij) <- dem_varnames
+    dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
+    for(i in 1:nrow(demij)){
+      dem_time <- min(which(demij[i, ] == 1))
+      if(is.finite(dem_time)){
+        demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+        dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
+      } else{
+        dem_wave[i] = NA
+      }
+    }
+    
+    #Dementia diagnosis indicator
+    dem <- (1 - is.na(dem_wave))
+    
+    #Compute time to dementia
+    timetodem <- obs %>% dplyr::select(Cij_varnames, slopeij_varnames) %>% 
+      cbind(., dem_wave, survtime) %>% mutate("timetodem" = dem_onset(.)) %>%
+      dplyr::select("timetodem")
     
     #---- Compute person years ----
     Sij[Sij > 5] <- 5
+    contribute <- Sij*demij
+    cases_py1000 <- vector(length = num_tests)
     dem_cases <- colSums(demij, na.rm = TRUE)[-1]
-    person_years <- colSums(Sij, na.rm = TRUE)
-    cases_py1000 <- 1000*dem_cases/person_years
-  
+    for(j in 1:length(cases_py1000)){
+      person_years <- colSums(Sij, na.rm = TRUE)
+      cases_py1000 <- 1000*dem_cases/person_years
+    }
+    
     #---- Values to return ----
     return(cases_py1000)
   }
@@ -203,7 +232,7 @@ find_demcut <- function(dem_table){
       if(index > 0){
         if(is.null(dem_cut_vals[[j - 1]])){
           val_match <- as.double(dem_table[index, "Rate"])
-          dem_cut_vals[[j]] <- optim(par = c(-0.15, -0.4, -1), 
+          dem_cut_vals[[j]] <- optim(par = c(0, 0, 0), 
                                      fn = dem_rates, J = j, dem_val = val_match, 
                                      upper = c(0, 0, 0))
         } else{
