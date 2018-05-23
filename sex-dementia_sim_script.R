@@ -281,7 +281,7 @@ sex_dem_sim <- function(){
     
     timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
       mutate("timetodem_death" = 
-               ifelse(dem == 1, min(timetodem, survtime), survtime)) %>%
+               if_else(dem == 1, pmin(timetodem, survtime), survtime)) %>%
       dplyr::select("timetodem_death")
     
     ageatdem_death <- age0 + timetodem_death %>% 
@@ -292,8 +292,8 @@ sex_dem_sim <- function(){
       mutate("dem_alive" = dem_death) %>% dplyr::select("dem_alive")
     
 #---- Combine all variables ----
-obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
-             demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
+obs <- cbind(obs, Sij, deathij, study_death, demij, dem_wave, dem, 
+             survtime, age_death, timetodem, ageatdem, dem_death, 
              timetodem_death, ageatdem_death, dem_alive) %>% mutate() 
     
 #---- Edit for actual simulation ----
