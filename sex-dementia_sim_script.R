@@ -84,6 +84,34 @@ survival <- function(obs, lambda){
   return("Sij" = Sij)
 }
 
+#---- Function for computing dementia onset ----
+dem_onset <- function(obs){
+  #Function we are trying to find the root of
+  event_est <- function(t, M, B){
+    cij = B + M*t
+    return(abs(cij - dem_cut))
+  }
+  timetodem <- vector(length = nrow(obs))
+  for(i in 1:nrow(obs)){
+    data <- obs[i, ]
+    if(is.na(data["dem_wave"])){
+      timetodem[i] = as.double(data["survtime"])
+    } else if(data["dem_wave"] == 0){
+      timetodem[i] = 0
+    } else {
+      wave = as.double(data["dem_wave"])
+      slope <- paste("slope", wave - 1, wave, sep = "")
+      int <- paste("Ci", wave - 1, sep = "")
+      m = as.double(data[slope])
+      b = as.double(data[int])
+      timetodem[i] = (wave - 1)*int_time + 
+        optimize(event_est, M = m, 
+                 B = b, interval = c(0, 5))$minimum
+    }
+  }
+  return(timetodem)
+}
+
 #---- Generate Covariance Matrix for random slope and intercept terms ----
 slope_int_cov <- matrix(c(var0, cov, cov, var1), nrow = 2, byrow = TRUE)
 
@@ -231,26 +259,29 @@ sex_dem_sim <- function(){
     #Dementia diagnosis indicator
     dem <- (1 - is.na(dem_wave))
       
-    #Time to dementia
-    timetodem <- dem_wave*int_time
-    timetodem[which(is.na(timetodem))] = survtime[which(is.na(timetodem))]
+    #Compute time to dementia
+    timetodem <- obs %>% dplyr::select(Cij_varnames, slopeij_varnames) %>% 
+      cbind(., dem_wave, survtime) %>% mutate("timetodem" = dem_onset(.)) %>%
+      dplyr::select("timetodem")
     
     #Age at dementia diagnosis
     ageatdem <- age0 + timetodem
+    names(ageatdem) <- c("ageatdem")
     
-    #Dementia at death??
-    dem_death <- as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
+    #Dementia status at death
+    dem_death <- 
+      as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
       mutate("dem_death" = 
                case_when(dem == 1 & timetodem <= survtime ~ 1, 
                          study_death == 1 & 
-                           (dem == 0 | (dem == 1 & timetodem > survtime)) ~ 
-                           2)) %>% 
+                           (dem == 0 | (dem == 1 & timetodem > survtime)) 
+                         ~ 2)) %>% 
       mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
       dplyr::select("dem_death")
     
     timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
       mutate("timetodem_death" = 
-               ifelse(dem == 1, pmin(timetodem, survtime), survtime)) %>%
+               ifelse(dem == 1, min(timetodem, survtime), survtime)) %>%
       dplyr::select("timetodem_death")
     
     ageatdem_death <- age0 + timetodem_death %>% 
@@ -262,8 +293,8 @@ sex_dem_sim <- function(){
     
 #---- Combine all variables ----
 obs <- cbind(obs, Sij, deathij, study_death, survtime, age_death, 
-                       demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
-                       timetodem_death, ageatdem_death, dem_alive) 
+             demij, dem_wave, dem, timetodem, ageatdem, dem_death, 
+             timetodem_death, ageatdem_death, dem_alive) %>% mutate() 
     
 #---- Edit for actual simulation ----
 #Comment out for simulation checks
