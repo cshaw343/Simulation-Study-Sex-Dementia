@@ -103,12 +103,12 @@ find_demcut <- function(dem_table){
     
     #---- Calculating Cij for each individual ----
     #Store Cij values
-    Cij <- as.data.frame(opt_cog_func(Cslopeb, delta, obs)$Cij) %>% 
+    Cij <- as.data.frame(opt_cog_func(CslopeB, delta, obs)$Cij) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
     #Store slope values per interval per individual
-    slopeij <- as.data.frame(opt_cog_func(Cslopeb, delta, obs)$slopes) %>% 
+    slopeij <- as.data.frame(opt_cog_func(CslopeB, delta, obs)$slopes) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(slopeij) <- slopeij_varnames
     
@@ -220,7 +220,7 @@ find_demcut <- function(dem_table){
       last_test = j - 1
       last_wave <- paste("dem", last_test, sep = "")
       this_wave <- paste("dem", j, sep = "")
-      dem_data <- demij %>% dplyr::select(c(last_wave, this_wave)) %>%
+      dem_data <- test_demdata %>% dplyr::select(c(last_wave, this_wave)) %>%
         mutate("contr_time" = mod_time)
       colnames(dem_data) <- c("last_wave", "this_wave", "contr_time")
       dem_data %<>% filter(last_wave == 0) %>%
@@ -228,7 +228,6 @@ find_demcut <- function(dem_table){
       cases_py1000[j] = 1000*
         sum(dem_data$this_wave, na.rm = TRUE)/sum(dem_data$PY)  
     }
-    
     #---- Values to return ----
     return(cases_py1000)
   }
