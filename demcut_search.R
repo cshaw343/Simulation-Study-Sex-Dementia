@@ -197,21 +197,36 @@ find_demcut <- function(dem_table){
       cbind(., dem_wave, survtime) %>% mutate("timetodem" = dem_onset(.)) %>%
       dplyr::select("timetodem")
     
+    #Dementia classification at death
+    dem_death <- 
+      as_tibble(cbind(dem, timetodem, survtime, study_death)) %>% 
+      mutate("dem_death" = 
+               case_when(dem == 1 & timetodem <= survtime ~ 1, 
+                         study_death == 1 & 
+                           (dem == 0 | (dem == 1 & timetodem > survtime)) 
+                         ~ 2)) %>% 
+      mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>% 
+      dplyr::select("dem_death")
+    
+    timetodem_death <- as_tibble(cbind(timetodem, survtime, dem)) %>% 
+      mutate("timetodem_death" = 
+               if_else(dem == 1, pmin(timetodem, survtime), survtime)) %>%
+      dplyr::select("timetodem_death")
+    
     #---- Compute person years ----
-    
-    #---- test code ----
-    
-    
-    #-------------------
-    
-    
-    Sij[Sij > 5] <- 5
-    contribute <- Sij*demij
+    mod_time <- timetodem_death%%5
     cases_py1000 <- vector(length = num_tests)
-    dem_cases <- colSums(demij, na.rm = TRUE)[-1]
-    for(j in 1:length(cases_py1000)){
-      person_years <- colSums(Sij, na.rm = TRUE)
-      cases_py1000 <- 1000*dem_cases/person_years
+    for(j in 1:num_tests){
+      last_test = j - 1
+      last_wave <- paste("dem", last_test, sep = "")
+      this_wave <- paste("dem", j, sep = "")
+      dem_data <- demij %>% dplyr::select(c(last_wave, this_wave)) %>%
+        mutate("contr_time" = mod_time)
+      colnames(dem_data) <- c("last_wave", "this_wave", "contr_time")
+      dem_data %<>% filter(last_wave == 0) %>%
+        mutate("PY" = case_when(this_wave == 0 ~ 5, TRUE ~ contr_time)) 
+      cases_py1000[j] = 1000*
+        sum(dem_data$this_wave, na.rm = TRUE)/sum(dem_data$PY)  
     }
     
     #---- Values to return ----
