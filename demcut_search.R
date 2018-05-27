@@ -22,7 +22,7 @@ find_demcut <- function(dem_table){
   #Function we are trying to optimize
   dem_rates <- function(parameters, J, dem_val){
     CslopeB <- parameters[1]
-    CslopeC <- parameters[2]
+    delta <- parameters[2]
     dem_cut <- parameters[3]
   #---- Model for Cognitive Function ----
   opt_cog_func <- function(CslopeB, delta, obs){
@@ -103,20 +103,14 @@ find_demcut <- function(dem_table){
     
     #---- Calculating Cij for each individual ----
     #Store Cij values
-    Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
+    Cij <- as.data.frame(opt_cog_func(Cslopeb, delta, obs)$Cij) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(Cij) <- Cij_varnames
     
     #Store slope values per interval per individual
-    slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
+    slopeij <- as.data.frame(opt_cog_func(Cslopeb, delta, obs)$slopes) %>% 
       cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
     colnames(slopeij) <- slopeij_varnames
-    
-    #---- Calculating mean Cij by sex ----
-    mean_Cij <- Cij %>% mutate("sex" = obs$sex) %>% 
-      mutate_at("sex", as.factor) %>% group_by(sex) %>% 
-      dplyr::select(-id) %>% summarise_all(mean)
-    colnames(mean_Cij) <- mean_Cij_varnames
     
     #---- Generate survival time for each person ----
     #Individual hazard functions
@@ -204,6 +198,13 @@ find_demcut <- function(dem_table){
       dplyr::select("timetodem")
     
     #---- Compute person years ----
+    
+    #---- test code ----
+    
+    
+    #-------------------
+    
+    
     Sij[Sij > 5] <- 5
     contribute <- Sij*demij
     cases_py1000 <- vector(length = num_tests)
