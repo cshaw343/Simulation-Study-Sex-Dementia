@@ -215,18 +215,19 @@ find_demcut <- function(dem_table){
     
     #---- Compute person years ----
     mod_time <- timetodem_death%%5
+    names(mod_time) <- c("contributed")
     cases_py1000 <- vector(length = num_tests)
     for(j in 1:num_tests){
       last_test = j - 1
       last_wave <- paste("dem", last_test, sep = "")
       this_wave <- paste("dem", j, sep = "")
-      dem_data <- test_demdata %>% dplyr::select(c(last_wave, this_wave)) %>%
-        mutate("contr_time" = mod_time)
-      colnames(dem_data) <- c("last_wave", "this_wave", "contr_time")
-      dem_data %<>% filter(last_wave == 0) %>%
-        mutate("PY" = case_when(this_wave == 0 ~ 5, TRUE ~ contr_time)) 
+      dem_data <- demij %>% dplyr::select(c(last_wave, this_wave)) 
+      dem_data %<>% cbind(., mod_time)
+      dem_data %<>% filter(!! as.name(last_wave) == 0) %>%
+        mutate("PY" = case_when(!! as.name(this_wave) == 0 ~ 5, 
+                                TRUE ~ contributed)) 
       cases_py1000[j] = 1000*
-        sum(dem_data$this_wave, na.rm = TRUE)/sum(dem_data$PY)  
+        sum(dem_data[, this_wave], na.rm = TRUE)/sum(dem_data$PY)  
     }
     #---- Values to return ----
     return(cases_py1000)
