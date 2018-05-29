@@ -12,7 +12,8 @@ options(warn = -1)
 cog_decline <- tibble("WHICAP" = c(-0.4, -0.5, -0.4), 
                       "SENAS" = c(-0.8, -0.4, -0.4), 
                       "DUKE" = c(-0.4, -0.4, -0.45), 
-                      "NCODE" = c(0, 0, 0.1)) %>% map_df(.f = ~(.)/10)
+                      "NCODE" = c(0, 0, 0.1)) %>% 
+  map_df(.f = ~(.)/10) #Change scale to SD = 1 
 rownames(cog_decline) <- c("White", "Black", "Hispanic")
 
 #Average all data 
