@@ -48,22 +48,6 @@ find_demcut <- function(dem_table){
              b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
       }
     }
-  # opt_cog_func <- function(CslopeB, delta, obs){
-  #   knots = c(0, 20, 35)
-  #   Cij <- vector(length = length(visit_times))
-  #   for(j in 1:length(Cij)){
-  #     t = visit_times[j]
-  #     test_num = j - 1
-  #     eps <- paste("eps", test_num, sep = "")
-  #     Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] +
-  #       b03*obs[, "U"] + obs[, eps] +
-  #       (b10a - CslopeB)*knots[2]*(t >= knots[2]) +
-  #       (CslopeB - (CslopeB + delta))*knots[3]*(t >= knots[3]) +
-  #       (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] +
-  #         b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) +
-  #         CslopeB*(t >= knots[2] & t< knots[3]) +
-  #         (CslopeB + delta)*(t >= knots[3]))*t
-  #   }
     slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
     #Cij is stored as a list in this function environment so use list indexing
     for(j in 1:ncol(slopes)){
