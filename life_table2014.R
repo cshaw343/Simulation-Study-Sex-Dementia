@@ -37,29 +37,29 @@ ages <- seq(from = 45, to = 100, by = 5) #Start at 45 for hazard calcs
 
 life <- tibble("Age" = ages, 
                "Survivors" = c(72036, 68429, 63947, 58079, 50560, 41090, 29729, 
-                               18298, 8683, 2941, 646, 67)) %>% 
-  mutate("Prob" = Survivors/100000,
-         "logProb" = log(Prob),
-         "CP" = cond_prob(Survivors), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+                               18298, 8683, 2941, 646, 67), 
+               "Prob" = Survivors/100000, 
+               "logProb" = log(Prob), 
+               "CP" = cond_prob(Survivors), 
+               "Haz" = haz(age = Age, logprobs = logProb)) 
 
 male_life <- tibble("MAge" = ages, 
                     "MSurvivors" = c(71244, 67553, 62965, 56917, 49218, 39668, 
-                                     28316, 17128, 7920, 2527, 556, 62)) %>% 
-  mutate("MProb" = MSurvivors/100000,
-         "MlogProb" = log(MProb),
-         "CP" = cond_prob(MSurvivors), 
-         "MHaz" = haz(age = MAge, logprobs = MlogProb))
+                                     28316, 17128, 7920, 2527, 556, 62), 
+                    "MProb" = MSurvivors/100000,
+                    "MlogProb" = log(MProb),
+                    "CP" = cond_prob(MSurvivors), 
+                    "MHaz" = haz(age = MAge, logprobs = MlogProb)) 
 
 female_life <- tibble("FAge" = ages, 
                       "FSurvivors" = c(72954, 69452, 65099, 59438, 52126, 42741, 
-                                       31344, 19613, 9515, 3314, 728, 72)) %>% 
-  mutate("FProb" = FSurvivors/100000,
-         "FlogProb" = log(FProb),
-         "CP" = cond_prob(FSurvivors), 
-         "FHaz" = haz(age = FAge, logprobs = FlogProb))
+                                       31344, 19613, 9515, 3314, 728, 72), 
+                      "FProb" = FSurvivors/100000,
+                      "FlogProb" = log(FProb),
+                      "CP" = cond_prob(FSurvivors), 
+                      "FHaz" = haz(age = FAge, logprobs = FlogProb)) 
 
-Hratio <- male_life$MHaz/female_life$FHaz %>% as.data.frame()
+Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
 colnames(Hratio) <- c("ratio")
 
 #---- Hazard Plots ----
