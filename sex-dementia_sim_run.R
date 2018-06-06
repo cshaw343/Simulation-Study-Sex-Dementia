@@ -9,6 +9,7 @@ source("sex-dementia_sim_script.R")
 sim_results <- replicate(1, sex_dem_sim())
 
 #---- Looking at simulation results ----
+sim_obs <- sim_results["obs", ]
 #Finding the mean Cij by sex across all simulations
-mean_Cij_sim <- sim_results[[2]]
-mean_Cij_sim_compare <- sim_results_compare[[2]]
+mean_Cij_sim <- sim_results["mean_Cij", ]
+
