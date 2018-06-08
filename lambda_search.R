@@ -29,18 +29,16 @@ data_gen <- function(){
   ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
   for(j in 1:length(age_varnames)){
     if(j == 1){
-      ages[, j] = seq(from = 1, to = num_obs, by = 1) #Creates column of ids
-    } else if(j == 2){
       ages[, j] = age0 #Creates column of baseline ages
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
   }
   colnames(ages) <- age_varnames
+  obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% 
-    mutate("id" = seq(from = 1, to = num_obs, by = 1)) #Creates column of ids
-  colnames(c_ages) <- agec_varnames
+  c_ages <- as_tibble(ages - mean(age0)) %>% set_colnames(., agec_varnames)
+  obs %<>% bind_cols(., c_ages)
   
   #---- Generating "true" cognitive function Cij ----
   #Cij = b00 + z0i + bo1*sexi + b02*age0i + b03*Ui + (b10 + z1i + b11*sexi + 
@@ -50,42 +48,54 @@ data_gen <- function(){
   #Generate random terms for each individual
   slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
                                        Sigma = slope_int_cov)) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
-  colnames(slope_int_noise) <- c("id", "z0i", "z1i")
+    set_colnames(., c("z0i", "z1i"))
+  obs %<>% bind_cols(., slope_int_noise)
   
   #---- Generating noise term (unexplained variance in Cij) for each visit ----
-  sd_eps <- sqrt(var3)
-  eps <- as_tibble(replicate(num_tests + 1, 
-                             rnorm(n = num_obs, mean = 0, sd = sd_eps))) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creates column of ids
-  colnames(eps) <- eps_varnames
+  #Creating AR(1) correlation matrix
+  num_visits = num_tests + 1
+  powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
+  corr <- sqrt(var3)*(r1^powers)                            #Correlation matrix
+  S <- diag(rep(sqrt(var3)), nrow(corr))                    #Diagonal matrix of SDs
+  cov_mat <- S%*%corr%*%S                                   #Covariance matrix
   
-  #---- Creating complete matrix of observation data ----
-  obs <- left_join(obs, ages, by = "id") %>% left_join(c_ages, by = "id") %>%
-    left_join(slope_int_noise, by = "id") %>% left_join(eps, by = "id")
+  #Generating noise terms
+  eps <- as_tibble(mvrnorm(n = num_obs, 
+                           mu = rep(0, num_visits), Sigma = cov_mat)) %>%
+    set_colnames(., eps_varnames)
+  obs %<>% bind_cols(., eps)
   
   #---- Calculating Cij for each individual ----
-  #Store Cij values
-  Cij <- as.data.frame(cog_func(obs)$Cij) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(Cij) <- Cij_varnames
+  #Store Cij values and slope values for each assessment
+  compute_Cij <- cog_func(obs)
+  Cij <- as.data.frame(compute_Cij$Cij) %>% 
+    set_colnames(., Cij_varnames)
+  slopeij <- as.data.frame(compute_Cij$slopes) %>% 
+    set_colnames(., slopeij_varnames)
+  obs %<>% bind_cols(., Cij, slopeij)
   
-  #Store slope values per interval per individual
-  slopeij <- as.data.frame(cog_func(obs)$slopes) %>% 
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(slopeij) <- slopeij_varnames
+  #---- Calculating mean Cij by sex ----
+  mean_Cij <- obs %>% mutate_at("sex", as.factor) %>% group_by(sex) %>% 
+    dplyr::select(sex, Cij_varnames) %>% summarise_all(mean) %>%
+    set_colnames(mean_Cij_varnames)
+  
+  #---- Generate survival time for each person ----
+  #Individual hazard functions
+  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
+  #g5*slopeij + g6Cij)
+  #See Additional notes in README file
   
   #---- Generating uniform random variables per interval for Sij ----
   USij <- as_tibble(replicate(num_tests, 
                               runif(num_obs, min = 0, max = 1))) %>%
-    cbind("id" = seq(from = 1, to = num_obs, by = 1), .) #Creating column of ids
-  colnames(USij) <- USij_varnames
+    set_colnames(USij_varnames)
+  obs %<>% bind_cols(., USij)
   
-  #---- Merging Cij, slopeij, and USij with observation data ----
-  #Used as input for survival function
-  obs <- left_join(obs, Cij, by = "id") %>% left_join(slopeij, by = "id") %>% 
-    left_join(USij, by = "id")
-
+  #---- Calculating Sij for each individual ----
+  #Store Sij values
+  Sij <- as.data.frame(survival(obs, lambda)) %>% set_colnames(Sij_varnames)
+  obs %<>% bind_cols(., Sij)
+  
   return("obs" = obs)
 }
 
