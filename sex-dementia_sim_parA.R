@@ -27,9 +27,9 @@ psex <- 0.49
 var0 <- 0.2   #Variance of random cognitive intercept
 var1 <- 0.005 #Variance of random cognitive slope
 cov <- 0.01   #Covariance of random intercept and random slope
-var3 <- 0.2   #Variance of noise for Cij (cognitive function for person i at time j)
-r1 <- 0       #Correlation between noise terms for Cij
-var4 <- 0.19  #Variance of measurement error of Cij
+var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
+r1 <- 0.3     #Correlation between noise terms for Cij
+#var4 <- 0.19  #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
 #Knots placed at ages 70 and 85
@@ -38,8 +38,8 @@ b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 b10a <- 0     #Cognitive slope for females age 50-70
-deltaB <- 0   #Change in cognitive slope for females age 70-85
-deltaC <- 0   #Change in cognitive slope for females age 85+
+b10delta_b <- 0   #Change in cognitive slope for females age 70-85
+b10delta_c <- 0   #Change in cognitive slope for females age 85+
 
 b10b <- -0.15 #Cognitive slope for females age 70-85
 b10c <- -0.4  #Cognitive slope for females age 85+
