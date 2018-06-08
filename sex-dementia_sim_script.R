@@ -150,9 +150,16 @@ sex_dem_sim <- function(){
   obs %<>% bind_cols(., slope_int_noise)
   
   #---- Generating noise term (unexplained variance in Cij) for each visit ----
-  sd_eps <- sqrt(var3)
-  eps <- as_tibble(replicate(num_tests + 1, 
-                             rnorm(n = num_obs, mean = 0, sd = sd_eps))) %>%
+  #Creating AR(1) correlation matrix
+  num_visits = num_tests + 1
+  powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
+  corr <- sqrt(var3)*(r1^powers)                            #Correlation matrix
+  S <- diag(rep(sqrt(var3)), nrow(corr))                    #Diagonal matrix of SDs
+  cov_mat <- S%*%corr%*%S                                   #Covariance matrix
+  
+  #Generating noise terms
+  eps <- as_tibble(mvrnorm(n = num_obs, 
+                           mu = rep(0, num_visits), Sigma = cov_mat)) %>%
     set_colnames(., eps_varnames)
   obs %<>% bind_cols(., eps)
   
