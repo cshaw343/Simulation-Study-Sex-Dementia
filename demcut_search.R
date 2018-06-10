@@ -111,7 +111,7 @@ find_demcut <- function(dem_table){
       
       #---- Calculating Cij for each individual ----
       #Store Cij values and slope values for each assessment
-      compute_Cij <- opt_cog_func(obs)
+      compute_Cij <- opt_cog_func(slopes, obs)
       Cij <- as.data.frame(compute_Cij$Cij) %>% 
         set_colnames(., Cij_varnames)
       slopeij <- as.data.frame(compute_Cij$slopes) %>% 
@@ -235,7 +235,7 @@ find_demcut <- function(dem_table){
   return(abs(target - dem_val))
   }
   
-  #Creating vector search to return
+  #---- Creating vector search to return ----
   dem_cut_vals <- vector("list", length = num_tests)
   for(j in 1:(length(dem_cut_vals) - 5)){
     testnum = j - 1
@@ -245,10 +245,11 @@ find_demcut <- function(dem_table){
       if(index > 0){
         if(is.null(dem_cut_vals[[j - 1]])){
           val_match <- as.double(dem_table[index, "Rate"])
+          #---- Edit search values ----
           dem_cut_vals[[j]] <- optim(par = c(rep(0, 10), -5), 
                                      fn = dem_rates, J = j, 
                                      dem_val = val_match,
-                                     upper = c(rep(0, 10), -5), 
+                                     upper = c(rep(0, 10), -4), 
                                      lower = c(rep(-0.05, 10), -6))
         } else{
           val_match <- as.double(dem_table[index, "Rate"])
