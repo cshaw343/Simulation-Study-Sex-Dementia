@@ -246,11 +246,13 @@ find_demcut <- function(dem_table){
         if(is.null(dem_cut_vals[[j - 1]])){
           val_match <- as.double(dem_table[index, "Rate"])
           #---- Edit search values ----
-          dem_cut_vals[[j]] <- optim(par = c(rep(0, 10), -5), 
+          dem_cut_vals[[j]] <- optim(par = c(rep(-0.01, 10), -4.75), 
                                      fn = dem_rates, J = j, 
                                      dem_val = val_match,
-                                     upper = c(rep(0, 10), -4), 
-                                     lower = c(rep(-0.05, 10), -6))
+                                     upper = c(rep(0, 4), 
+                                               rep(-0.01, 10), -4.5), 
+                                     lower = c(rep(-0.03, 4), 
+                                               rep(-0.01, 10), -5))
         } else{
           val_match <- as.double(dem_table[index, "Rate"])
           dem_cut_vals[[j]] <- optim(par = c(dem_cut_vals[[j-1]]$par[1:(j-1)], 
