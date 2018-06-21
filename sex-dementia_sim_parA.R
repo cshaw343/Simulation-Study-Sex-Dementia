@@ -28,7 +28,7 @@ var0 <- 0.2   #Variance of random cognitive intercept
 var1 <- 0.005 #Variance of random cognitive slope
 cov <- 0.01   #Covariance of random intercept and random slope
 var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
-r1 <- 0.3     #Correlation between noise terms for Cij
+r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
 #var4 <- 0.19  #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
