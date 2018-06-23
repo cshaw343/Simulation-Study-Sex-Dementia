@@ -8,7 +8,7 @@
 #***************************************************************
 
 #---- Number of observations ----
-num_obs <- 3000
+num_obs <- 100000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -38,12 +38,16 @@ b00 <- 0      #Cognitive intercept for females
 b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
-b10a <- 0     #Cognitive slope for females age 50-70
-b10delta_b <- 0   #Change in cognitive slope for females age 70-85
-b10delta_c <- 0   #Change in cognitive slope for females age 85+
 
-b10b <- -0.15 #Cognitive slope for females age 70-85
-b10c <- -0.4  #Cognitive slope for females age 85+
+#First value is cognitive slopes, the remaining values are changes in cognitive slopes
+slopes <- c(rep(-0.01, 3), -0.015, -0.075, -0.0825, -0.155, -0.274, -1, 0)
+
+# b10a <- 0     #Cognitive slope for females age 50-70
+# b10delta_b <- 0   #Change in cognitive slope for females age 70-85
+# b10delta_c <- 0   #Change in cognitive slope for females age 85+
+# b10b <- -0.15 #Cognitive slope for females age 70-85
+# b10c <- -0.4  #Cognitive slope for females age 85+
+
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
@@ -66,4 +70,4 @@ lambda <- c(0.0134, 0.0187, 0.0266, 0.0392, 0.0622, 0.0946, 0.1439, 0.2072,
 
 #---- Dementia Cut Point ----
 #Chosen using from dem_cut portion of parameter_search.R script
-dem_cut <- -3.28
+dem_cut <- -4.75
