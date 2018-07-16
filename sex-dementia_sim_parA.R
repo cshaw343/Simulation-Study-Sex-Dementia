@@ -38,12 +38,13 @@ b00 <- 0      #Cognitive intercept for females
 b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
-b10a <- 0     #Cognitive slope for females age 50-70
+
+b10a <- 0         #Cognitive slope for females age 50-70
 b10delta_b <- 0   #Change in cognitive slope for females age 70-85
 b10delta_c <- 0   #Change in cognitive slope for females age 85+
+b10b <- -0.15     #Cognitive slope for females age 70-85
+b10c <- -0.4      #Cognitive slope for females age 85+
 
-b10b <- -0.15 #Cognitive slope for females age 70-85
-b10c <- -0.4  #Cognitive slope for females age 85+
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
