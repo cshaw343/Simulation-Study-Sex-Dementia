@@ -33,10 +33,11 @@ haz <- function(age, logprobs){
 
 #---- Life Table Data ----
 #"Survivors" represents number surviving out of 100,000 born alive
-ages <- seq(from = 45, to = 100, by = 5) #Start at 45 for hazard calcs
+ages <- seq(from = 0, to = 100, by = 5) #Start at 45 for hazard calcs
 
 life <- tibble("Age" = ages, 
-               "Survivors" = c(72036, 68429, 63947, 58079, 50560, 41090, 29729, 
+               "Survivors" = c(100000, 83389, 88129, 87144, 85441, 83146, 80642, 77961, 75114, 
+                               72036, 68429, 63947, 58079, 50560, 41090, 29729, 
                                18298, 8683, 2941, 646, 67), 
                "Prob" = Survivors/100000, 
                "logProb" = log(Prob), 
@@ -44,7 +45,8 @@ life <- tibble("Age" = ages,
                "Haz" = haz(age = Age, logprobs = logProb)) 
 
 male_life <- tibble("MAge" = ages, 
-                    "MSurvivors" = c(71244, 67553, 62965, 56917, 49218, 39668, 
+                    "MSurvivors" = c(100000, 88505, 87184, 86156, 84440, 82252, 79890, 77514, 74432,   
+                                     71244, 67553, 62965, 56917, 49218, 39668, 
                                      28316, 17128, 7920, 2527, 556, 62), 
                     "MProb" = MSurvivors/100000,
                     "MlogProb" = log(MProb),
@@ -52,7 +54,8 @@ male_life <- tibble("MAge" = ages,
                     "MHaz" = haz(age = MAge, logprobs = MlogProb)) 
 
 female_life <- tibble("FAge" = ages, 
-                      "FSurvivors" = c(72954, 69452, 65099, 59438, 52126, 42741, 
+                      "FSurvivors" = c(100000, 90380, 89186, 88247, 86556, 84135, 81463, 78713, 75907,
+                                       72954, 69452, 65099, 59438, 52126, 42741, 
                                        31344, 19613, 9515, 3314, 728, 72), 
                       "FProb" = FSurvivors/100000,
                       "FlogProb" = log(FProb),
