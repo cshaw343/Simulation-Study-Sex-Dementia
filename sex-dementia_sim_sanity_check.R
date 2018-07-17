@@ -20,6 +20,23 @@ sim_check <- sex_dem_sim()
 obs_check <- as_tibble(sim_check$obs)
 mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 
+#Check the distribution of Cij across timepoints
+obs_check %>% dplyr::select(Cij_varnames) %>% gather() %>% 
+  ggplot(aes(value)) + facet_wrap(~ key, scales = "free") +
+  geom_histogram()
+
+Cij_data <- obs_check %>% dplyr::select(Cij_varnames) 
+Cij_summaries <- as_tibble(matrix(nrow = 3, ncol = length(Cij_varnames))) %>% 
+  set_colnames(Cij_varnames) %>% set_rownames(c("Med", "Mean", "SD"))
+Cij_summaries["Med", ] <- Cij_data %>% summarise_all(funs(median), na.rm = TRUE)
+Cij_summaries["Mean", ] <- Cij_data %>% summarise_all(funs(mean), na.rm = TRUE)
+Cij_summaries["SD", ] <- Cij_data %>% summarise_all(funs(sd), na.rm = TRUE)
+
+cov_Cij <- cov(Cij_data, use = "complete.obs")
+sd_mat <- diag(sqrt(diag(cov_Cij)))
+sd_mat_inv <- solve(sd_mat)
+corr_Cij <- sd_mat_inv%*%cov_Cij%*%sd_mat_inv
+
 #Check means: proportion of males, U
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 

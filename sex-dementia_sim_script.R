@@ -40,31 +40,64 @@ for(j in 1:num_tests){
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Model for Cognitive Function ----
-cog_func <- function(obs){
-  knots = c(0, 20, 35)
+cog_func <- function(slopes, obs){
+  knots = visit_times
+  mid_visits <- knots[c(-1, -length(knots))]
+  test_nums = seq(from = 0, to = 10, by = 1)
+  testXslope = (-1)*slopes[-1]*mid_visits
   Cij <- vector(length = length(visit_times))
   for(j in 1:length(Cij)){
-    t = visit_times[j]
-    test_num = j - 1
+    t = knots[j]
+    test_num = test_nums[j]
     eps <- paste("eps", test_num, sep = "")
-    Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
-      b03*obs[, "U"] + obs[, eps] + 
-      (b10a - b10b)*knots[2]*(t >= knots[2]) + 
-      (b10b - b10c)*knots[3]*(t >= knots[3]) + 
-      (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
-         b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
-         b10b*(t >= knots[2] & t< knots[3]) +
-         b10c*(t >= knots[3]))*t
+    if(t <= 5){
+      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] +
+        b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
+        (slopes[1] + obs[, "z1i"] + b11*obs[, "sex"] +
+           b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
+    } else{
+      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] +
+        b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
+        sum(testXslope[1:(test_num - 1)]) +
+        (sum(slopes[1:test_num]) + obs[, "z1i"] + b11*obs[, "sex"] +
+           b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
+    }
   }
   slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
   #Cij is stored as a list in this function environment so use list indexing
   for(j in 1:ncol(slopes)){
-    b <- Cij[[j + 1]] 
+    b <- Cij[[j + 1]]
     a <- Cij[[j]]
     slopes[, j] = (b-a)/int_time
   }
   return(list("Cij" = Cij, "slopes" = slopes))
 }
+  
+  #Old cog_func Code
+  # knots = c(0, 20, 35)
+  # Cij <- vector(length = length(visit_times))
+  # for(j in 1:length(Cij)){
+  #   t = visit_times[j]
+  #   test_num = j - 1
+  #   eps <- paste("eps", test_num, sep = "")
+  #   Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + b02*obs[, "age0_c50"] + 
+  #     b03*obs[, "U"] + obs[, eps] + 
+  #     (b10a - b10b)*knots[2]*(t >= knots[2]) + 
+  #     (b10b - b10c)*knots[3]*(t >= knots[3]) + 
+  #     (obs[, "z1i"] + b11*obs[, "sex"] + b12*obs[, "age0_c50"] + 
+  #        b13*obs[, "U"] + b10a*(t >= knots[1] & t< knots[2]) + 
+  #        b10b*(t >= knots[2] & t< knots[3]) +
+  #        b10c*(t >= knots[3]))*t
+#   }
+#   slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
+#   #Cij is stored as a list in this function environment so use list indexing
+#   for(j in 1:ncol(slopes)){
+#     b <- Cij[[j + 1]] 
+#     a <- Cij[[j]]
+#     slopes[, j] = (b-a)/int_time
+#   }
+#   return(list("Cij" = Cij, "slopes" = slopes))
+# }
 
 #---- Model for Survival Time ----
 survival <- function(obs, lambda){
@@ -165,7 +198,7 @@ sex_dem_sim <- function(){
   
   #---- Calculating Cij for each individual ----
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(obs)
+  compute_Cij <- cog_func(slopes, obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
     set_colnames(., Cij_varnames)
   slopeij <- as.data.frame(compute_Cij$slopes) %>% 
@@ -264,6 +297,22 @@ sex_dem_sim <- function(){
            "dem_alive" = case_when(dem_death == 1 ~ 1, 
                                    TRUE ~ 0))
   
+  #---- Compute person years ----
+  contributed <- (obs$timetodem_death)%%5
+  cases_py1000 <- vector(length = num_tests)
+  for(j in 1:num_tests){
+    last_test = j - 1
+    last_wave <- paste("dem", last_test, sep = "")
+    this_wave <- paste("dem", j, sep = "")
+    dem_data <- demij %>% dplyr::select(c(last_wave, this_wave)) 
+    dem_data %<>% cbind(., contributed)
+    dem_data %<>% filter(!! as.name(last_wave) == 0) %>%
+      mutate("PY" = case_when(!! as.name(this_wave) == 0 ~ 5, 
+                              TRUE ~ contributed)) 
+    cases_py1000[j] = 1000*
+      sum(dem_data[, this_wave], na.rm = TRUE)/sum(dem_data$PY)  
+  }
+  
   #---- Edit for actual simulation ----
   #Comment out for simulation checks
   #obs <- obs %>% filter(dem_wave != 0)
@@ -272,7 +321,7 @@ sex_dem_sim <- function(){
   #return(list("mean_Cij" = mean_Cij))
   
   #Alternative return function for code checking
-  return(list("obs" = obs, "mean_Cij" = mean_Cij))
+  return(list("obs" = obs, "mean_Cij" = mean_Cij, "dem_cases" = cases_py1000))
 }
 
 
