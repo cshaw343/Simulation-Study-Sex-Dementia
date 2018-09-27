@@ -13,9 +13,9 @@ p_load("tidyverse", "magrittr")
 options(warn = -1)
 
 #---- Specify source files ----
-source("sex-dementia_sim_parA.R")
-source("dementia_incidence2000-2013.R")
-source("sex-dementia_sim_script.R")
+source("RScripts/sex-dementia_sim_parA.R")
+source("RScripts/dementia_incidence2000-2013.R")
+source("RScripts/sex-dementia_sim_script.R")
 
 #---- Dementia search function ----
 find_demcut <- function(dem_table){
