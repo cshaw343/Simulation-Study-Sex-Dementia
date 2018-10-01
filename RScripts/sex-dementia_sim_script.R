@@ -10,9 +10,6 @@ options(warn = -1)    #Suppress warnings
 
 set.seed(10789)
 
-#---- Source Files ----
-source("RScripts/variable_names.R")
-
 #---- Generating assessment timepoint data ----
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
