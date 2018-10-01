@@ -13,9 +13,6 @@ set.seed(10789)
 #---- Generating assessment timepoint data ----
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
-#---- Generate Covariance Matrix for random slope and intercept terms ----
-slope_int_cov <- matrix(c(var0, cov, cov, var1), nrow = 2, byrow = TRUE)
-
 #---- The simulation function ----
 sex_dem_sim <- function(){
   #---- Generating IDs, sex, U ----
@@ -46,6 +43,9 @@ sex_dem_sim <- function(){
   #b12*age0i + b13*Ui)*timej + epsilonij
   
   #---- Generating random terms for slope and intercept ----
+  #Covariance matrix for random slope and intercept terms
+  slope_int_cov <- matrix(c(var0, cov, cov, var1), nrow = 2, byrow = TRUE)
+  
   #Generate random terms for each individual
   slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
                                        Sigma = slope_int_cov)) %>% 
