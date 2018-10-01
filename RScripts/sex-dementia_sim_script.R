@@ -75,9 +75,10 @@ sex_dem_sim <- function(){
   #Store Cij values and slope values for each assessment
   compute_Cij <- cog_func(slopes, obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., Cij_varnames)
+    set_colnames(., variable_names$Cij_varnames)
   slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    set_colnames(., slopeij_varnames)
+    #remove the last variable name because there are only 10 slopes
+    set_colnames(., head(variable_names$slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, slopeij)
   
   #---- Calculating mean Cij by sex ----
