@@ -1,7 +1,7 @@
-#***************************************************************
+#*******************************************************************************
 # Performs a search for an appropriate dementia cutpoint 
 # Reference data found in dem_calcs(Gross, et.al).R
-#***************************************************************
+#*******************************************************************************
 
 #---- Package Loading and Options ----
 if (!require("pacman")) 
@@ -19,7 +19,7 @@ source("RScripts/sex-dementia_sim_script.R")
 
 #---- Dementia search function ----
 find_demcut <- function(dem_table){
-  #Function we are trying to optimize
+  #---- Function we are trying to optimize ----
   dem_rates <- function(parameters, J, dem_val){
     slopes <- parameters[-1]
     dem_cut <- parameters[length(parameters)]
