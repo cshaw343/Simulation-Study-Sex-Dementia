@@ -18,7 +18,14 @@ source("dementia_incidence2000-2013.R")
 #Storing the results of the simulation
 sim_check <- sex_dem_sim()
 obs_check <- as_tibble(sim_check$obs)
-mean_Cij_check <- as_tibble(sim_check$mean_Cij)
+
+#---- Calculating mean Cij by sex ----
+mean_Cij <- obs %>% mutate_at("sex", as.factor) %>% group_by(sex) %>% 
+  dplyr::select(sex, Cij_varnames) %>% summarise_all(mean) %>%
+  set_colnames(mean_Cij_varnames)
+
+#Would I still need this?
+#mean_Cij_check <- as_tibble(sim_check$mean_Cij)
 
 #Check the distribution of Cij across timepoints
 obs_check %>% dplyr::select(Cij_varnames) %>% gather() %>% 
