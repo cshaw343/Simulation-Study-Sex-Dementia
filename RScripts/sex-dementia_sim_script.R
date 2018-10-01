@@ -63,7 +63,7 @@ sex_dem_sim <- function(){
   #Generating noise terms
   eps <- as_tibble(mvrnorm(n = num_obs, 
                            mu = rep(0, num_visits), Sigma = cov_mat)) %>%
-    set_colnames(., eps_varnames)
+    set_colnames(., variable_names$eps_varnames)
   obs %<>% bind_cols(., eps)
   
   #---- Calculating Cij for each individual ----
