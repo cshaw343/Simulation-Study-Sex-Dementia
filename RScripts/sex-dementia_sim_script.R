@@ -25,13 +25,14 @@ sex_dem_sim <- function(){
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
-  for(j in 1:length(age_varnames)){
+  ages <- as_tibble(matrix(NA, nrow = num_obs, 
+                           ncol = length(nrow(variable_names))))
+  for(j in 1:nrow(variable_names)){
     if(j == 1){
       ages[, j] = age0 #Creates column of baseline ages
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
   }
-  colnames(ages) <- age_varnames
+  colnames(ages) <- variable_names$age_varnames
   obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
