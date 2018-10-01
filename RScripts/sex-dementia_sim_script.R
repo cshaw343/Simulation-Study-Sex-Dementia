@@ -10,31 +10,8 @@ options(warn = -1)    #Suppress warnings
 
 set.seed(10789)
 
-#---- Generating variable names for each assessment timepoint ----
-age_varnames <- c("age0", vector(length = num_tests)) #Age labels
-agec_varnames <- c("age0_c50", vector(length = num_tests)) #Centered age labels
-eps_varnames <- c("eps0", vector(length = num_tests)) #Epsilon labels
-dem_varnames <- c("dem0", vector(length = num_tests)) #Dementia labels
-Cij_varnames <- c("Ci0", vector(length = num_tests)) #Cij labels
-mean_Cij_varnames <- c("sex", "meanCi0", vector(length = num_tests)) #Mean Cij labels
-slopeij_varnames <- c(vector(length = num_tests)) #interval slope labels
-USij_varnames <- c(vector(length = num_tests)) #Uniform survival noise labels
-deathij_varnames <- vector(length = num_tests) #Death indicator labels
-Sij_varnames <- vector(length = num_tests) #Survival time labels
-
-
-for(j in 1:num_tests){
-  age_varnames[j + 1] = paste("age", j, sep = "")
-  agec_varnames[j + 1] = paste(age_varnames[j + 1], "_c50", sep = "")
-  eps_varnames[j + 1] = paste("eps", j, sep = "")
-  dem_varnames[j + 1] = paste("dem", j, sep = "")
-  Cij_varnames[j + 1] = paste("Ci", j, sep = "")
-  mean_Cij_varnames[j + 2] = paste("meanCi", j, sep = "")
-  slopeij_varnames[j] = paste("slope",j-1, j, sep = "")
-  USij_varnames[j] = paste("U",j-1, j, sep = "")
-  deathij_varnames[j] = paste("death",j-1, j, sep = "")
-  Sij_varnames[j] = paste("survtime",j-1, j, sep = "")
-}
+#---- Source Files ----
+source("RScripts/variable_names.R")
 
 #---- Generating assessment timepoint data ----
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
