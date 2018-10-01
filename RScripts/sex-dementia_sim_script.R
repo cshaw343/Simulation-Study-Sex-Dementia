@@ -10,6 +10,11 @@ options(warn = -1)    #Suppress warnings
 
 set.seed(10789)
 
+#---- Source files ----
+source("RScripts/cognitive_function_model.R")
+source("RScripts/survival_times.R")
+source("RScripts/dementia_onset.R")
+
 #---- Generating assessment timepoint data ----
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
