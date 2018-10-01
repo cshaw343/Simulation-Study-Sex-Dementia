@@ -1,6 +1,9 @@
 #---- Specify the parameter file ----
 source("RScripts/sex-dementia_sim_parA.R")
 
+#---- Create all variable names ----
+source("RScripts/variable_names.R")
+
 #---- Specify the simulation script ----
 source("RScripts/sex-dementia_sim_script.R")
 
