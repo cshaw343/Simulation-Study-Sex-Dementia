@@ -1,8 +1,8 @@
 #---- Specify the parameter file ----
-source("sex-dementia_sim_parA.R")
+source("RScripts/sex-dementia_sim_parA.R")
 
 #---- Specify the simulation script ----
-source("sex-dementia_sim_script.R")
+source("RScripts/sex-dementia_sim_script.R")
 
 #---- Running the simulation----
 #Storing the results of the simulation
