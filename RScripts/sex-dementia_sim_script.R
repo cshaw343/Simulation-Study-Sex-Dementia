@@ -77,14 +77,9 @@ sex_dem_sim <- function(){
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
     set_colnames(., variable_names$Cij_varnames)
   slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    #remove the last variable name because there are only 10 slopes
+    #remove the last variable name because there are only 10 intervals
     set_colnames(., head(variable_names$slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, slopeij)
-  
-  #---- Calculating mean Cij by sex ----
-  mean_Cij <- obs %>% mutate_at("sex", as.factor) %>% group_by(sex) %>% 
-    dplyr::select(sex, Cij_varnames) %>% summarise_all(mean) %>%
-    set_colnames(mean_Cij_varnames)
   
   #---- Generate survival time for each person ----
   #Individual hazard functions
@@ -95,7 +90,8 @@ sex_dem_sim <- function(){
   #---- Generating uniform random variables per interval for Sij ----
   USij <- as_tibble(replicate(num_tests, 
                               runif(num_obs, min = 0, max = 1))) %>%
-    set_colnames(USij_varnames)
+    #remove the last variable name because there are only 10 intervals
+    set_colnames(head(variable_names$USij_varnames, -1))
   obs %<>% bind_cols(., USij)
   
   #---- Calculating Sij for each individual ----
