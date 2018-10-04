@@ -81,6 +81,9 @@ sex_dem_sim <- function(){
     set_colnames(., head(variable_names$slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, slopeij)
   
+  #---- Calculating Dij for each individual ----
+  compute_Dij <- dis_func()
+  
   #---- Generate survival time for each person ----
   #Individual hazard functions
   #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
