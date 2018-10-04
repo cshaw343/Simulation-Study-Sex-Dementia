@@ -103,7 +103,13 @@ sex_dem_sim <- function(){
   #---- Calculating death data for each individual ----
   #Compute death indicator for each interval
   #Change death indicators to 1 after death
-  deathij <- as.tibble((Sij < int_time)*1) %>% set_colnames(deathij_varnames)
+  deathij <- as.tibble((Sij < int_time)*1) %>% 
+    set_colnames(head(variable_names$deathij_varnames, -1))
+  
+  time_dead
+    mutate("time_dead" = min(which(. == 1)))
+  
+  
   for(i in 1:nrow(deathij)){
     death <- min(which(deathij[i, ] == 1))
     if(is.finite(death)){
