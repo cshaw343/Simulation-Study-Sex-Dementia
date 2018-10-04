@@ -96,7 +96,8 @@ sex_dem_sim <- function(){
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda)) %>% set_colnames(Sij_varnames)
+  Sij <- as.data.frame(survival(obs, lambda)) %>% 
+    set_colnames(variable_names$Sij_varnames)
   obs %<>% bind_cols(., Sij)
   
   #---- Calculating death data for each individual ----
