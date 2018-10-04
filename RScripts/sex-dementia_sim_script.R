@@ -81,8 +81,8 @@ sex_dem_sim <- function(){
     set_colnames(., head(variable_names$slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, slopeij)
   
-  #---- Calculating Dij for each individual ----
-  compute_Dij <- dis_func()
+  #---- Calculating FAij for each individual ----
+  compute_FAij <- func_ability()
   
   #---- Generate survival time for each person ----
   #Individual hazard functions
