@@ -4,7 +4,7 @@ survival <- function(obs, lambda){
   Sij <- vector(length = (length(visit_times) - 1))
   for(j in 1:length(Sij)){
     test_num = j - 1
-    US <- paste("U", test_num, test_num + 1, sep = "")
+    US <- paste("USij", test_num, test_num + 1, sep = "")
     agec <- paste("age", test_num, "_c50", sep = "")
     slope <- paste("slope", test_num, test_num + 1, sep = "")
     C <- paste("Ci", test_num, sep = "")
