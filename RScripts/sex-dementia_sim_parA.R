@@ -25,11 +25,11 @@ num_tests <- 10
 psex <- 0.49
 
 #---- Variances and correlations ----
-var0 <- 0.2   #Variance of random cognitive intercept
-var1 <- 0.005 #Variance of random cognitive slope
-cov <- 0.01   #Covariance of random intercept and random slope
-var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
-r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
+cij_var0 <- 0.2   #Variance of random cognitive intercept
+cij_var1 <- 0.005 #Variance of random cognitive slope
+cij_cov <- 0.01   #Covariance of random intercept and random slope
+cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
+cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
 #var4 <- 0.19  #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----

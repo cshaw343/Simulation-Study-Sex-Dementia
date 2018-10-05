@@ -49,7 +49,8 @@ sex_dem_sim <- function(){
   
   #---- Generating random terms for slope and intercept ----
   #Covariance matrix for random slope and intercept terms
-  slope_int_cov <- matrix(c(var0, cov, cov, var1), nrow = 2, byrow = TRUE)
+  slope_int_cov <- matrix(c(cij_var0, cij_cov, cij_cov, cij_var1), nrow = 2, 
+                          byrow = TRUE)
   
   #Generate random terms for each individual
   slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
@@ -61,8 +62,8 @@ sex_dem_sim <- function(){
   #Creating AR(1) correlation matrix
   num_visits = num_tests + 1
   powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
-  corr <- sqrt(var3)*(r1^powers)                            #Correlation matrix
-  S <- diag(rep(sqrt(var3)), nrow(corr))                    #Diagonal matrix of SDs
+  corr <- sqrt(cij_var3)*(cij_r1^powers)                            #Correlation matrix
+  S <- diag(rep(sqrt(cij_var3)), nrow(corr))                    #Diagonal matrix of SDs
   cov_mat <- S%*%corr%*%S                                   #Covariance matrix
   
   #Generating noise terms
