@@ -33,14 +33,15 @@ r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adju
 #var4 <- 0.19  #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
+#Cognitive function for person i at time j
 #Experimenting with knots placed at every age
-b00 <- 0      #Cognitive intercept for females
-b01 <- 0      #Effect of sex on cognitive intercept
-b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
-b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
+cij_b00 <- 0      #Cognitive intercept for females
+cij_b01 <- 0      #Effect of sex on cognitive intercept
+cij_b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
+cij_b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
 #First value is cognitive slopes, the remaining values are changes in cognitive slopes
-slopes <- c(rep(-0.01, 3), -0.015, -0.075, -0.0825, -0.155, -0.274, -1, 0)
+cij_slopes <- c(rep(-0.01, 3), -0.015, -0.075, -0.0825, -0.155, -0.274, -1, 0)
 
 #This is replaced by the vector of slopes above
 # b10a <- 0     #Cognitive slope for females age 50-70
@@ -49,9 +50,15 @@ slopes <- c(rep(-0.01, 3), -0.015, -0.075, -0.0825, -0.155, -0.274, -1, 0)
 # b10b <- -0.15 #Cognitive slope for females age 70-85
 # b10c <- -0.4  #Cognitive slope for females age 85+
 
-b11 <- 0      #Effect of sex on cognitive slope
-b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
-b13 <- -0.05  #Effect of U on cognitive slope
+cij_b11 <- 0      #Effect of sex on cognitive slope
+cij_b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
+cij_b13 <- -0.05  #Effect of U on cognitive slope
+
+#---- Parameters for Fij ----
+#Functional ability of person i at time j
+
+
+
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
