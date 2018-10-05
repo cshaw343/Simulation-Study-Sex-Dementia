@@ -10,16 +10,16 @@ cog_func <- function(slopes, obs){
     test_num = test_nums[j]
     eps <- paste("eps", test_num, sep = "")
     if(t <= 5){
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] +
-        b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
-        (slopes[1] + obs[, "z1i"] + b11*obs[, "sex"] +
-           b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
+      Cij[j] = cij_b00 + obs[, "z0i"] + cij_b01*obs[, "sex"] +
+        cij_b02*obs[, "age0_c50"] + cij_b03*obs[, "U"] + obs[, eps] +
+        (slopes[1] + obs[, "z1i"] + cij_b11*obs[, "sex"] +
+           cij_b12*obs[, "age0_c50"] + cij_b13*obs[, "U"])*t
     } else{
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] +
-        b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
+      Cij[j] = cij_b00 + obs[, "z0i"] + cij_b01*obs[, "sex"] +
+        cij_b02*obs[, "age0_c50"] + cij_b03*obs[, "U"] + obs[, eps] +
         sum(testXslope[1:(test_num - 1)]) +
-        (sum(slopes[1:test_num]) + obs[, "z1i"] + b11*obs[, "sex"] +
-           b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
+        (sum(slopes[1:test_num]) + obs[, "z1i"] + cij_b11*obs[, "sex"] +
+           cij_b12*obs[, "age0_c50"] + cij_b13*obs[, "U"])*t
     }
   }
   slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
