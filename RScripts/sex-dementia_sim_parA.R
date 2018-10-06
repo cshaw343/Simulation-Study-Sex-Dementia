@@ -30,14 +30,14 @@ cij_var1 <- 0.005 #Variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
-#var4 <- 0.19  #Variance of measurement error of Cij
+#var4 <- 0.19     #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
 #Cognitive function for person i at time j
 #Experimenting with knots placed at every age
 cij_b00 <- 0      #Cognitive intercept for females
 cij_b01 <- 0      #Effect of sex on cognitive intercept
-cij_b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect
+cij_b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 cij_b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
 #First value is cognitive slopes, the remaining values are changes in cognitive slopes
