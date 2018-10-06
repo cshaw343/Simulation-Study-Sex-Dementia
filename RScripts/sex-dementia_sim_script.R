@@ -62,8 +62,8 @@ sex_dem_sim <- function(){
   #Creating AR(1) correlation matrix
   num_visits = num_tests + 1
   powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
-  corr <- sqrt(cij_var3)*(cij_r1^powers)                            #Correlation matrix
-  S <- diag(rep(sqrt(cij_var3)), nrow(corr))                    #Diagonal matrix of SDs
+  corr <- sqrt(cij_var3)*(cij_r1^powers)                    #Correlation matrix
+  S <- diag(rep(sqrt(cij_var3)), nrow(corr))                #Diagonal matrix of SDs
   cov_mat <- S%*%corr%*%S                                   #Covariance matrix
   
   #Generating noise terms
@@ -82,8 +82,8 @@ sex_dem_sim <- function(){
     set_colnames(., head(variable_names$slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, slopeij)
   
-  #---- Calculating FAij for each individual ----
-  compute_FAij <- func_ability()
+  #---- Calculating Fij for each individual ----
+  compute_Fij <- func_ability()
   
   #---- Generate survival time for each person ----
   #Individual hazard functions
