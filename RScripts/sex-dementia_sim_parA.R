@@ -51,6 +51,7 @@ b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive interce
 #These are: b10a, b10b - b10a, b10c - b10b
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 cij_slopes <- c(0, -0.15, -0.25)
+cij_knots <- c(70, 85) #Specify which ages to place knots
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -59,19 +60,18 @@ b13 <- -0.05  #Effect of U on cognitive slope
 #---- Parameters for Fij ----
 #Functional ability of person i at time j
 #Go back to knots placed at 70 and 85
-a00 <- 0      #Functional ability intercept for females
-a01 <- 0      #Effect of sex on functional ability
-a02 <- -0.05  #Effect of age on functional ability intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
-a03 <- 0      #Effect of U (unmeasured/underlying variable) on functional ability intercept
+a00 <- 0      #Functional ability intercept 
+a01 <- -0.05  #Effect of age on functional ability intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
+a02 <- 0      #Effect of U (unmeasured/underlying variable) on functional ability intercept
 
 #First value is functional ability slope, the remaining values are changes in functional ability
 #These are: a10a, a10b - a10a, a10c - a10b
 #ie Functional ability slope for females age 50-70, change in functional ability slope for females age 70-85, etc...
 fij_slopes <- c(0, -0.15, -0.25)
+fij_knots <- c(70, 85) #Specify which ages to place knots
 
-a11 <- 0      #Effect of sex on functional ability slope
-a12 <- -0.005 #Effect of age on functional ability slope; Note: Everyone is the same age so there is no age effect
-a13 <- -0.05  #Effect of U on functional ability slope
+a11 <- -0.005 #Effect of age on functional ability slope; Note: Everyone is the same age so there is no age effect
+a12 <- 0  #Effect of U on functional ability slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
