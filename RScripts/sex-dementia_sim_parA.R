@@ -30,25 +30,27 @@ cij_var1 <- 0.005 #Variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
-#var4 <- 0.19     #Variance of measurement error of Cij
+#cij_var4 <- 0.19     #Variance of measurement error of Cij
+
+fij_var0 <- 0.2   #Variance of random functional ability intercept
+fij_var1 <- 0.005 #Variance of random functional ability slope
+fij_cov <- 0.01   #Covariance of random intercept and random slope
+fij_var3 <- 1     #Variance of noise for Fij (functional ability of person i at time j)
+fij_r1 <- 0.3     #Correlation between noise terms for Fij; this may need to be adjusted
+#fij_var4 <- 0.19     #Variance of measurement error of Fij
 
 #---- Parameters for Cij ----
 #Cognitive function for person i at time j
-#Experimenting with knots placed at every age
+#Go back to knots placed at 70 and 85
 b00 <- 0      #Cognitive intercept for females
 b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
-#First value is cognitive slopes, the remaining values are changes in cognitive slopes
-cij_slopes <- c(rep(-0.01, 3), -0.015, -0.075, -0.0825, -0.155, -0.274, -1, 0)
-
-#This is replaced by the vector of slopes above
-# b10a <- 0     #Cognitive slope for females age 50-70
-# b10delta_b <- 0   #Change in cognitive slope for females age 70-85
-# b10delta_c <- 0   #Change in cognitive slope for females age 85+
-# b10b <- -0.15 #Cognitive slope for females age 70-85
-# b10c <- -0.4  #Cognitive slope for females age 85+
+#First value is cognitive slope, the remaining values are changes in cognitive slopes
+#These are: b10a, b10b - b10a, b10c - b10b
+#ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
+cij_slopes <- c(0, -0.15, -0.25)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -56,9 +58,20 @@ b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Fij ----
 #Functional ability of person i at time j
+#Go back to knots placed at 70 and 85
+a00 <- 0      #Functional ability intercept for females
+a01 <- 0      #Effect of sex on functional ability
+a02 <- -0.05  #Effect of age on functional ability intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
+a03 <- 0      #Effect of U (unmeasured/underlying variable) on functional ability intercept
 
+#First value is functional ability slope, the remaining values are changes in functional ability
+#These are: a10a, a10b - a10a, a10c - a10b
+#ie Functional ability slope for females age 50-70, change in functional ability slope for females age 70-85, etc...
+fij_slopes <- c(0, -0.15, -0.25)
 
-
+a11 <- 0      #Effect of sex on functional ability slope
+a12 <- -0.005 #Effect of age on functional ability slope; Note: Everyone is the same age so there is no age effect
+a13 <- -0.05  #Effect of U on functional ability slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
