@@ -1,9 +1,12 @@
 #---- Model for Cognitive Function ----
-cog_func <- function(slopes, obs){
-  knots = visit_times
-  mid_visits <- knots[c(-1, -length(knots))]
+cog_func <- function(knots_ages, slopes, obs){
+  extend_slopes <- c(slopes[1], rep(0, num_tests - 1))
+  for(k in 1:length(knots_ages)){
+    extend_slopes[which(ages[1, ] == knots_ages[k])] <- slopes[k + 1]
+  }
+  mid_visits <- visit_times[c(-1, -length(visit_times))]
   test_nums = seq(from = 0, to = num_tests, by = 1)
-  testXslope = (-1)*slopes[-1]*mid_visits
+  testXslope = (-1)*extend_slopes[-1]*mid_visits
   Cij <- vector(length = length(visit_times))
   for(j in 1:length(Cij)){
     t = knots[j]
@@ -12,13 +15,13 @@ cog_func <- function(slopes, obs){
     if(t <= 5){
       Cij[j] = cij_b00 + obs[, "z0i"] + cij_b01*obs[, "sex"] +
         cij_b02*obs[, "age0_c50"] + cij_b03*obs[, "U"] + obs[, eps] +
-        (slopes[1] + obs[, "z1i"] + cij_b11*obs[, "sex"] +
+        (extend_slopes[1] + obs[, "z1i"] + cij_b11*obs[, "sex"] +
            cij_b12*obs[, "age0_c50"] + cij_b13*obs[, "U"])*t
     } else{
       Cij[j] = cij_b00 + obs[, "z0i"] + cij_b01*obs[, "sex"] +
         cij_b02*obs[, "age0_c50"] + cij_b03*obs[, "U"] + obs[, eps] +
         sum(testXslope[1:(test_num - 1)]) +
-        (sum(slopes[1:test_num]) + obs[, "z1i"] + cij_b11*obs[, "sex"] +
+        (sum(extend_slopes[1:test_num]) + obs[, "z1i"] + cij_b11*obs[, "sex"] +
            cij_b12*obs[, "age0_c50"] + cij_b13*obs[, "U"])*t
     }
   }
