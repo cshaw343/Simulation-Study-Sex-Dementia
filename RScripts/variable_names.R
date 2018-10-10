@@ -17,7 +17,7 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "Ci" = rep("Ci", num_tests + 1), 
                          "mean" = rep("mean", num_tests + 1), 
                          "slope" = rep("slope", num_tests + 1), 
-                         "USij" = rep("USij", num_tests + 1), 
+                         "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
                          "survtime" = rep("survtime", num_tests + 1)) %>% 
   #Interval timepoints
@@ -40,7 +40,7 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("slopeij_varnames", c(slope, interval_times), sep = "", 
         remove = FALSE) %>%
   #Uniform survival noise labels
-  unite("USij_varnames", c(USij, interval_times), sep = "", remove = FALSE) %>%
+  unite("rij_varnames", c(rij, interval_times), sep = "", remove = FALSE) %>%
   #Death indicator labels
   unite("deathij_varnames", c(death, interval_times), sep = "", 
         remove = FALSE) %>%
