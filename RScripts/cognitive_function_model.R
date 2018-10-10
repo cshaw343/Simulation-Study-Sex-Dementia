@@ -3,7 +3,7 @@ cog_func <- function(knots_ages, slopes, obs){
   extend_slopes <- c(slopes[1], rep(0, num_tests - 1))
   ages <- visit_times + 50
   for(k in 1:length(knots_ages)){
-    extend_slopes[which(ages[1, ] == knots_ages[k])] <- slopes[k + 1]
+    extend_slopes[which(ages == knots_ages[k])] <- slopes[k + 1]
   }
   mid_visits <- visit_times[c(-1, -length(visit_times))]
   test_nums = seq(from = 0, to = num_tests, by = 1)
