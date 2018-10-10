@@ -116,8 +116,9 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
     theme_minimal()
 
   #Saving plot output
-  ggsave(filename = paste("mean_Cij_samp_plot", str_extract(par_file, ".\\."), 
-                          "jpeg", sep = ""), width = 10, height = 7, 
+  lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
+  ggsave(filename = paste("mean_Cij_samp_plot_parA_", lgd, ".jpeg", 
+                          sep = ""), width = 10, height = 7, 
          plot = Cij_plot_samp)
 
   ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), 
