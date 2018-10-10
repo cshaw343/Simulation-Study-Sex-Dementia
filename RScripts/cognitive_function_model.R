@@ -1,6 +1,7 @@
 #---- Model for Cognitive Function ----
 cog_func <- function(knots_ages, slopes, obs){
   extend_slopes <- c(slopes[1], rep(0, num_tests - 1))
+  ages <- visit_times + 50
   for(k in 1:length(knots_ages)){
     extend_slopes[which(ages[1, ] == knots_ages[k])] <- slopes[k + 1]
   }
@@ -8,11 +9,11 @@ cog_func <- function(knots_ages, slopes, obs){
   test_nums = seq(from = 0, to = num_tests, by = 1)
   testXslope = (-1)*extend_slopes[-1]*mid_visits
   Cij <- vector(length = length(visit_times))
-  for(j in 1:length(Cij)){
-    t = knots[j]
+  for(j in 1:length(visit_times)){
+    t = visit_times[j]
     test_num = test_nums[j]
     eps <- paste("eps", test_num, sep = "")
-    if(t <= 5){
+    if(ages[j] <= knots_ages[1]){
       Cij[j] = cij_b00 + obs[, "z0i"] + cij_b01*obs[, "sex"] +
         cij_b02*obs[, "age0_c50"] + cij_b03*obs[, "U"] + obs[, eps] +
         (extend_slopes[1] + obs[, "z1i"] + cij_b11*obs[, "sex"] +
