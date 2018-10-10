@@ -74,7 +74,7 @@ sex_dem_sim <- function(){
   
   #---- Calculating Cij for each individual ----
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(slopes, obs)
+  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
     set_colnames(., variable_names$Cij_varnames)
   slopeij <- as.data.frame(compute_Cij$slopes) %>% 
