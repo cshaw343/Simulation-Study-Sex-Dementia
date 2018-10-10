@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of observations ----
-num_obs <- 10
+num_obs <- 100000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -67,7 +67,7 @@ a02 <- 0      #Effect of U (unmeasured/underlying variable) on functional abilit
 #First value is functional ability slope, the remaining values are changes in functional ability
 #These are: a10a, a10b - a10a, a10c - a10b
 #ie Functional ability slope for females age 50-70, change in functional ability slope for females age 70-85, etc...
-fij_slopes <- c(0, -0.15, -0.25)
+fij_slopes <- c(0, -0.05, -0.15)
 fij_knots <- c(70, 85) #Specify which ages to place knots
 
 a11 <- -0.005 #Effect of age on functional ability slope; Note: Everyone is the same age so there is no age effect
