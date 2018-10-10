@@ -48,46 +48,30 @@ corr_Cij <- sd_mat_inv%*%cov_Cij%*%sd_mat_inv
 means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
   #---- Creating plot data ----
-  #Defining mean Cij plot data for females
-  female_meanCij <- mean_Cij_check %>% filter(sex == 1) %>% 
-    dplyr::select(-sex) %>% t() %>% as.data.frame() %>% 
-    mutate("female" = V1) %>% dplyr::select(-V1) %>% 
-    cbind(., "t" = visit_times) %>% melt(., id.vars = "t")
-
-  #Defining mean Cij plot data for males
-  male_meanCij <- mean_Cij_check %>% filter(sex == 0) %>% 
-    dplyr::select(-sex) %>% t() %>% as.data.frame() %>% mutate("male" = V1) %>% 
-    dplyr::select(-V1) %>% cbind(., "t" = visit_times) %>% 
-    melt(., id.vars = "t")
-
+  Cij_check <- obs %>% dplyr::select(sex, contains("Ci"))
+  
+  #Getting mean Cij by sex
+  female_meanCij<- Cij_check %>% filter(sex == 0) %>% colMeans()
+  male_mean_Cij <- Cij_check %>% filter(sex == 1) %>% colMeans()
+  
   #Checking the mean slopes by sex
-  male_slopes <- data_frame("b0a" = (male_meanCij[5, "value"] - 
-                                       male_meanCij[1, "value"])/
-                              (male_meanCij[5, "t"] - male_meanCij[1, "t"]), 
-                            "b0b" = (male_meanCij[8, "value"] - 
-                                       male_meanCij[5, "value"])/
-                              (male_meanCij[8, "t"] - male_meanCij[5, "t"]), 
-                            "b0c" = (male_meanCij[11, "value"] - 
-                                       male_meanCij[8, "value"])/
-                              (male_meanCij[11, "t"] - male_meanCij[8, "t"]))
-  female_slopes <- data_frame("b0a" = (female_meanCij[5, "value"] - 
-                                       female_meanCij[1, "value"])/
-                              (female_meanCij[5, "t"] - female_meanCij[1, "t"]), 
-                            "b0b" = (female_meanCij[8, "value"] - 
-                                       female_meanCij[5, "value"])/
-                              (female_meanCij[8, "t"] - female_meanCij[5, "t"]), 
-                            "b0c" = (female_meanCij[11, "value"] - 
-                                       female_meanCij[8, "value"])/
-                              (female_meanCij[11, "t"] - 
-                                 female_meanCij[8, "t"]))
+  slopes_check <- obs %>% dplyr::select(sex, contains("slope"))
+  female_slopes_check <- slopes_check %>% filter(sex == 0) %>% colMeans()
+  male_slopes_check <- slopes_check %>% filter(sex == 1) %>% colMeans()
   
-  #Combine all plot data into one dataframe (includes random sample of Cij)
-  
-  samp_Cij <- sample_n(obs_check, 10) %>% 
-    dplyr::select(dput(Cij_varnames[-1])) %>% t() %>%
+  female_mean_plot <- tibble("t" = visit_times, "variable" = "female", 
+                             "value" = female_meanCij[-1])
+    
+  male_mean_plot <- tibble("t" = visit_times, "variable" = "male", 
+                           "value" = male_mean_Cij[-1])
+    
+    
+  #Create all plot data (includes random sample of Cij)
+  samp_Cij <- sample_n(mean_Cij_check, 10) %>% 
+    dplyr::select(-sex) %>% t() %>%
     cbind(., "t" = visit_times) %>% as.data.frame() %>% 
-    melt(., id.vars = "t") %>% rbind(., female_meanCij) %>% 
-    rbind(., male_meanCij)
+    melt(., id.vars = "t") %>% rbind(., female_mean_plot) %>% 
+    rbind(., male_mean_plot)
 
   #---- Plot a sample of Cij ----
   #Creating a plot with random sample in the background
@@ -99,7 +83,7 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
               aes(color = variable), size = 1.25) + 
     geom_line(data = subset(samp_Cij, variable == "male"), 
               aes(color = variable), size = 1.25, alpha = 0.6) + 
-    labs(y = "Cognitive function", 
+    labs(y = "Cognitive Function", 
          x = "Visit Time", 
          color = "Mean Cognitive \n Function") + 
     theme_minimal()
@@ -117,12 +101,12 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
   #Saving plot output
   lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
-  ggsave(filename = paste("mean_Cij_samp_plot_parA_", lgd, ".jpeg", 
+  ggsave(filename = paste("Plots/mean_Cij_samp_plot_parA_", lgd, ".jpeg", 
                           sep = ""), width = 10, height = 7, 
          plot = Cij_plot_samp)
 
-  ggsave(filename = paste("mean_Cij_plot", str_extract(par_file, ".\\."), 
-                          "jpeg", sep = ""), width = 10, height = 7, 
+  ggsave(filename = paste("Plots/mean_Cij_plot_parA_", lgd, ".jpeg", sep = ""), 
+         width = 10, height = 7, 
          plot = Cij_plot)
 
 #---- Comparing with life-table data ----
