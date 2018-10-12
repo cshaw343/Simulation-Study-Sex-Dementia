@@ -5,7 +5,7 @@ survival <- function(obs, lambda){
   for(j in 1:length(Sij)){
     r <- variable_names$rij_varnames[j]
     agec <- variable_names$agec_varnames[j]
-    slope <- variable_names$slopeij_varnames[j]
+    cij_slope <- variable_names$cij_slopeij_varnames[j]
     C <- variable_names$Cij_varnames[j]
     Sij[j] = -log(obs[r])/
       (lambda[j]*exp(g1[j]*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
