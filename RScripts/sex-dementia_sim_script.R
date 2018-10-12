@@ -113,7 +113,7 @@ sex_dem_sim <- function(){
   #Calculating Fij for each individual
   #Store Fij values and slope values for each assessment
   compute_Fij <- func_ability(fij_knots, fij_slopes, obs)
-  Fij <- as.data.frame(compute_Fij$Fij) %>% 
+  Fij <- compute_Fij$Fij %>% as.data.frame() %>% 
     set_colnames(., variable_names$Fij_varnames)
   fij_slopeij <- as.data.frame(compute_Fij$slopes) %>% 
     #remove the last variable name because there are only 10 intervals

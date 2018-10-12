@@ -16,6 +16,7 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "delta" = rep("delta", num_tests + 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
+                         "Fi" = rep("Fi", num_tests + 1),
                          "mean" = rep("mean", num_tests + 1), 
                          "cij_slope" = rep("cij_slope", num_tests + 1),
                          "fij_slope" = rep("fij_slope", num_tests + 1),
@@ -36,6 +37,8 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("dem_varnames", c(dem, timepoints), sep = "", remove = FALSE) %>% 
   #Cij labels
   unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
+  #Fij labels
+  unite("Fij_varnames", c(Fi, timepoints), sep = "", remove = FALSE) %>%
   #Mean Cij labels
   unite("mean_Cij_varnames", c(mean, Cij_varnames), sep = "", 
         remove = FALSE) %>%
