@@ -20,7 +20,7 @@ func_ability <- function(knots_ages, slopes, obs){
            a12*obs[, "U"])*t
     } else{
       Fij[j] = a00 + obs[, "w0i"] + a01*obs[, "age0_c50"] + 
-        a02*obs[, "U"] + obs[, eps] +
+        a02*obs[, "U"] + obs[, delta] +
         sum(testXslope[1:(test_num - 1)]) +
         (sum(extend_slopes[1:test_num]) + obs[, "w1i"] + 
            a11*obs[, "age0_c50"] + a12*obs[, "U"])*t
