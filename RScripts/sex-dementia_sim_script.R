@@ -12,6 +12,7 @@ set.seed(10789)
 
 #---- Source files ----
 source("RScripts/cognitive_function_model.R")
+sourse("RScripts/functional_ability_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 
@@ -120,17 +121,14 @@ sex_dem_sim <- function(){
   obs %<>% bind_cols(., Fij, fij_slopeij)
     
   #---- Generate survival time for each person ----
-  #Individual hazard functions
-  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
-  #g5*slopeij + g6Cij)
-  #See Additional notes in README file
+  #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  USij <- as_tibble(replicate(num_tests, 
+  rij <- as_tibble(replicate(num_tests, 
                               runif(num_obs, min = 0, max = 1))) %>%
     #remove the last variable name because there are only 10 intervals
-    set_colnames(head(variable_names$USij_varnames, -1))
-  obs %<>% bind_cols(., USij)
+    set_colnames(head(variable_names$rij_varnames, -1))
+  obs %<>% bind_cols(., rij)
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
