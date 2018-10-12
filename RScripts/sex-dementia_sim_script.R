@@ -99,29 +99,26 @@ sex_dem_sim <- function(){
   #Creating AR(1) correlation matrix
   num_visits = num_tests + 1
   powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
-  corr <- sqrt(cij_var3)*(cij_r1^powers)                    #Correlation matrix
-  S <- diag(rep(sqrt(cij_var3)), nrow(corr))                #Diagonal matrix of SDs
-  cov_mat <- S%*%corr%*%S                                   #Covariance matrix
+  corr <- sqrt(fij_var3)*(fij_r1^powers)                    #Correlation matrix
+  S <- diag(rep(sqrt(fij_var3)), nrow(corr))                #Diagonal matrix of SDs
+  fij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
-  eps <- as_tibble(mvrnorm(n = num_obs, 
-                           mu = rep(0, num_visits), Sigma = cov_mat)) %>%
-    set_colnames(., variable_names$eps_varnames)
-  obs %<>% bind_cols(., eps)
+  delta <- as_tibble(mvrnorm(n = num_obs, 
+                             mu = rep(0, num_visits), Sigma = fij_cov_mat)) %>%
+    set_colnames(., variable_names$delta_varnames)
+  obs %<>% bind_cols(., delta)
   
-  #Calculating Cij for each individual
-  #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
-  Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., variable_names$Cij_varnames)
-  slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(., head(variable_names$slopeij_varnames, -1)) 
-  obs %<>% bind_cols(., Cij, slopeij)
-    
-    #Calculating Fij for each individual ----
+  #Calculating Fij for each individual
+  #Store Fij values and slope values for each assessment
   compute_Fij <- func_ability(fij_knots, fij_slopes, obs)
-  
+  Fij <- as.data.frame(compute_Fij$Fij) %>% 
+    set_colnames(., variable_names$Fij_varnames)
+  fij_slopeij <- as.data.frame(compute_Fij$slopes) %>% 
+    #remove the last variable name because there are only 10 intervals
+    set_colnames(., head(variable_names$fij_slopeij_varnames, -1)) 
+  obs %<>% bind_cols(., Fij, fij_slopeij)
+    
   #---- Generate survival time for each person ----
   #Individual hazard functions
   #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
