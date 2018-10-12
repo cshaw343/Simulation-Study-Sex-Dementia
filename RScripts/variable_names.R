@@ -12,7 +12,8 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                                                    by = 1),
                          "c50" = rep("c50", num_tests + 1),
                          "age" = rep("age", num_tests + 1), 
-                         "eps" = rep("eps", num_tests + 1), 
+                         "eps" = rep("eps", num_tests + 1),
+                         "delta" = rep("delta", num_tests + 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
                          "mean" = rep("mean", num_tests + 1), 
@@ -28,8 +29,9 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("age_varnames", c(age, timepoints), sep = "", remove = FALSE) %>% 
   #Centered age labels
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
-  #Epsilon labels
+  #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
+  unite("delta_varnames", c(delta, timepoints), sep = "", remove = FALSE) %>% 
   #Dementia labels
   unite("dem_varnames", c(dem, timepoints), sep = "", remove = FALSE) %>% 
   #Cij labels
