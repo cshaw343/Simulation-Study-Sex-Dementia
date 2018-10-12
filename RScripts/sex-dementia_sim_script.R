@@ -12,7 +12,7 @@ set.seed(10789)
 
 #---- Source files ----
 source("RScripts/cognitive_function_model.R")
-sourse("RScripts/functional_ability_model.R")
+source("RScripts/functional_ability_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 
