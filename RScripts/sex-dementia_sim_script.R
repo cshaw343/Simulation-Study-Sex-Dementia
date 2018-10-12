@@ -76,24 +76,24 @@ sex_dem_sim <- function(){
   compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
     set_colnames(., variable_names$Cij_varnames)
-  slopeij <- as.data.frame(compute_Cij$slopes) %>% 
+  cij_slopeij <- as.data.frame(compute_Cij$slopes) %>% 
     #remove the last variable name because there are only 10 intervals
-    set_colnames(., head(variable_names$slopeij_varnames, -1)) 
-  obs %<>% bind_cols(., Cij, slopeij)
+    set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
+  obs %<>% bind_cols(., Cij, cij_slopeij)
   
   #---- Generating "true" functional ability Fij ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #Generating random terms for slope and intercept
   #Covariance matrix for random slope and intercept terms
-  slope_int_cov <- matrix(c(cij_var0, cij_cov, cij_cov, cij_var1), nrow = 2, 
-                          byrow = TRUE)
+  fij_slope_int_cov <- matrix(c(fij_var0, fij_cov, fij_cov, fij_var1), nrow = 2, 
+                              byrow = TRUE)
   
   #Generate random terms for each individual
-  slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                       Sigma = slope_int_cov)) %>% 
-    set_colnames(., c("z0i", "z1i"))
-  obs %<>% bind_cols(., slope_int_noise)
+  fij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+                                           Sigma = fij_slope_int_cov)) %>% 
+    set_colnames(., c("w0i", "w1i"))
+  obs %<>% bind_cols(., fij_slope_int_noise)
   
   #Generating noise term (unexplained variance in Cij) for each visit
   #Creating AR(1) correlation matrix
