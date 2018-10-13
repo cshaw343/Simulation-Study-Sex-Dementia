@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of observations ----
-num_obs <- 100000
+num_obs <- 50
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -82,6 +82,8 @@ g3 <- 0       #Effect of U on log hazard of death
 g4 <- 0       #Interaction effect of sex and age on log hazard of death
 g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g6 <- 0       #Effect of cognitive function at time j on log hazard of death
+g7 <- 0       #Effect of functional ability slope at time j on log hazard of death
+g8 <- 0       #Effect of functional ability at time j on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search.R script
