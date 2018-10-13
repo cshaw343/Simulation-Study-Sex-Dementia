@@ -9,7 +9,7 @@ survival <- function(obs, lambda){
     C <- variable_names$Cij_varnames[j]
     Sij[j] = -log(obs[r])/
       (lambda[j]*exp(g1[j]*obs["sex"] + g2*obs[agec] + g3*obs["U"] + 
-                       g4*obs["sex"]*obs[agec] + g5*obs[slope] + 
+                       g4*obs["sex"]*obs[agec] + g5*obs[cij_slope] + 
                        g6*obs[C]))
   }
   return("Sij" = Sij)
