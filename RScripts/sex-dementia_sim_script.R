@@ -165,11 +165,13 @@ sex_dem_sim <- function(){
   
   #---- Censor Cij and Fij based on death data ----
   for(i in 1:num_obs){
-    death_int <- (min(which(deathij[i, ] == 1)))
-    Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
-    Fs <- c(variable_names$Fij_varnames[(death_int + 1):nrow(variable_names)])
-    obs[i, Cs] <- NA
-    obs[i, Fs] <- NA
+    if(obs$study_death == 1){
+      death_int <- (min(which(deathij[i, ] == 1)))
+      Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
+      Fs <- c(variable_names$Fij_varnames[(death_int + 1):nrow(variable_names)])
+      obs[i, Cs] <- NA
+      obs[i, Fs] <- NA
+    }
   }
   
   # #---- Create a competing risk outcome ----
