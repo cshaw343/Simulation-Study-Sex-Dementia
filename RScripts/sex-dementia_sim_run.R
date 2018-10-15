@@ -1,15 +1,30 @@
+#---- Package Loading and Options ----
+if (!require("pacman")) 
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+
+p_load("parallel")
+
 #---- Source Files ----
 source("RScripts/sex-dementia_sim_parA.R")    #The parameter file
 source("RScripts/variable_names.R")           #Creates all the variable names
 source("RScripts/sex-dementia_sim_script.R")  #The simulation script
 source("RScripts/misc_custom_functions.R")    #Other functions needed
 
-#---- Running the simulation----
+#---- Running the simulation in parallel----
+use_cores <- detectCores() - 1                 #Use one less than number of available cores
+cl <- makeCluster(use_cores, type = "FORK")    #Make a cluster from your cores 
+                                               #"FORKING" environment only works on Mac
+
 #Storing the results of the simulation
 start <- proc.time()  #This times the code
 runs = 100
-sim_results <- replicate(runs, sex_dem_sim()) 
+sim_results <- parSapply(cl, 1:runs, sex_dem_sim)
+#stop the cluster
+stopCluster(cl)
 proc.time() - start
+
+#---- Running simulation on one core ----
+sim_results <- replicate(100, sex_dem_sim())
 
 #---- Converting results to usable format ----
 #---- Look at survival data ----
