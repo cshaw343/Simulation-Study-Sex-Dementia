@@ -3,6 +3,7 @@
 # Source: National Vital Statistics Reports, Vol. 66, No. 4, 
 # August 14, 2017 (pg 48-49)
 # Birth cohort:  1919 - 1921
+# **Used data with race aggregated**
 #***************************************************************
 
 #---- Package Loading and Options ----
