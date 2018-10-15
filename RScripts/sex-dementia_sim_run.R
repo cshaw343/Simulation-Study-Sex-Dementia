@@ -27,8 +27,15 @@ proc.time() - start
 sim_results <- replicate(100, sex_dem_sim())
 
 #---- Converting results to usable format ----
-#---- Look at survival data ----
-test_life_table <- 
+results_mat <- matrix(nrow = runs*num_obs, ncol = nrow(sim_results))
+for(r in 1:nrow(sim_results)){
+  results_mat[, r] <- unlist(sim_results[r, ])
+}
+
+results_mat %<>% as.data.frame() %>% set_colnames(dimnames(sim_results)[[1]])
+
+  #---- Look at survival data ----
+  test_life_table <- 
   sim_results[c("sex", head(variable_names$deathij_varnames,-1)), ] 
 
 results_mat <- matrix(nrow = runs*num_obs, ncol = nrow(test_life_table))
