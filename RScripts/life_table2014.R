@@ -11,15 +11,8 @@ if (!require("pacman"))
 
 p_load("tidyverse", "ggplot2")
 
-#---- Conditional Probabilities Function ----
-cond_prob <- function(x){
-  probs <- vector(length = length(x))
-  for(i in 2:length(probs)){
-    probs[i] = x[i]/x[i - 1]
-  }
-  probs[1] <- 1
-  return(probs)
-}
+#---- Source Files ----
+source("RScripts/misc_custom_functions.R")
 
 #---- Hazard Function ----
 haz <- function(age, logprobs){
@@ -29,7 +22,6 @@ haz <- function(age, logprobs){
   }
   return(HZ)
 }
-
 
 #---- Life Table Data ----
 #"Survivors" represents number surviving out of 100,000 born alive
@@ -92,3 +84,5 @@ hazard_plot<- ggplot(haz_plot_data, aes(Age, value), color = variable) +
 #Saving plot output
 ggsave(filename = "hazard_plot_2014life.jpeg", width = 10, height = 7, 
        plot = hazard_plot)
+
+
