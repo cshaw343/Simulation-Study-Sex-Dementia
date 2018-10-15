@@ -1,9 +1,10 @@
-#***************************************************************
+#*******************************************************************************
 # Dementia Incidence Rates (2000 - 2013) per 1000 person years
-# Source: 
+# Source: Supplementary Table 2, Inequalities in dementia incidence between six 
+# racial and ethnic groups over 14 years (Mayeda et al, 2016)
 # 
 # Life Table birth cohort:  1919 - 1921
-#***************************************************************
+#*******************************************************************************
 
 #The original source has incidence rates by race, age, and sex.
 #We will start with calibrating to Whites as a first attempt
