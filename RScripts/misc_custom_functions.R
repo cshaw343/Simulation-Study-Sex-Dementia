@@ -7,3 +7,13 @@ cond_prob <- function(x){
   probs[1] <- 1
   return(probs)
 }
+
+#---- Recursive Subtraction Function ----
+sub_recurse <- function(x){
+  diffs <- vector(length = length(x))
+  for(i in 2:length(diffs)){
+    diffs[i] = x[i] - x[i - 1]
+  }
+  diffs[1] <- x[1]
+  return(diffs)
+}
