@@ -40,4 +40,12 @@ source("RScripts/misc_custom_functions.R")
     tibble("age" = seq(70, 100, by = 5), 
            "cum_risk" = c(1.3, 4.7, 10.6, 19.7, 29.8, 37, 40)) %>%
     mutate("risk" = sub_recurse(cum_risk))
+  
+  dem_risk <- cum_risk_whites$risk %>% t()
+  
+  risk_data_labels <- tibble("age" = rep("age", ncol(dem_risk)), 
+                             "ages" = seq(70, 100, by = 5)) %>% 
+    unite("risk_labels", sep = "")
+  
+  colnames(dem_risk) <- risk_data_labels$risk_labels
 
