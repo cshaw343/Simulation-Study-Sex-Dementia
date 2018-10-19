@@ -38,21 +38,35 @@ find_betas <- function(obs, dem_risk){
     Cij_nomiss <- Cij[-which(is.na(Cij))]
     Fij_nomiss <- Fij[-which(is.na(Cij))]
     
-    many_opts <- replicate(10, 
-                           {optim(par = rep(-0.05, 5), 
-                                  fn = dem_diag, 
-                                  sex_i = sex_i_nomiss, Cij = Cij_nomiss, 
-                                  Fij = Fij_nomiss, 
-                                  risk_match = dem_risk[[i]], 
-                                  upper = rep(0, 5), 
-                                  lower = rep(-1, 5))})
+    if(i == 1){
+      many_opts <- replicate(100, 
+                             {optim(par = rep(-0.05, 5), 
+                                    fn = dem_diag, 
+                                    sex_i = sex_i_nomiss, Cij = Cij_nomiss, 
+                                    Fij = Fij_nomiss, 
+                                    risk_match = dem_risk[[i]], 
+                                    upper = rep(0, 5), 
+                                    lower = rep(-1, 5))})
+    } else {
+      many_opts <- replicate(100, 
+                             {optim(par = beta_results[(i - 1), ], 
+                                    fn = dem_diag, 
+                                    sex_i = sex_i_nomiss, Cij = Cij_nomiss, 
+                                    Fij = Fij_nomiss, 
+                                    risk_match = dem_risk[[i]], 
+                                    upper = rep(0, 5), 
+                                    lower = rep(-1, 5))})
+    }
+    
     
     mean_diff <- many_opts["value", ] %>% unlist() %>% mean()
     mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, byrow = TRUE) %>%
       colMeans()
     
     beta_results[i, ] <- c(mean_betas, mean_diff)
-    
     start = start + 1
   }
+  return(beta_results)
 }
+
+fingers_crossed <- find_betas(results_mat, dem_risk = dem_risk)
