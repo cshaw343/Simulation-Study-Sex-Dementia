@@ -37,9 +37,8 @@ find_betas <- function(obs, dem_risk){
     mutate("dem_case" = rep(0, nrow(obs)))
   
   for(i in 1:nrow(beta_results)){
-    target_measurement <- variable_names$Cij_varnames[start + 1] %>% noquote()
-    data <- data[-which(is.na(data[, eval(target_measurement)])), ] %>% 
-      filter(dem_case == 0)
+    #target_measurement <- variable_names$Cij_varnames[start + 1] %>% noquote()
+    data %<>% filter(dem_case == 0)
     
     sex_i <- data$sex
     Cij <- data[, variable_names$Cij_varnames[start + 1]] 
@@ -48,12 +47,16 @@ find_betas <- function(obs, dem_risk){
     # if(i == 1)
     {
       many_opts <- replicate(10, 
-                             {optim(par = rep(-0.05, 5), 
+                             {optim(par = rep(-13, 5), 
                                     fn = dem_diag, 
                                     sex_i = sex_i, Cij = Cij, Fij = Fij, 
                                     risk_match = dem_risk[[i]], 
                                     upper = rep(0, 5), 
-                                    lower = rep(-1, 5))})
+                                    lower = rep(-15, 5))})
+      
+      mean_diff <- many_opts["value", ] %>% unlist() %>% mean()
+      mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, byrow = TRUE) %>%
+        colMeans()
     # } else {
     #   many_opts <- replicate(10, 
     #                          {optim(par = rep(-4.5, 5), 
@@ -64,9 +67,6 @@ find_betas <- function(obs, dem_risk){
     #                                 upper = rep(-4, 5), 
     #                                 lower = rep(-5, 5))})
     }
-    mean_diff <- many_opts["value", ] %>% unlist() %>% mean()
-    mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, byrow = TRUE) %>%
-      colMeans()
     
     beta_results[i, ] <- c(mean_betas, mean_diff)
     
