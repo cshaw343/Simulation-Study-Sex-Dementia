@@ -8,11 +8,11 @@ p_load("ggplot2", "tidyverse")
 options(warn = -1)
 
 #---- Specify source file ----
-par_file <- "sex-dementia_sim_parA.R" #This syntax is used for file naming later
+par_file <- "RScripts/sex-dementia_sim_parA.R" #This syntax is used for file naming later
 source(par_file)
-source("sex-dementia_sim_script.R")
-source("life_table2014.R")
-source("dementia_incidence2000-2013.R")
+source("RScripts/sex-dementia_sim_script.R")
+source("RScripts/life_table2014.R")
+source("RScripts/dementia_incidence2000-2013.R")
 
 #---- Checking one simulated dataset----
 #Storing the results of the simulation
