@@ -10,17 +10,17 @@ source("RScripts/variable_names.R")           #Creates all the variable names
 source("RScripts/sex-dementia_sim_script.R")  #The simulation script
 source("RScripts/misc_custom_functions.R")    #Other functions needed
 
-#---- Running the simulation in parallel----
-use_cores <- detectCores() - 1                 #Use one less than number of available cores
-cl <- makeCluster(use_cores, type = "FORK")    #Make a cluster from your cores 
-                                               #"FORKING" environment only works on Mac
-runs = 100
-#Storing the results of the simulation
-start <- proc.time()  #This times the code
-sim_results <- parSapply(cl, 1:runs, sex_dem_sim)
-#stop the cluster
-stopCluster(cl)
-proc.time() - start
+# #---- Running the simulation in parallel----
+# use_cores <- detectCores() - 1                 #Use one less than number of available cores
+# cl <- makeCluster(use_cores, type = "FORK")    #Make a cluster from your cores 
+#                                                #"FORKING" environment only works on Mac
+# runs = 100
+# #Storing the results of the simulation
+# start <- proc.time()  #This times the code
+# sim_results <- parSapply(cl, 1:runs, sex_dem_sim)
+# #stop the cluster
+# stopCluster(cl)
+# proc.time() - start
 
 #---- Running simulation on one core ----
 runs = 100
