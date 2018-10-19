@@ -163,16 +163,17 @@ sex_dem_sim <- function(){
   obs %<>% mutate("survtime" = survtime, 
                   "age_death" = age0 + survtime) #Age at death
   
-  #---- Censor Cij and Fij based on death data ----
-  for(i in 1:num_obs){
-    if(obs[i, "study_death"] == 1){
-      death_int <- (min(which(deathij[i, ] == 1)))
-      Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
-      Fs <- c(variable_names$Fij_varnames[(death_int + 1):nrow(variable_names)])
-      obs[i, Cs] <- NA
-      obs[i, Fs] <- NA
-    }
-  }
+  #Comment out while searching for parameters for dem_diagnosis models
+  # #---- Censor Cij and Fij based on death data ----
+  # for(i in 1:num_obs){
+  #   if(obs[i, "study_death"] == 1){
+  #     death_int <- (min(which(deathij[i, ] == 1)))
+  #     Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
+  #     Fs <- c(variable_names$Fij_varnames[(death_int + 1):nrow(variable_names)])
+  #     obs[i, Cs] <- NA
+  #     obs[i, Fs] <- NA
+  #   }
+  # }
   
   # #---- Create a competing risk outcome ----
   # demij <- obs %>% dplyr::select(Cij_varnames) %>% 
