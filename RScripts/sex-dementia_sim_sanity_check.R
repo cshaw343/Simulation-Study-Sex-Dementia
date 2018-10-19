@@ -13,6 +13,7 @@ source(par_file)
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/life_table2014.R")
 source("RScripts/dementia_incidence2000-2013.R")
+source("RScripts/sex-dementia_sim_run.R")
 
 #---- Checking one simulated dataset----
 #Storing the results of the simulation
@@ -112,27 +113,43 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
-#Make sure the appropriate return values are "turned on" in the simulation script
-sample_sim <- replicate(1, sex_dem_sim()) 
-all_obs <- sample_sim["obs", ] %>% do.call(rbind, .)
 
-#Conditional probability of survival at each timepoint by sex
-all_alive <- all_obs[, dput(deathij_varnames)] %>% 
-  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob() 
-all_alive[1] <- 1 - sum(all_obs$death01)/nrow(all_obs)
-
-female_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
-  filter(sex == 0) %>% dplyr::select(-sex) %>%
-  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
-female_alive[1] <- filter(all_obs, sex == 0) %>% dplyr::select(death01) %>%
-  map_dbl(.f = ~1 - sum(.)/length(.)) 
+  #---- Look at survival data ----
+  sim_data <- 
+    results_mat[, c("sex", head(variable_names$deathij_varnames,-1))] 
   
-male_alive <- all_obs[, c("sex", dput(deathij_varnames))] %>% 
-  filter(sex == 1) %>% dplyr::select(-sex) %>%
-  map_dbl(.f = ~length(.) - sum(.)) %>% cond_prob()
-male_alive[1] <- filter(all_obs, sex == 1) %>% dplyr::select(death01) %>%
-  map_dbl(.f = ~1 - sum(.)/length(.)) 
-
+  sim_data <- matrix(nrow = runs*num_obs, ncol = nrow(test_life_table))
+  for(r in 1:nrow(test_life_table)){
+    sim_data[, r] <- unlist(test_life_table[r, ])
+  }
+  colnames(sim_data) <- c("sex", head(variable_names$deathij_varnames, -1))
+  sim_data %<>% as.data.frame()
+  
+  #Want to look at unconditional and conditional probabilities of survival
+  #Unconditional Survival
+  death_intervals <- colnames(sim_data)[-1]
+  all_death_counts <- sim_data %>% dplyr::select(-one_of("sex")) %>% 
+    colSums() 
+  all_survival_counts <- num_obs*runs - death_counts
+  all_cp_survival <- cond_prob(all_survival_counts)
+  all_cp_survival[1] <- all_survival_counts[1]/(num_obs*runs)
+  
+  #Female survival
+  num_females <- sim_data %>% filter(sex == 0) %>% nrow()
+  female_death_counts <- sim_data %>% filter(sex == 0) %>% 
+    dplyr::select(-one_of("sex")) %>% colSums()
+  female_survival_counts <- num_females - female_death_counts
+  female_cp_survival <- cond_prob(female_survival_counts)
+  female_cp_survival[1] <- female_survival_counts[1]/(num_females)
+  
+  #Male survival
+  num_males <- sim_data %>% filter(sex == 1) %>% nrow()
+  male_death_counts <- sim_data %>% filter(sex == 1) %>% 
+    dplyr::select(-one_of("sex")) %>% colSums()
+  male_survival_counts <- num_males - male_death_counts
+  male_cp_survival <- cond_prob(male_survival_counts)
+  male_cp_survival[1] <- male_survival_counts[1]/(num_males)
+  
 #---- Comparing with dementia incidence data ----
 #Make sure the appropriate return values are "turned on" in the simulation script
 sample_sim <- replicate(35, sex_dem_sim())

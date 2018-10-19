@@ -34,45 +34,7 @@ for(r in 1:nrow(sim_results)){
 
 results_mat %<>% as.data.frame() %>% set_colnames(dimnames(sim_results)[[1]])
 
-  #---- Look at survival data ----
-  test_life_table <- 
-  sim_results[c("sex", head(variable_names$deathij_varnames,-1)), ] 
-
-  results_mat <- matrix(nrow = runs*num_obs, ncol = nrow(test_life_table))
-  for(r in 1:nrow(test_life_table)){
-    results_mat[, r] <- unlist(test_life_table[r, ])
-  }
-  colnames(results_mat) <- c("sex", head(variable_names$deathij_varnames, -1))
-  results_mat %<>% as.data.frame()
   
-  #Want to look at unconditional and conditional probabilities of survival
-    #Unconditional Survival
-    death_intervals <- colnames(results_mat)[-1]
-    all_death_counts <- results_mat %>% dplyr::select(-one_of("sex")) %>% 
-      colSums() 
-    all_survival_counts <- num_obs*runs - death_counts
-    all_cp_survival <- cond_prob(all_survival_counts)
-    all_cp_survival[1] <- all_survival_counts[1]/(num_obs*runs)
-  
-    #Female survival
-    num_females <- results_mat %>% filter(sex == 0) %>% nrow()
-    female_death_counts <- results_mat %>% filter(sex == 0) %>% 
-      dplyr::select(-one_of("sex")) %>% colSums()
-    female_survival_counts <- num_females - female_death_counts
-    female_cp_survival <- cond_prob(female_survival_counts)
-    female_cp_survival[1] <- female_survival_counts[1]/(num_females)
-    
-    #Male survival
-    num_males <- results_mat %>% filter(sex == 1) %>% nrow()
-    male_death_counts <- results_mat %>% filter(sex == 1) %>% 
-      dplyr::select(-one_of("sex")) %>% colSums()
-    male_survival_counts <- num_males - male_death_counts
-    male_cp_survival <- cond_prob(male_survival_counts)
-    male_cp_survival[1] <- male_survival_counts[1]/(num_males)
-  
-
-
-
 
 
 
