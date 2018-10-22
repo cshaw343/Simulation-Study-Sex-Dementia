@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("ggplot2", "tidyverse")
+p_load("ggplot2", "tidyverse", "reshape")
 
 #Suppress warnings
 options(warn = -1)
@@ -118,21 +118,14 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   sim_data <- 
     results_mat[, c("sex", head(variable_names$deathij_varnames,-1))] 
   
-  sim_data <- matrix(nrow = runs*num_obs, ncol = nrow(test_life_table))
-  for(r in 1:nrow(test_life_table)){
-    sim_data[, r] <- unlist(test_life_table[r, ])
-  }
-  colnames(sim_data) <- c("sex", head(variable_names$deathij_varnames, -1))
-  sim_data %<>% as.data.frame()
-  
   #Want to look at unconditional and conditional probabilities of survival
   #Unconditional Survival
   death_intervals <- colnames(sim_data)[-1]
   all_death_counts <- sim_data %>% dplyr::select(-one_of("sex")) %>% 
     colSums() 
-  all_survival_counts <- num_obs*runs - death_counts
+  all_survival_counts <- nrow(sim_data) - all_death_counts
   all_cp_survival <- cond_prob(all_survival_counts)
-  all_cp_survival[1] <- all_survival_counts[1]/(num_obs*runs)
+  all_cp_survival[1] <- all_survival_counts[1]/(nrow(sim_data))
   
   #Female survival
   num_females <- sim_data %>% filter(sex == 0) %>% nrow()
@@ -149,6 +142,63 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   male_survival_counts <- num_males - male_death_counts
   male_cp_survival <- cond_prob(male_survival_counts)
   male_cp_survival[1] <- male_survival_counts[1]/(num_males)
+  
+  #Visualize by plots
+  plot_data <- tibble("age" = seq(55, 100, by = 5), 
+                      "pub_all_survival" = life$CP[-c(1, 2)], 
+                      "pub_female_survival" = female_life$CP[-c(1, 2)], 
+                      "pub_male_survival" = male_life$CP[-c(1, 2)], 
+                      "cohort_all_survival" = all_cp_survival, 
+                      "cohort_female_survival" = female_cp_survival, 
+                      "cohort_male_survival" = male_cp_survival) %>% 
+    gather(key = "data_type", value = "cp", colnames(plot_data)[-1])
+  
+  all_survival_plot <- ggplot(plot_data, aes(age, cp)) + 
+    geom_line(data = subset(plot_data, data_type == "cohort_all_survival"), 
+              aes(color = "Simulated"), size = 1.25, color = "dodgerblue2", 
+              alpha = 0.6) + 
+    geom_line(data = subset(plot_data, data_type == "pub_all_survival"), 
+              aes(color = "Published"), size = 1.25, 
+              color = "gray", linetype = "longdash") + ylim(0, 1) + 
+    labs(y = "Conditional Probability of Survival", x = "Age", 
+         color = "") + ggtitle("Entire Cohort") + theme_minimal()
+  
+  survival_female_plot <- ggplot(plot_data, aes(age, cp)) + 
+    geom_line(data = subset(plot_data, data_type == "cohort_female_survival"), 
+              aes(color = "Simulated"), size = 1.25, color = "dodgerblue2", 
+              alpha = 0.6) + 
+    geom_line(data = subset(plot_data, data_type == "pub_female_survival"), 
+              aes(color = "Published"), size = 1.25, 
+              color = "gray", linetype = "longdash") + ylim(0, 1) + 
+    labs(y = "Conditional Probability of Survival (Females)", x = "Age", 
+         color = "") + ggtitle("Females") + theme_minimal()
+  
+  survival_male_plot <- ggplot(plot_data, aes(age, cp)) + 
+    geom_line(data = subset(plot_data, data_type == "cohort_male_survival"), 
+              aes(color = "Simulated"), size = 1.25, color = "dodgerblue2", 
+              alpha = 0.6) + 
+    geom_line(data = subset(plot_data, data_type == "pub_male_survival"), 
+              aes(color = "Published"), size = 1.25, 
+              color = "gray", linetype = "longdash") + ylim(0, 1) + 
+    labs(y = "Conditional Probability of Survival (Males)", x = "Age", 
+         color = "") + ggtitle("Males") + theme_minimal()
+  
+  #Saving plot output
+  lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
+  ggsave(filename = paste("Plots/all_survival_plot_parA_", lgd, ".jpeg", 
+                          sep = ""), width = 10, height = 7, 
+         plot = all_survival_plot)
+  
+  ggsave(filename = paste("Plots/female_survival_plot_parA_", lgd, ".jpeg", 
+                          sep = ""), width = 10, height = 7, 
+         plot = survival_female_plot)
+  
+  ggsave(filename = paste("Plots/male_survival_plot_parA_", lgd, ".jpeg", 
+                          sep = ""), width = 10, height = 7, 
+         plot = survival_male_plot)
+  
+  
+  
   
 #---- Comparing with dementia incidence data ----
 #Make sure the appropriate return values are "turned on" in the simulation script
