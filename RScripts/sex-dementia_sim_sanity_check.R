@@ -110,6 +110,55 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
          width = 10, height = 7, 
          plot = Cij_plot)
 
+#---- Cij Distributions ----
+#Check the distribution of Cij across timepoints
+hists <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% gather() %>% 
+    mutate_at("key", as.factor) 
+hists$key <- fct_relevel(hists$key, "Ci10", after = 10)
+
+z <- data.frame(variable = levels(hists$key), 
+                cutoff = rep(-4.75, length(levels(hists$key))))
+  
+Cij_dists <- hists %>% ggplot(aes(value)) + facet_wrap(~ key, scales = "free") + 
+  geom_vline(data = z, aes(xintercept = cutoff), color = "black", size = 1) + 
+  geom_histogram(fill = "dodgerblue2", alpha = 0.6) + 
+  xlim(-20, 10) + theme_minimal()
+
+#Saving plot output
+lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
+ggsave(filename = paste("Plots/Cij_dists_parA_", lgd, ".jpeg", 
+                        sep = ""), width = 10, height = 7, plot = Cij_dists)
+
+#---- Mean Fij Plot ----
+Fij_check <- obs %>% dplyr::select(sex, contains("Fi"))
+
+#Getting mean Fij by sex
+female_meanFij<- Fij_check %>% filter(sex == 0) %>% colMeans()
+male_mean_Fij <- Fij_check %>% filter(sex == 1) %>% colMeans()
+
+female_meanFij_plot <- tibble("t" = visit_times, "variable" = "female", 
+                              "value" = head(female_meanFij[-1], 11))
+
+male_meanFij_plot <- tibble("t" = visit_times, "variable" = "male", 
+                            "value" = head(male_mean_Fij[-1], 11))
+
+Fij_plot_data <- rbind(female_meanFij_plot, male_meanFij_plot)
+
+Fij_plot <- ggplot(Fij_plot_data, aes(t, value)) + 
+  geom_line(data = subset(Fij_plot_data, variable == "female"), 
+            aes(color = variable), size = 1.25) +
+  geom_line(data = subset(Fij_plot_data, variable == "male"), 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  labs(y = "Functional Ability", 
+       x = "Visit Time", 
+       color = "") + ylim(-20, 10) + 
+  theme_minimal()
+
+#Saving plot output
+lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
+ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg", 
+                        sep = ""), width = 10, height = 7, plot = Fij_plot)
+
 #---- Comparing with life-table data ----
 #Based on 2014 life table found in 
 #National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
