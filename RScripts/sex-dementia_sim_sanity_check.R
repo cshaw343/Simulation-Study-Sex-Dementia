@@ -4,8 +4,8 @@ if (!require("pacman"))
 
 p_load("ggplot2", "tidyverse", "reshape")
 
-#Suppress warnings
-options(warn = -1)
+options(warn = -1)    #Suppress warnings
+options(scipen = 999) #Standard notation
 
 #---- Specify source file ----
 par_file <- "RScripts/sex-dementia_sim_parA.R" #This syntax is used for file naming later
@@ -196,8 +196,6 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
   ggsave(filename = paste("Plots/male_survival_plot_parA_", lgd, ".jpeg", 
                           sep = ""), width = 10, height = 7, 
          plot = survival_male_plot)
-  
-  
   
   
 #---- Comparing with dementia incidence data ----
