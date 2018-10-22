@@ -12,7 +12,7 @@
 source("RScripts/dementia_incidence2000-2013.R")
 
 #---- Function that we are trying to optimize ----
-dem_diag <- function(BETAS, 
+dem_diag <- function(BETAS,cohort_size, 
                      sex_i, Cij, Fij, 
                      risk_match){
   
@@ -20,13 +20,15 @@ dem_diag <- function(BETAS,
     BETAS[5]*Cij*Fij
   pi_hat <- exp(model)/(1 + exp(model))
   dem_diag <- rbernoulli(1, p = pi_hat)*1
-  risk_percent <- mean(dem_diag)*100
+  
+  #takes percent out of initial cohort size
+  risk_percent <- mean(dem_diag)*(length(dem_diag)/cohort_size)*100 
   
   return(abs(risk_percent - risk_match))
 }
 
 #---- Function that looks for the betas ----
-find_betas <- function(obs, dem_risk){
+find_betas <- function(obs, dem_risk, cohort_size){
   beta_results <- matrix(nrow = length(dem_risk), ncol = 6)
   start = 4 #represent starting age where we have data (age 70)
   data <- obs %>% 
@@ -49,6 +51,7 @@ find_betas <- function(obs, dem_risk){
       many_opts <- replicate(10, 
                              {optim(par = rep(-13, 5), 
                                     fn = dem_diag, 
+                                    cohort_size = 100000,
                                     sex_i = sex_i, Cij = Cij, Fij = Fij, 
                                     risk_match = dem_risk[[i]], 
                                     upper = rep(0, 5), 
@@ -81,4 +84,5 @@ find_betas <- function(obs, dem_risk){
   return(beta_results)
 }
 
-fingers_crossed <- find_betas(results_mat, dem_risk = dem_risk)
+fingers_crossed <- 
+  find_betas(results_mat, dem_risk = dem_risk, cohort_size = nrow(results_mat))
