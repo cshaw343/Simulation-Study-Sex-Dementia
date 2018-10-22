@@ -46,29 +46,31 @@ find_betas <- function(obs, dem_risk, cohort_size){
     Cij <- data[, variable_names$Cij_varnames[start + 1]] 
     Fij <- data[, variable_names$Fij_varnames[start + 1]] 
 
-    # if(i == 1)
-    {
-      many_opts <- replicate(10, 
-                             {optim(par = rep(-13, 5), 
+    if(i == 1){
+      many_opts <- replicate(100, 
+                             {optim(par = rep(-7, 5), 
                                     fn = dem_diag, 
                                     cohort_size = 100000,
                                     sex_i = sex_i, Cij = Cij, Fij = Fij, 
                                     risk_match = dem_risk[[i]], 
                                     upper = rep(0, 5), 
-                                    lower = rep(-15, 5))})
+                                    lower = rep(-14, 5))})
       
       mean_diff <- many_opts["value", ] %>% unlist() %>% mean()
-      mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, byrow = TRUE) %>%
-        colMeans()
-    # } else {
-    #   many_opts <- replicate(10, 
-    #                          {optim(par = rep(-4.5, 5), 
-    #                                 fn = dem_diag, 
-    #                                 sex_i = sex_i_nomiss, Cij = Cij_nomiss, 
-    #                                 Fij = Fij_nomiss, 
-    #                                 risk_match = dem_risk[[i]], 
-    #                                 upper = rep(-4, 5), 
-    #                                 lower = rep(-5, 5))})
+      mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, 
+                           byrow = TRUE) %>% colMeans()
+    } else {
+      many_opts <- replicate(100,
+                             {optim(par = head(beta_results[(i - 1), ], -1),
+                                    fn = dem_diag, cohort_size = 100000,
+                                    sex_i = sex_i, Cij = Cij, Fij = Fij,
+                                    risk_match = dem_risk[[i]],
+                                    upper = rep(0, 5),
+                                    lower = rep(-14, 5))})
+      
+      mean_diff <- many_opts["value", ] %>% unlist() %>% mean()
+      mean_betas <- matrix(unlist(many_opts["par", ]), ncol = 5, 
+                           byrow = TRUE) %>% colMeans()
     }
     
     beta_results[i, ] <- c(mean_betas, mean_diff)
