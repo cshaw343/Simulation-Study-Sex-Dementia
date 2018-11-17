@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of observations ----
-num_obs <- 10
+num_obs <- 1000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -67,4 +67,4 @@ lambda <- c(0.0134, 0.0187, 0.0266, 0.0392, 0.0622, 0.0946, 0.1439, 0.2072,
 
 #---- Dementia Cut Point ----
 #Cutoff for the age standardized Cij scores (1.5 SD below age-specific measures)
-dem_cut <- -1.5
+dem_cuts <- rep(-1.5, (num_tests + 1))
