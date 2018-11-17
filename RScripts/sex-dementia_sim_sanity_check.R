@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("ggplot2", "tidyverse", "reshape")
+p_load("ggplot2", "tidyverse", "reshape", "magrittr")
 
 options(warn = -1)    #Suppress warnings
 options(scipen = 999) #Standard notation
@@ -112,21 +112,40 @@ means <- obs_check %>% summarise_at(c("sex", "U"), mean)
 
 #---- Cij Distributions ----
 #Check the distribution of Cij across timepoints
-hists <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% gather() %>% 
-    mutate_at("key", as.factor) 
+dem_cut <- -4.75
+
+Cij_data <- obs %>% dplyr::select(variable_names$Cij_varnames)
+Cij_indicators <- matrix(nrow = nrow(Cij_data), ncol = ncol(Cij_data))
+for(i in 1:ncol(Cij_data)){
+  if(i == 1){
+    indicators <- rep(0, nrow(Cij_indicators))
+  } else {
+    indicators <- (Cij_data[, i] <= dem_cut & Cij_data[, (i-1)] > dem_cut)*1
+    indicators[is.na(indicators)] <- 0
+  }
+  Cij_indicators[, i] <- indicators
+}
+indicators <- unlist(as.data.frame(Cij_indicators))
+
+hists <- Cij_data %>% gather() %>% mutate_at("key", as.factor) 
+hists$indicators <- indicators
 hists$key <- fct_relevel(hists$key, "Ci10", after = 10)
+
 
 z <- data.frame(variable = levels(hists$key), 
                 cutoff = rep(-4.75, length(levels(hists$key))))
   
-Cij_dists <- hists %>% ggplot(aes(value)) + facet_wrap(~ key, scales = "free") + 
+Cij_dists <- hists %>% ggplot(aes(value)) + 
+  facet_wrap(~ key, scales = "free") + 
   geom_vline(data = z, aes(xintercept = cutoff), color = "black", size = 1) + 
-  geom_histogram(fill = "dodgerblue2", alpha = 0.6) + 
+  geom_histogram(fill = "gray", alpha = 0.6) + 
+  geom_histogram(data = hists %>% filter(indicators == 1), fill = "dodgerblue2", 
+                 alpha = 0.6) + 
   xlim(-20, 10) + theme_minimal()
 
 #Saving plot output
 lgd <- format(Sys.time(), "%Y_%m_%d_%H:%M:%S") #format the time/date for file creation
-ggsave(filename = paste("Plots/Cij_dists_parA_", lgd, ".jpeg", 
+ggsave(filename = paste("Plots/Cij_dists_dem_inc_parA_", lgd, ".jpeg", 
                         sep = ""), width = 10, height = 7, plot = Cij_dists)
 
 #---- Mean Fij Plot ----

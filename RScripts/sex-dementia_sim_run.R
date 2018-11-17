@@ -23,7 +23,7 @@ source("RScripts/misc_custom_functions.R")    #Other functions needed
 # proc.time() - start
 
 #---- Running simulation on one core ----
-runs = 100
+runs = 1
 sim_results <- replicate(runs, sex_dem_sim())
 
 #---- Converting results to usable format ----

@@ -12,7 +12,6 @@ set.seed(10789)
 
 #---- Source files ----
 source("RScripts/cognitive_function_model.R")
-source("RScripts/functional_ability_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 
@@ -82,44 +81,6 @@ sex_dem_sim <- function(){
     set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
   obs %<>% bind_cols(., Cij, cij_slopeij)
   
-  #---- Generating "true" functional ability Fij ----
-  #Refer to Manuscript/manuscript_equations.pdf for equation
-  
-  #Generating random terms for slope and intercept
-  #Covariance matrix for random slope and intercept terms
-  fij_slope_int_cov <- matrix(c(fij_var0, fij_cov, fij_cov, fij_var1), nrow = 2, 
-                              byrow = TRUE)
-  
-  #Generate random terms for each individual
-  fij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                           Sigma = fij_slope_int_cov)) %>% 
-    set_colnames(., c("w0i", "w1i"))
-  obs %<>% bind_cols(., fij_slope_int_noise)
-  
-  #Generating noise term (unexplained variance in Cij) for each visit
-  #Creating AR(1) correlation matrix
-  num_visits = num_tests + 1
-  powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
-  corr <- sqrt(fij_var3)*(fij_r1^powers)                    #Correlation matrix
-  S <- diag(rep(sqrt(fij_var3)), nrow(corr))                #Diagonal matrix of SDs
-  fij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
-  
-  #Generating noise terms
-  delta <- as_tibble(mvrnorm(n = num_obs, 
-                             mu = rep(0, num_visits), Sigma = fij_cov_mat)) %>%
-    set_colnames(., variable_names$delta_varnames)
-  obs %<>% bind_cols(., delta)
-  
-  #Calculating Fij for each individual
-  #Store Fij values and slope values for each assessment
-  compute_Fij <- func_ability(fij_knots, fij_slopes, obs)
-  Fij <- compute_Fij$Fij %>% as.data.frame() %>% 
-    set_colnames(., variable_names$Fij_varnames)
-  fij_slopeij <- as.data.frame(compute_Fij$slopes) %>% 
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(., head(variable_names$fij_slopeij_varnames, -1)) 
-  obs %<>% bind_cols(., Fij, fij_slopeij)
-    
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
@@ -163,20 +124,25 @@ sex_dem_sim <- function(){
   obs %<>% mutate("survtime" = survtime, 
                   "age_death" = age0 + survtime) #Age at death
   
-  #Comment out while searching for parameters for dem_diagnosis models
-  # #---- Censor Cij and Fij based on death data ----
-  # for(i in 1:num_obs){
-  #   if(obs[i, "study_death"] == 1){
-  #     death_int <- (min(which(deathij[i, ] == 1)))
-  #     Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
-  #     Fs <- c(variable_names$Fij_varnames[(death_int + 1):nrow(variable_names)])
-  #     obs[i, Cs] <- NA
-  #     obs[i, Fs] <- NA
-  #   }
-  # }
+  #---- Censor Cij based on death data ----
+  for(i in 1:num_obs){
+    if(obs[i, "study_death"] == 1){
+      death_int <- (min(which(deathij[i, ] == 1)))
+      Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
+      obs[i, Cs] <- NA
+    }
+  }
   
+  #---- Standardize Cij values ----
+  std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
+    map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
+    set_colnames(variable_names$std_Cij_varnames)
+  
+  obs %<>% bind_cols(., std_Cij)
+
+  #** Proofread this code!**
   # #---- Create a competing risk outcome ----
-  # demij <- obs %>% dplyr::select(Cij_varnames) %>% 
+  # demij <- obs %>% dplyr::select(Cij_varnames) %>%
   #   mutate_all(funs((. < dem_cut)*1)) %>% set_colnames(dem_varnames)
   # 
   # dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
@@ -190,21 +156,21 @@ sex_dem_sim <- function(){
   #   }
   # }
   # 
-  # obs %<>% bind_cols(., demij) %>% 
+  # obs %<>% bind_cols(., demij) %>%
   #   mutate("dem_wave" = dem_wave) %>%
   #   mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
   #          "timetodem" = dem_onset(.),    #Time to dementia diagnosis
   #          "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
   #          "dem_death" =                  #Dementia status at death
-  #            case_when(dem == 1 & timetodem <= survtime ~ 1, 
-  #                      study_death == 1 & 
-  #                        (dem == 0 | (dem == 1 & timetodem > survtime)) ~ 
-  #                        2)) %>% 
+  #            case_when(dem == 1 & timetodem <= survtime ~ 1,
+  #                      study_death == 1 &
+  #                        (dem == 0 | (dem == 1 & timetodem > survtime)) ~
+  #                        2)) %>%
   #   mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
-  #   mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime), 
-  #                                      survtime), 
-  #          "ageatdem_death" = age0 + timetodem_death, 
-  #          "dem_alive" = case_when(dem_death == 1 ~ 1, 
+  #   mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
+  #                                      survtime),
+  #          "ageatdem_death" = age0 + timetodem_death,
+  #          "dem_alive" = case_when(dem_death == 1 ~ 1,
   #                                  TRUE ~ 0))
   # 
   # #---- Compute person years ----
@@ -214,15 +180,15 @@ sex_dem_sim <- function(){
   #   last_test = j - 1
   #   last_wave <- paste("dem", last_test, sep = "")
   #   this_wave <- paste("dem", j, sep = "")
-  #   dem_data <- demij %>% dplyr::select(c(last_wave, this_wave)) 
+  #   dem_data <- demij %>% dplyr::select(c(last_wave, this_wave))
   #   dem_data %<>% cbind(., contributed)
   #   dem_data %<>% filter(!! as.name(last_wave) == 0) %>%
-  #     mutate("PY" = case_when(!! as.name(this_wave) == 0 ~ 5, 
-  #                             TRUE ~ contributed)) 
+  #     mutate("PY" = case_when(!! as.name(this_wave) == 0 ~ 5,
+  #                             TRUE ~ contributed))
   #   cases_py1000[j] = 1000*
-  #     sum(dem_data[, this_wave], na.rm = TRUE)/sum(dem_data$PY)  
+  #     sum(dem_data[, this_wave], na.rm = TRUE)/sum(dem_data$PY)
   # }
-  # 
+
   return("obs" = obs)
 }
 

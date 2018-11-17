@@ -16,10 +16,9 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "delta" = rep("delta", num_tests + 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
-                         "Fi" = rep("Fi", num_tests + 1),
+                         "std_Ci" = rep("std_Ci", num_tests + 1),
                          "mean" = rep("mean", num_tests + 1), 
                          "cij_slope" = rep("cij_slope", num_tests + 1),
-                         "fij_slope" = rep("fij_slope", num_tests + 1),
                          "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
                          "survtime" = rep("survtime", num_tests + 1)) %>% 
@@ -32,20 +31,17 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
   #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
-  unite("delta_varnames", c(delta, timepoints), sep = "", remove = FALSE) %>% 
   #Dementia labels
   unite("dem_varnames", c(dem, timepoints), sep = "", remove = FALSE) %>% 
   #Cij labels
   unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
-  #Fij labels
-  unite("Fij_varnames", c(Fi, timepoints), sep = "", remove = FALSE) %>%
+  #Standardized Cij labels
+  unite("std_Cij_varnames", c(std_Ci, timepoints), sep = "", remove = FALSE) %>%
   #Mean Cij labels
   unite("mean_Cij_varnames", c(mean, Cij_varnames), sep = "", 
         remove = FALSE) %>%
   #Interval slope labels
   unite("cij_slopeij_varnames", c(cij_slope, interval_times), sep = "", 
-        remove = FALSE) %>%
-  unite("fij_slopeij_varnames", c(fij_slope, interval_times), sep = "", 
         remove = FALSE) %>%
   #Uniform survival noise labels
   unite("rij_varnames", c(rij, interval_times), sep = "", remove = FALSE) %>%
