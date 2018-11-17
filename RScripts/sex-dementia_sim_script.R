@@ -134,11 +134,12 @@ sex_dem_sim <- function(){
   }
   
   #---- Standardize Cij values ----
-  std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
-    map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-    set_colnames(variable_names$std_Cij_varnames)
-  
-  obs %<>% bind_cols(., std_Cij)
+  #We actually don't think this is right
+  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
+  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
+  #   set_colnames(variable_names$std_Cij_varnames)
+  # 
+  # obs %<>% bind_cols(., std_Cij)
 
   #** Proofread this code!**
   # #---- Create a competing risk outcome ----
