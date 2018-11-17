@@ -20,6 +20,9 @@ int_time <- 5
 #Number of assessments
 num_tests <- 10
 
+#Resulting visit times
+visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
+
 #---- Prevalance of exposure (male) ----
 #Exposure = male gender
 psex <- 0.49
