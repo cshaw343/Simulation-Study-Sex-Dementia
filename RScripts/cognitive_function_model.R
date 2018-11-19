@@ -26,7 +26,7 @@ cog_func <- function(knots_ages, slopes, obs){
            b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
     }
   }
-  slopes <- matrix(NA, nrow = num_obs, ncol= (length(visit_times) - 1))
+  slopes <- matrix(NA, nrow = nrow(obs), ncol= (length(visit_times) - 1))
   #Cij is stored as a list in this function environment so use list indexing
   for(j in 1:ncol(slopes)){
     b <- Cij[[j + 1]]
