@@ -21,19 +21,20 @@ source("RScripts/misc_custom_functions.R")
 
   #---- Dementia incidence rates ----
   dem_rates_whites <- 
-    data_frame("LowAge" = c(64, 70, 75, 80, 85, 90), 
-               "HighAge" = c(69, 74, 79, 84, 89, 1000), 
-               "Rate" = c(3.45, 8.44, 17.35, 34.51, 61.35, 99.26))
+    data_frame("LowAge" = c(64, 70, 75, 80, 85, 90, 95), 
+               "HighAge" = c(69, 74, 79, 84, 89, 94, 99),
+               "VisitAge" = HighAge + 1,
+               "Rate" = c(3.45, 8.44, 17.35, 34.51, 61.35, 99.26, 99.26))
   
-  #Divide by 200 to get the probability(diagnosis)/5 years
-  dem_incidence <- as.matrix(dem_rates_whites$Rate/200) %>% as.data.frame() %>%
-    t()
-  
-  incidence_data_labels <- tibble("age" = rep("age", ncol(dem_incidence)),
-                                  "ages" = seq(70, 95, by = 5)) %>% 
-    unite("incidence_labels", sep = "")
-  
-  colnames(dem_incidence) <- incidence_data_labels$incidence_labels
+  # #Divide by 200 to get the probability(diagnosis)/5 years
+  # dem_incidence <- as.matrix(dem_rates_whites$Rate/200) %>% as.data.frame() %>%
+  #   t()
+  # 
+  # incidence_data_labels <- tibble("age" = rep("age", ncol(dem_incidence)),
+  #                                 "ages" = seq(70, 95, by = 5)) %>% 
+  #   unite("incidence_labels", sep = "")
+  # 
+  # colnames(dem_incidence) <- incidence_data_labels$incidence_labels
   
   #---- Cumulative dementia risk ----
   cum_risk_whites <- 
