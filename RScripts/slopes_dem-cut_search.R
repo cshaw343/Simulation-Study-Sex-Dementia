@@ -14,7 +14,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "magrittr")
+p_load("tidyverse", "magrittr", "MASS")
 
 #---- Source Files ----
 source("RScripts/dementia_incidence2000-2013.R")
@@ -26,16 +26,16 @@ source("RScripts/dementia_onset.R")
 
 #---- Data generation ----
 #Can generate data all the way up to generating cognitive function
-generate_base_data <- function(num_obs){
+generate_base_data <- function(n){
   #---- Generating IDs, sex, U ----
-  obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1),
-                "sex" = rbinom(num_obs, size = 1, prob = psex), 
-                "U" = rnorm(num_obs, mean = 0, sd = 1), 
-                "age0" = rep(50, num_obs))
+  obs <- tibble("id" = seq(from = 1, to = n, by = 1),
+                "sex" = rbinom(n, size = 1, prob = psex), 
+                "U" = rnorm(n, mean = 0, sd = 1), 
+                "age0" = rep(50, n))
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, 
+  ages <- as_tibble(matrix(NA, nrow = n, 
                            ncol = length(nrow(variable_names))))
   for(j in 1:nrow(variable_names)){
     if(j == 1){
@@ -60,7 +60,7 @@ generate_base_data <- function(num_obs){
                               nrow = 2, byrow = TRUE)
   
   #Generate random terms for each individual
-  cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+  cij_slope_int_noise <- as_tibble(mvrnorm(n = n, mu = rep(0, 2), 
                                            Sigma = cij_slope_int_cov)) %>% 
     set_colnames(., c("z0i", "z1i"))
   obs %<>% bind_cols(., cij_slope_int_noise)
@@ -74,7 +74,7 @@ generate_base_data <- function(num_obs){
   cij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
-  eps <- as_tibble(mvrnorm(n = num_obs, 
+  eps <- as_tibble(mvrnorm(n = n, 
                            mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
     set_colnames(., variable_names$eps_varnames)
   obs %<>% bind_cols(., eps)
@@ -90,12 +90,14 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   if(is.na(old_slopes)){
     slopes <- c(NEWSLOPE_NEWDEMCUT[1:half_point], 
                 rep(0, (num_tests - half_point)))
-    demcuts <- c(NEWSLOPE_NEWDEMCUT[(half_point + 1):length(NEWSLOPE_NEWDEMCUT)], 
+    demcuts <- c(0, #for baseline Cij
+                 NEWSLOPE_NEWDEMCUT[(half_point + 1):length(NEWSLOPE_NEWDEMCUT)], 
                  rep(0, (num_tests - half_point)))
   } else {
     slopes <- c(old_slopes, NEWSLOPE_NEWDEMCUT[1], 
                 rep(0, (num_tests - (1 + length(old_slopes)))))
-    demcuts <- c(old_demcuts, NEWSLOPE_NEWDEMCUT[2], 
+    demcuts <- c(0, #for baseline Cij
+                 old_demcuts, NEWSLOPE_NEWDEMCUT[2], 
                  rep(0, (num_tests - (1 + length(old_demcuts)))))
   }
   
@@ -114,7 +116,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   
   #---- Generating uniform random variables per interval for Sij ----
   rij <- as_tibble(replicate(num_tests, 
-                             runif(num_obs, min = 0, max = 1))) %>%
+                             runif(n = nrow(obs), min = 0, max = 1))) %>%
     #remove the last variable name because there are only 10 intervals
     set_colnames(head(variable_names$rij_varnames, -1))
   obs %<>% bind_cols(., rij)
@@ -141,7 +143,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
     mutate("study_death" = (rowSums(deathij) > 0)*1) #Study death indicator
   
   #Compute overall survival times
-  survtime <- vector(length = num_obs)
+  survtime <- vector(length = nrow(obs))
   survtime[which(obs$study_death == 0)] = num_tests*int_time
   for(i in 1:length(survtime)){
     if(survtime[i] == 0){
@@ -153,7 +155,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
                   "age_death" = age0 + survtime) #Age at death
   
   #---- Censor Cij based on death data ----
-  for(i in 1:num_obs){
+  for(i in 1:n){
     if(obs[i, "study_death"] == 1){
       death_int <- (min(which(deathij[i, ] == 1)))
       Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
@@ -169,7 +171,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
 
-  dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
+  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
   for(i in 1:nrow(demij)){
     dem_time <- min(which(demij[i, ] == 1))
     if(is.finite(dem_time)){
@@ -223,36 +225,39 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 
 #---- Running the optimization ----
 dem_inc_table <- dem_rates_whites
-cohort <- generate_base_data(num_obs = 100000)
+young_cohort <- generate_base_data(n = 5000)
+old_cohort <- generate_base_data(n = 100)
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 4)
 colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "dem_inc_rate")
 best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
-for(i in 1:nrow(dem_rates_whites)){
-  if(i == 1){ 
-    slopes_cuts = c(rep(0, 4), rep(-7, 4))
-    opt <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
-                 age = dem_inc_table[i, "VisitAge"], 
-                 pub_inc = dem_inc_table[i, "Rate"], 
-                 obs = cohort,
-                 upper = slopes_cuts, 
-                 lower = c(rep(-0.15, 4), rep(-8, 4)))
-    parameters <- opt$par
-    best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
-      parameters[1:(length(parameters)/2)]
-    best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <- 
-      parameters[(length(parameters)/2 + 1):length(parameters)]
-    best_slopes_cuts[length(parameters)/2, "dem_inc_rate"] <- 
-      dem_inc_table[[i, "Rate"]] + opt$value
-  } else if(i <= 4){
+#Finding the parameters based on the young cohort
+slopes_cuts = c(rep(0, 4), rep(-4.5, 4))
+opt <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
+             age = dem_inc_table[1, "VisitAge"], 
+             pub_inc = dem_inc_table[1, "Rate"], 
+             obs = young_cohort,
+             upper = slopes_cuts, 
+             lower = c(rep(-0.15, 4), rep(-5, 4)))
+parameters <- opt$par
+best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
+  parameters[1:(length(parameters)/2)]
+best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <- 
+  parameters[(length(parameters)/2 + 1):length(parameters)]
+best_slopes_cuts[length(parameters)/2, "dem_inc_rate"] <- 
+  dem_inc_table[[1, "Rate"]] + opt$value
+
+#Finding parameters based on the older cohorts
+for(i in 2:nrow(dem_rates_whites)){
+  if(i <= 4){
     last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_inc_rate"])))
     this_slot <- last_slot + 1
     slopes_cuts = c(0, best_slopes_cuts[[last_slot, "dem_cut"]])
     opt <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
                  age = dem_inc_table[i, "VisitAge"], 
                  pub_inc = dem_inc_table[i, "Rate"], 
-                 obs = cohort, 
+                 obs = old_cohort, 
                  old_slopes = 
                    best_slopes_cuts[1:max(which(!is.na(
                      best_slopes_cuts[, "slope"]))), "slope"], 
@@ -273,7 +278,7 @@ for(i in 1:nrow(dem_rates_whites)){
     opt <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
                  age = dem_inc_table[i, "VisitAge"], 
                  pub_inc = dem_inc_table[i, "Rate"], 
-                 obs = cohort, 
+                 obs = old_cohort, 
                  old_slopes = 
                    best_slopes_cuts[1:max(which(!is.na(
                      best_slopes_cuts[, "slope"]))), "slope"], 
@@ -292,17 +297,17 @@ for(i in 1:nrow(dem_rates_whites)){
 }
 
 #---- testing code ----
-obs <- generate_base_data(num_obs = 10)
-NEWSLOPE <- -0.05
-NEWDEMCUT <- -2
+obs <- generate_base_data(n = 10)
+NEWSLOPE <- rep(0, 4)
+NEWDEMCUT <- rep(-7, 4)
 NEWSLOPE_NEWDEMCUT <- c(NEWSLOPE, NEWDEMCUT)
-old_slopes <- rep(0, 4)
-old_demcuts <- rep(-1.75, 4)
+old_slopes <- NA
+old_demcuts <- NA
 age <- 70
 pub_inc <- 3.45
 
 test <- dem_irate_1000py (NEWSLOPE_NEWDEMCUT = NEWSLOPE_NEWDEMCUT, 
-                          age = age, pub_inc = pub_inc, obs = obs)
+                          age = age, pub_inc = pub_inc, obs = young_cohort)
 
 slopes_cuts = c(rep(0, 4), rep(-5, 4))
 
