@@ -184,7 +184,7 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
 
   #---- Look at survival data ----
   sim_data <- 
-    results_mat[, c("sex", head(variable_names$deathij_varnames,-1))] 
+    results_mat[, c("sex", head(variable_names$deathij_varnames, -1))] 
   
   #Want to look at unconditional and conditional probabilities of survival
   #Unconditional Survival
