@@ -234,9 +234,9 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 
 #---- Running the optimization ----
 dem_inc_table <- EURODEM_inc_rates
-young_cohort <- generate_base_data(n = 5000)
-old_cohort <- generate_base_data(n = 10000)
-very_old_cohort <- generate_base_data(n = 100000)
+young_cohort <- generate_base_data(n = 500)
+old_cohort <- generate_base_data(n = 500)
+very_old_cohort <- generate_base_data(n = 500)
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 5) %>% as.data.frame()
 colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "dem_inc_rate", 
@@ -245,9 +245,10 @@ best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
 #Setting up cluster for parallel optimization
 cluster <- makeCluster(detectCores() - 1, type = "PSOCK")
-clusterExport(cl = cl, varlist = c("dem_inc_table", "young_cohort", 
-                                   "old_cohort", "very_old_cohort", 
-                                   "best_slopes_cuts"), envir = environment())
+clusterExport(cl = cluster, varlist = c("dem_inc_table", "young_cohort", 
+                                        "old_cohort", "very_old_cohort", 
+                                        "best_slopes_cuts"), 
+              envir = environment())
 
 #Finding the parameters based on the young cohort
 slopes_cuts = c(rep(0, 4), rep(-4.75, 4))
