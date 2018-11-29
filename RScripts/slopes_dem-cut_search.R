@@ -234,9 +234,9 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 
 #---- Running the optimization ----
 dem_inc_table <- EURODEM_inc_rates
-young_cohort <- generate_base_data(n = 500)
-old_cohort <- generate_base_data(n = 500)
-very_old_cohort <- generate_base_data(n = 500)
+young_cohort <- generate_base_data(n = 10000)
+old_cohort <- generate_base_data(n = 50000)
+very_old_cohort <- generate_base_data(n = 100000)
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 5) %>% as.data.frame()
 colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "dem_inc_rate", 
@@ -244,20 +244,36 @@ colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "dem_inc_rate",
 best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
 #Setting up cluster for parallel optimization
+#If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
+#option instead and comment out the clusterEvalQ() lines
+
 cluster <- makeCluster(detectCores() - 1, type = "PSOCK")
-clusterExport(cl = cluster, varlist = c("dem_inc_table", "young_cohort", 
-                                        "old_cohort", "very_old_cohort", 
-                                        "best_slopes_cuts"), 
+clusterEvalQ(cl = cluster, {
+  source("RScripts/sex-dementia_sim_parA.R") 
+  source("RScripts/variable_names.R") 
+  source("RScripts/cognitive_function_model.R") 
+  source("RScripts/survival_times.R") 
+  source("RScripts/dementia_onset.R")
+  
+  if (!require("pacman")) 
+    install.packages("pacman", repos='http://cran.us.r-project.org')
+  
+  p_load("tidyverse", "magrittr", "MASS")
+}) 
+
+clusterExport(cl = cluster, 
+              varlist = c("dem_inc_table", "young_cohort", "old_cohort", 
+                          "very_old_cohort", "best_slopes_cuts"), 
               envir = environment())
 
 #Finding the parameters based on the young cohort
-slopes_cuts = c(rep(0, 4), rep(-4.75, 4))
+slopes_cuts = c(rep(0, 4), rep(-10, 4))
 opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
                      age = dem_inc_table[[1, "Visit_Age"]], 
                      pub_inc = dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
                      obs = young_cohort,
                      upper = slopes_cuts, 
-                     lower = c(rep(-0.15, 4), rep(-5.5, 4)), 
+                     lower = c(rep(-0.15, 4), rep(-15, 4)), 
                      parallel = list(cl = cluster))
 parameters <- opt$par
 best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
