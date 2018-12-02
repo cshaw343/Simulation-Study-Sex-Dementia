@@ -27,74 +27,74 @@ data_gen <- function(){
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
-  for(j in 1:length(age_varnames)){
+  ages <- as_tibble(matrix(NA, nrow = num_obs, 
+                           ncol = length(nrow(variable_names))))
+  for(j in 1:nrow(variable_names)){
     if(j == 1){
       ages[, j] = age0 #Creates column of baseline ages
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
   }
-  colnames(ages) <- age_varnames
+  colnames(ages) <- variable_names$age_varnames
   obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% set_colnames(., agec_varnames)
+  c_ages <- as_tibble(ages - mean(age0)) %>% 
+    set_colnames(., variable_names$agec_varnames)
   obs %<>% bind_cols(., c_ages)
   
   #---- Generating "true" cognitive function Cij ----
-  #Cij = b00 + z0i + bo1*sexi + b02*age0i + b03*Ui + (b10 + z1i + b11*sexi + 
-  #b12*age0i + b13*Ui)*timej + epsilonij
+  #Refer to Manuscript/manuscript_equations.pdf for equation
   
-  #---- Generating random terms for slope and intercept ----
+  #Generating random terms for slope and intercept
+  #Covariance matrix for random slope and intercept terms
+  cij_slope_int_cov <- matrix(c(cij_var0, cij_cov, cij_cov, cij_var1), 
+                              nrow = 2, byrow = TRUE)
+  
   #Generate random terms for each individual
-  slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                       Sigma = slope_int_cov)) %>% 
+  cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+                                           Sigma = cij_slope_int_cov)) %>% 
     set_colnames(., c("z0i", "z1i"))
-  obs %<>% bind_cols(., slope_int_noise)
+  obs %<>% bind_cols(., cij_slope_int_noise)
   
-  #---- Generating noise term (unexplained variance in Cij) for each visit ----
+  #Generating noise term (unexplained variance in Cij) for each visit
   #Creating AR(1) correlation matrix
   num_visits = num_tests + 1
   powers <- abs(outer(1:(num_visits), 1:(num_visits), "-")) #Exponents for autoregressive terms
-  corr <- sqrt(var3)*(r1^powers)                            #Correlation matrix
-  S <- diag(rep(sqrt(var3)), nrow(corr))                    #Diagonal matrix of SDs
-  cov_mat <- S%*%corr%*%S                                   #Covariance matrix
+  corr <- sqrt(cij_var3)*(cij_r1^powers)                    #Correlation matrix
+  S <- diag(rep(sqrt(cij_var3)), nrow(corr))                #Diagonal matrix of SDs
+  cij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
   eps <- as_tibble(mvrnorm(n = num_obs, 
-                           mu = rep(0, num_visits), Sigma = cov_mat)) %>%
-    set_colnames(., eps_varnames)
+                           mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
+    set_colnames(., variable_names$eps_varnames)
   obs %<>% bind_cols(., eps)
   
-  #---- Calculating Cij for each individual ----
+  #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(obs)
+  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., Cij_varnames)
-  slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    set_colnames(., slopeij_varnames)
-  obs %<>% bind_cols(., Cij, slopeij)
-  
-  #---- Calculating mean Cij by sex ----
-  mean_Cij <- obs %>% mutate_at("sex", as.factor) %>% group_by(sex) %>% 
-    dplyr::select(sex, Cij_varnames) %>% summarise_all(mean) %>%
-    set_colnames(mean_Cij_varnames)
+    set_colnames(., variable_names$Cij_varnames)
+  cij_slopeij <- as.data.frame(compute_Cij$slopes) %>% 
+    #remove the last variable name because there are only 10 intervals
+    set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
+  obs %<>% bind_cols(., Cij, cij_slopeij)
   
   #---- Generate survival time for each person ----
-  #Individual hazard functions
-  #h(tij|x) = lambda*exp(g1*sexi + g2*ageij + g3*Ui + g4*sexi + 
-  #g5*slopeij + g6Cij)
-  #See Additional notes in README file
+  #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  USij <- as_tibble(replicate(num_tests, 
-                              runif(num_obs, min = 0, max = 1))) %>%
-    set_colnames(USij_varnames)
-  obs %<>% bind_cols(., USij)
+  rij <- as_tibble(replicate(num_tests, 
+                             runif(num_obs, min = 0, max = 1))) %>%
+    #remove the last variable name because there are only 10 intervals
+    set_colnames(head(variable_names$rij_varnames, -1))
+  obs %<>% bind_cols(., rij)
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda)) %>% set_colnames(Sij_varnames)
+  Sij <- as.data.frame(survival(obs, lambda)) %>% 
+    set_colnames(head(variable_names$Sij_varnames, -1))
   obs %<>% bind_cols(., Sij)
   
   return("obs" = obs)
