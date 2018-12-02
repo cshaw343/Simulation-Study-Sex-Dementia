@@ -188,9 +188,20 @@ all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) +
 ggsave(filename = "Plots/1920-1925_birth_cohort.jpeg", width = 10, height = 7, 
        plot = all_countries_1920_1925)
 
-#---- Hazard ratio ----
+#---- Selected life table subsets ----
+female_life_netherlands <- Netherlands_F %>% 
+  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5))
 
-Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
+#---- Hazard ratio ----
+male_haz <- Netherlands_M %>% 
+  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5)) %>% 
+  dplyr::select("Haz")
+
+female_haz <- Netherlands_F %>% 
+  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5)) %>% 
+  dplyr::select("Haz")
+
+Hratio <- as.data.frame(male_haz$Haz/female_haz$Haz)
 colnames(Hratio) <- c("ratio")
 
 
