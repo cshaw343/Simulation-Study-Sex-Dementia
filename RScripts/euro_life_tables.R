@@ -171,6 +171,10 @@ all_countries_1910_1919 <- ggplot(all_tables, aes(Age, CP)) +
        color = "") + theme_minimal() + facet_wrap(~Sex) + 
   ggtitle("1910-1919 Birth Cohort")
 
+#Saving plot output
+ggsave(filename = "Plots/1910-1919_birth_cohort.jpeg", width = 10, height = 7, 
+       plot = all_countries_1910_1919)
+
 all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) + 
   geom_line(data = subset(all_tables, Year == "1920-1925" & 
                             Age %in% seq(45, 100, by = 5)), 
@@ -179,6 +183,10 @@ all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) +
   labs(y = "Conditional Probability of Survival", x = "Age", 
        color = "") + theme_minimal() + facet_wrap(~Sex) + 
   ggtitle("1920-1925 Birth Cohort")
+
+#Saving plot output
+ggsave(filename = "Plots/1920-1925_birth_cohort.jpeg", width = 10, height = 7, 
+       plot = all_countries_1920_1925)
 
 
 
