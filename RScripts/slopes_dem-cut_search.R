@@ -92,7 +92,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   if(is.na(old_slopes)){
     slopes <- c(NEWSLOPE_NEWDEMCUT[1:half_point], 
                 rep(0, (num_tests - half_point)))
-    demcuts <- c(0, #for baseline Cij
+    demcuts <- c(NEWSLOPE_NEWDEMCUT[(half_point + 1)], #for baseline Cij
                  NEWSLOPE_NEWDEMCUT[(half_point + 1):length(NEWSLOPE_NEWDEMCUT)], 
                  rep(0, (num_tests - half_point)))
   } else {
@@ -234,12 +234,12 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 
 #---- Running the optimization ----
 dem_inc_table <- EURODEM_inc_rates
-young_cohort <- generate_base_data(n = 10000)
+young_cohort <- generate_base_data(n = 5000)
 old_cohort <- generate_base_data(n = 50000)
 very_old_cohort <- generate_base_data(n = 100000)
 
-best_slopes_cuts <- matrix(nrow = num_tests, ncol = 5) %>% as.data.frame()
-colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "dem_inc_rate", 
+best_slopes_cuts <- matrix(nrow = num_tests, ncol = 4) %>% as.data.frame()
+colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", #"dem_inc_rate", 
                                 "diff")
 best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
@@ -247,7 +247,7 @@ best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 #If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
 #option instead and comment out the clusterEvalQ() lines
 
-cluster <- makeCluster(detectCores() - 1, type = "PSOCK")
+cluster <- makeCluster(detectCores() - 5, type = "PSOCK")
 clusterEvalQ(cl = cluster, {
   source("RScripts/sex-dementia_sim_parA.R") 
   source("RScripts/variable_names.R") 
@@ -267,21 +267,21 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #Finding the parameters based on the young cohort
-slopes_cuts = c(rep(0, 4), rep(-10, 4))
+slopes_cuts = c(rep(0, 4), rep(-2.25, 4))
 opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
                      age = dem_inc_table[[1, "Visit_Age"]], 
                      pub_inc = dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
                      obs = young_cohort,
-                     upper = slopes_cuts, 
-                     lower = c(rep(-0.15, 4), rep(-15, 4)), 
+                     upper = c(rep(0, 4), rep(-1.5, 4)), 
+                     lower = c(rep(-0.15, 4), rep(-3, 4)), 
                      parallel = list(cl = cluster))
 parameters <- opt$par
 best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
   parameters[1:(length(parameters)/2)]
 best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <- 
   parameters[(length(parameters)/2 + 1):length(parameters)]
-best_slopes_cuts[length(parameters)/2, "dem_inc_rate"] <- 
-  dem_inc_table[[1, "Total_All_Dementia_1000PY"]] + opt$value
+#best_slopes_cuts[length(parameters)/2, "dem_inc_rate"] <- 
+  #dem_inc_table[[1, "Total_All_Dementia_1000PY"]] + opt$value
 best_slopes_cuts[length(parameters)/2, "diff"] <- opt$value
 write_csv(best_slopes_cuts[1:(length(parameters)/2), ], 
           "Results/slopes_dem-cut_search.csv")
@@ -289,9 +289,9 @@ write_csv(best_slopes_cuts[1:(length(parameters)/2), ],
 #Finding parameters based on the older cohorts
 for(i in 2:nrow(dem_inc_table)){
   if(i <= 4){
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_inc_rate"])))
+    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
     this_slot <- last_slot + 1
-    slopes_cuts = c(-0.05, (best_slopes_cuts[[last_slot, "dem_cut"]] - 1))
+    slopes_cuts = c(-0.05, (best_slopes_cuts[[last_slot, "dem_cut"]]))
     opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
                          age = dem_inc_table[[i, "Visit_Age"]], 
                          pub_inc = 
@@ -301,21 +301,21 @@ for(i in 2:nrow(dem_inc_table)){
                            best_slopes_cuts[, "slope"]))), "slope"], 
                          old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                            best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = c(0, best_slopes_cuts[[last_slot, "dem_cut"]]), 
-                         lower = c(-0.15, (slopes_cuts[2] - 2)), 
+                         upper = c(0, (slopes_cuts[2] + 0.5)), 
+                         lower = c(-0.15, slopes_cuts[2]), 
                          parallel = list(cl = cluster))
     parameters <- opt$par
     best_slopes_cuts[this_slot, "slope"] <- 
       parameters[1]
     best_slopes_cuts[this_slot, "dem_cut"] <- 
       parameters[2]
-    best_slopes_cuts[this_slot, "dem_inc_rate"] <- 
-      dem_inc_table[[i, "Total_All_Dementia_1000PY"]] + opt$value
+    #best_slopes_cuts[this_slot, "dem_inc_rate"] <- 
+      #dem_inc_table[[i, "Total_All_Dementia_1000PY"]] + opt$value
     best_slopes_cuts[this_slot, "diff"] <- opt$value
     write_csv(best_slopes_cuts[this_slot, ], 
               "Results/slopes_dem-cut_search.csv", append = TRUE)
   } else {
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_inc_rate"])))
+    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
     slopes_cuts = c(-0.15, best_slopes_cuts[[last_slot, "dem_cut"]])
     opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
                          age = dem_inc_table[[i, "Visit_Age"]], 
@@ -326,16 +326,16 @@ for(i in 2:nrow(dem_inc_table)){
                            best_slopes_cuts[, "slope"]))), "slope"], 
                          old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                            best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = slopes_cuts, 
-                         lower = c(-0.40, (slopes_cuts[2] - 1.5)), 
+                         upper = c(0, (slopes_cuts[2] + 1)),
+                         lower = c(-0.40, (slopes_cuts[2])), 
                          parallel = list(cl = cluster))
     parameters <- opt$par
     best_slopes_cuts[this_slot, "slope"] <- 
       parameters[1]
     best_slopes_cuts[this_slot, "dem_cut"] <- 
       parameters[2]
-    best_slopes_cuts[this_slot, "dem_inc_rate"] <- 
-      dem_inc_table[[i, "Total_All_Dementia_1000PY"]] + opt$value
+    #best_slopes_cuts[this_slot, "dem_inc_rate"] <- 
+      #dem_inc_table[[i, "Total_All_Dementia_1000PY"]] + opt$value
     best_slopes_cuts[this_slot, "diff"] <- opt$value
     write_csv(best_slopes_cuts[this_slot, ], 
               "Results/slopes_dem-cut_search.csv", append = TRUE)
@@ -343,7 +343,7 @@ for(i in 2:nrow(dem_inc_table)){
 }
 
 #---- testing code ----
-obs <- generate_base_data(n = 10)
+obs <- generate_base_data(n = 1000)
 NEWSLOPE <- rep(0, 4)
 NEWDEMCUT <- rep(-4.5, 4)
 NEWSLOPE_NEWDEMCUT <- c(NEWSLOPE, NEWDEMCUT)
@@ -360,4 +360,5 @@ slopes_cuts = c(rep(0, 4), rep(-5, 4))
 test_optim <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
                     age = 70, pub_inc = 3.45, obs = cohort,
                     upper = slopes_cuts, 
-                    lower = c(rep(-0.15, 4), rep(-6, 4))) 
+                    lower = c(rep(-0.15, 4), rep(-6, 4)))
+
