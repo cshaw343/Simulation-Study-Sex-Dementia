@@ -7,11 +7,8 @@
 # This is a test change
 #*******************************************************************************
 
-#---- Source Files ----
-source("RScripts/euro_life_tables.R")
-
 #---- Number of observations ----
-num_obs <- 100
+num_obs <- 3000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -57,7 +54,7 @@ b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from euro_life_tables.R 
-g1 <- log(Hratio$ratio) 
+g1 <- log(c(1.62, 1.90, 2.13, 2.27, 2.22, 2.09, 1.85, 1.61, 1.39, 1.26, 1.18)) 
 g2 <- 0       #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
 g3 <- 0       #Effect of U on log hazard of death
 g4 <- 0       #Interaction effect of sex and age on log hazard of death
@@ -67,8 +64,8 @@ g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search.R script
 #Based on 35x3000 = 105000 observations
-lambda <- c(0.0134, 0.0187, 0.0266, 0.0392, 0.0622, 0.0946, 0.1439, 0.2072, 
-            0.2903, 0.4571)
+lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
+            0.10918, 0.20142, 0.33345)
 
 #---- Dementia Cut Point ----
 #Cutoff for the age standardized Cij scores (1.5 SD below age-specific measures)
