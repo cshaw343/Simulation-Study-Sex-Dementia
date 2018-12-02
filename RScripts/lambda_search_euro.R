@@ -135,7 +135,7 @@ lambdas <- function(sim_data, cp){
     } else {
       sim_data %<>% filter(alive == 1)
       lambdas[j] = optimise(survivors, 
-                            interval = c(lambdas[j - 1], 1.75*lambdas[j - 1]), 
+                            interval = c(lambdas[j - 1], 2*lambdas[j - 1]), 
                             obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
