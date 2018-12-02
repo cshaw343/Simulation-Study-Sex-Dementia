@@ -1,6 +1,6 @@
 #***************************************************************
 # Performs a search for baseline hazards 
-# Reference data found in life_table2014.R
+# Reference data found in life_table2014.R (US data)
 #***************************************************************
 
 #---- Package Loading and Options ----
