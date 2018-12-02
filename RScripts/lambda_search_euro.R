@@ -11,14 +11,15 @@ if (!require("pacman"))
 p_load("tidyverse", "magrittr")
 
 #Suppress warnings
-options(warn = -1)
+options(warnings = -1)
 
 #---- Specify source files ----
-source("sex-dementia_sim_parA.R")
-source("sex-dementia_sim_script.R")
-source("euro_life_tables.R")
+source("RScripts/sex-dementia_sim_parA.R")
+source("RScripts/sex-dementia_sim_script.R")
+source("RScripts/euro_life_tables.R")
+source("RScripts/variable_names.R")
 
-#---- Create datsets for the search ----
+#---- Create datasets for the search ----
 data_gen <- function(){
   #---- Generating IDs, sex, U ----
   obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1), 
@@ -105,9 +106,10 @@ data_gen <- function(){
 lambdas <- function(sim_data, cp){
   #Function we are trying to optimize
   survivors <- function(L, obs, cp){
-    time_left = -log(obs[US])/(L*exp(g1*obs["sex"] + g2*obs[agec] + 
-                                       g3*obs["U"] + g4*obs["sex"]*obs[agec] + 
-                                       g5*obs[slope] + g6*obs[C]))
+    time_left = -log(obs[rij])/(L*exp(g1*obs[, "sex"] + g2*obs[, agec] + 
+                                       g3*obs[, "U"] + 
+                                        g4*obs[, "sex"]*obs[, agec] + 
+                                        g5*obs[, slope] + g6*obs[, C]))
     alive <- (time_left > 5) * 1
     return(abs(mean(alive) - cp))
   }
@@ -118,9 +120,9 @@ lambdas <- function(sim_data, cp){
   #Begin search
   for(j in 1:length(lambdas)){
     test_num = j - 1
-    US <- paste("U", test_num, test_num + 1, sep = "")
-    agec <- paste("age", test_num, "_c50", sep = "")
-    slope <- paste("slope", test_num, test_num + 1, sep = "")
+    rij <- variable_names$rij_varnames[j]
+    agec <- variable_names$agec_varnames[j]
+    slope <- variable_names$cij_slopeij_varnames[j]
     C <- paste("Ci", test_num, sep = "")
     life_prob = as.double(cp[j + 1, "CP"])
     if(j == 1){
@@ -154,8 +156,9 @@ find_lambda <- function(unexposed, life_table){
 #---- Check conditional probabilities using baseline hazards ----
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
-lambda_searches <- replicate(35, find_lambda(unexposed = 0, 
-                                             life_table = female_life[-1, ]))
+lambda_searches <- 
+  replicate(35, find_lambda(unexposed = 0, 
+                           life_table = female_life_netherlands))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
