@@ -8,10 +8,10 @@
 #*******************************************************************************
 
 #---- Source Files ----
-source(euro_life_tables.R)
+source("RScripts/euro_life_tables.R")
 
 #---- Number of observations ----
-num_obs <- 3000
+num_obs <- 100
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
