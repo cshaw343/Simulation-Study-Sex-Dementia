@@ -154,7 +154,7 @@ find_lambda <- function(unexposed, life_table){
 #Make sure to rerun parameter file with desired baseline hazards before running 
 #actual simulation
 lambda_searches <- replicate(35, find_lambda(unexposed = 0, 
-                                            life_table = female_life[-1, ]))
+                                             life_table = female_life[-1, ]))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
