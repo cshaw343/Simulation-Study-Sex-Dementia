@@ -188,6 +188,11 @@ all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) +
 ggsave(filename = "Plots/1920-1925_birth_cohort.jpeg", width = 10, height = 7, 
        plot = all_countries_1920_1925)
 
+#---- Hazard ratio ----
+
+Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
+colnames(Hratio) <- c("ratio")
+
 
 
 
