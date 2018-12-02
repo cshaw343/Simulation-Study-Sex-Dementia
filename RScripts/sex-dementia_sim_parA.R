@@ -7,8 +7,11 @@
 # This is a test change
 #*******************************************************************************
 
+#---- Source Files ----
+source(euro_life_tables.R)
+
 #---- Number of observations ----
-num_obs <- 100000
+num_obs <- 3000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -53,9 +56,8 @@ b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age 
 b13 <- -0.05  #Effect of U on cognitive slope
 
 #---- Parameters for Sij (survival for person i at time j) ----
-#Effect of sex on log hazard of death; chosen using calc from life_table2014.R 
-g1 <- log(c(1.081, 1.087, 1.11, 1.107, 1.087, 1.087, 1.072, 1.066, 1.083, 
-            0.999, 0.948)) 
+#Effect of sex on log hazard of death; chosen using calc from euro_life_tables.R 
+g1 <- log(Hratio$ratio) 
 g2 <- 0       #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
 g3 <- 0       #Effect of U on log hazard of death
 g4 <- 0       #Interaction effect of sex and age on log hazard of death
