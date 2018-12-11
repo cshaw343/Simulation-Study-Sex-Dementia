@@ -6,10 +6,11 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse")
+p_load("tidyverse", "magrittr")
 
 #---- Source Files ----
 source("RScripts/misc_custom_functions.R")
+source("RScripts/life_table2014.R")
 
 #---- Hazard Function ----
 haz <- function(age, logprobs){
@@ -251,20 +252,25 @@ female_haz_france <- France_F %>%
 Hratio_France <- male_haz_france$Haz/female_haz_france$Haz %>%
   as.data.frame() %>% set_colnames("France_HR") 
 
+#Format US HR data
+Hratio_US <- Hratio$ratio %>% as.data.frame() %>% set_colnames("US_HR")
+
 #Combine hazard ratios
-HR_plot_data <- cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France) %>% 
+HR_plot_data <- 
+  cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France, Hratio_US) %>% 
   mutate("Age" = seq(0, 100, by = 5)) %>%
   gather(contains("HR"), key = "Country", value = "HR")
   
-#Plot Hazard Ratios
+#Plot Hazard Ratios 
 all_countries_1920_1925_HR <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) + 
+  geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
   labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
        color = "") + theme_minimal() + 
   ggtitle("1920-1925 Birth Cohort")
 
 ggsave(filename = "Plots/1920-1925_birth_cohort_HR.jpeg", width = 10, 
        height = 7, plot = all_countries_1920_1925_HR)
+
 
 
 
