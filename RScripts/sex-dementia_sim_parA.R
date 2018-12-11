@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of observations ----
-num_obs <- 3000
+num_obs <- 1000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -62,7 +62,7 @@ g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
-#Computed in lambda_search.R script
+#Computed in lambda_search_euro.R script
 #Based on 35x3000 = 105000 observations
 lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
             0.10918, 0.20142, 0.33345)
