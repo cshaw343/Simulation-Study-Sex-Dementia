@@ -179,8 +179,7 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
                         sep = ""), width = 10, height = 7, plot = Fij_plot)
 
 #---- Comparing with life-table data ----
-#Based on 2014 life table found in 
-#National Vital Statistics Reports, Vol. 66, No. 4, August 14, 2017 (pg 48-49)
+#Based on Netherlands 1920-1925 birth cohort from mortality.org
 
   #---- Look at survival data ----
   sim_data <- 
@@ -213,9 +212,9 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
   #Visualize by plots
   plot_data <- tibble("age" = seq(55, 100, by = 5), 
-                      "pub_all_survival" = life$CP[-c(1, 2)], 
-                      "pub_female_survival" = female_life$CP[-c(1, 2)], 
-                      "pub_male_survival" = male_life$CP[-c(1, 2)], 
+                      "pub_all_survival" = all_life_netherlands$CP[-1], 
+                      "pub_female_survival" = female_life_netherlands$CP[-1], 
+                      "pub_male_survival" = male_life_netherlands$CP[-1], 
                       "cohort_all_survival" = all_cp_survival, 
                       "cohort_female_survival" = female_cp_survival, 
                       "cohort_male_survival" = male_cp_survival) %>% 
