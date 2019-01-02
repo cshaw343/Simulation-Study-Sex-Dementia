@@ -131,61 +131,47 @@ sex_dem_sim <- function(){
   }
   
   #---- Standardize Cij values ----
-  #We actually don't think this is right
-  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
-  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-  #   set_colnames(variable_names$std_Cij_varnames)
-  # 
-  # obs %<>% bind_cols(., std_Cij)
-
-  #** Proofread this code!**
-  # #---- Create a competing risk outcome ----
-  # demij <- obs %>% dplyr::select(Cij_varnames) %>%
-  #   mutate_all(funs((. < dem_cut)*1)) %>% set_colnames(dem_varnames)
-  # 
-  # dem_wave <- vector(length = num_obs)  #Wave at which dementia was diagnosed
-  # for(i in 1:nrow(demij)){
-  #   dem_time <- min(which(demij[i, ] == 1))
-  #   if(is.finite(dem_time)){
-  #     demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
-  #     dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
-  #   } else{
-  #     dem_wave[i] = NA
-  #   }
-  # }
-  # 
-  # obs %<>% bind_cols(., demij) %>%
-  #   mutate("dem_wave" = dem_wave) %>%
-  #   mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
-  #          "timetodem" = dem_onset(.),    #Time to dementia diagnosis
-  #          "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
-  #          "dem_death" =                  #Dementia status at death
-  #            case_when(dem == 1 & timetodem <= survtime ~ 1,
-  #                      study_death == 1 &
-  #                        (dem == 0 | (dem == 1 & timetodem > survtime)) ~
-  #                        2)) %>%
-  #   mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
-  #   mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
-  #                                      survtime),
-  #          "ageatdem_death" = age0 + timetodem_death,
-  #          "dem_alive" = case_when(dem_death == 1 ~ 1,
-  #                                  TRUE ~ 0))
-  # 
-  # #---- Compute person years ----
-  # contributed <- (obs$timetodem_death)%%5
-  # cases_py1000 <- vector(length = num_tests)
-  # for(j in 1:num_tests){
-  #   last_test = j - 1
-  #   last_wave <- paste("dem", last_test, sep = "")
-  #   this_wave <- paste("dem", j, sep = "")
-  #   dem_data <- demij %>% dplyr::select(c(last_wave, this_wave))
-  #   dem_data %<>% cbind(., contributed)
-  #   dem_data %<>% filter(!! as.name(last_wave) == 0) %>%
-  #     mutate("PY" = case_when(!! as.name(this_wave) == 0 ~ 5,
-  #                             TRUE ~ contributed))
-  #   cases_py1000[j] = 1000*
-  #     sum(dem_data[, this_wave], na.rm = TRUE)/sum(dem_data$PY)
-  # }
+  std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
+    map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
+    set_colnames(variable_names$std_Cij_varnames)
+  
+  obs %<>% bind_cols(., std_Cij)
+  
+  #---- Create a competing risk outcome ----
+  dem_cuts_mat <- matrix(demcuts, nrow = nrow(obs), ncol = length(demcuts), 
+                         byrow = TRUE)
+  
+  demij <- obs %>% dplyr::select(variable_names$std_Cij_varnames) %>% 
+    set_colnames(variable_names$dem_varnames)
+  demij <- (demij < dem_cuts_mat)*1
+  
+  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
+  for(i in 1:nrow(demij)){
+    dem_time <- min(which(demij[i, ] == 1))
+    if(is.finite(dem_time)){
+      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
+    } else{
+      dem_wave[i] = NA
+    }
+  }
+  
+  obs %<>% cbind(., demij) %>%
+    mutate("dem_wave" = dem_wave) %>%
+    mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
+           "timetodem" = dem_onset(., demcuts),    #Time to dementia diagnosis
+           "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
+           "dem_death" =                  #Dementia status at death
+             case_when(dem == 1 & timetodem <= survtime ~ 1,
+                       study_death == 1 &
+                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~
+                         2)) %>%
+    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
+    mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
+                                       survtime),
+           "ageatdem_death" = age0 + timetodem_death,
+           "dem_alive" = case_when(dem_death == 1 ~ 1,
+                                   TRUE ~ 0))
 
   return("obs" = obs)
 }
