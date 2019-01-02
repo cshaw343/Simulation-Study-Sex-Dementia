@@ -88,7 +88,7 @@ hazard_plot<- ggplot(haz_plot_data, aes(Age, value), color = variable) +
   theme_minimal()
 
 #Saving plot output
-ggsave(filename = "hazard_plot_2014life.jpeg", width = 10, height = 7, 
-       plot = hazard_plot)
+#ggsave(filename = "hazard_plot_2014life.jpeg", width = 10, height = 7, 
+#       plot = hazard_plot)
 
 
