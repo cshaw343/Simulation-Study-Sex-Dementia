@@ -12,7 +12,7 @@ par_file <- "RScripts/sex-dementia_sim_parA.R" #This syntax is used for file nam
 source(par_file)
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/life_table2014.R")
-source("RScripts/dementia_incidence2000-2013.R")
+source("RScripts/dementia_incidence_EURODEM_pooled.R")
 source("RScripts/sex-dementia_sim_run.R")
 
 #---- Checking one simulated dataset----
@@ -267,10 +267,6 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
 #---- Comparing with dementia incidence data ----
 
-dem_1000py <- sample_sim["obs", ] %>% do.call(rbind, .) %>% 
-  dplyr::select(dput(dem_varnames)) %>% 
-  map_dbl(.f = 
-            ~1000*sum(., na.rm = TRUE)/(int_time*(length(.) - sum(is.na(.)))))
 
 
 
