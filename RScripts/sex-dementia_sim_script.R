@@ -159,7 +159,7 @@ sex_dem_sim <- function(){
   obs %<>% cbind(., demij) %>%
     mutate("dem_wave" = dem_wave) %>%
     mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
-           "timetodem" = dem_onset(., demcuts),    #Time to dementia diagnosis
+           "timetodem" = dem_onset(., dem_cuts),    #Time to dementia diagnosis
            "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
            "dem_death" =                  #Dementia status at death
              case_when(dem == 1 & timetodem <= survtime ~ 1,
