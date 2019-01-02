@@ -266,6 +266,32 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
   
 #---- Comparing with dementia incidence data ----
+#These cases start at age 55
+cases_py1000 <- vector(length = num_tests)
+names(cases_py1000) <- variable_names$age_varnames[-1]
+contributed <- (results_mat$timetodem_death)%%5
+for(slot in 1:num_tests + 1){
+    dem_last_wave <- paste("dem", (slot - 1), sep = "")
+    dem_this_wave <- paste("dem", slot, sep = "")
+    death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
+    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+      
+    PY_data <- results_mat %>% dplyr::select(death_last_wave, death_this_wave, 
+                                               dem_last_wave, dem_this_wave) %>% 
+      cbind(., contributed) %>% 
+      filter(!! as.name(death_last_wave) == 0 & 
+                 !! as.name(dem_last_wave) == 0) %>% 
+      mutate("person_years" = 
+                case_when(!! as.name(death_this_wave) == 1 | 
+                            !! as.name(dem_this_wave) == 1 ~ contributed, 
+                          TRUE ~ 5))
+      
+    cases_py1000[slot] = 1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+      sum(PY_data$person_years)
+  }
+
+  
+  
 
 
 
