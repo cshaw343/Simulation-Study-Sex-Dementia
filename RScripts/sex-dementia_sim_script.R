@@ -138,7 +138,7 @@ sex_dem_sim <- function(){
   obs %<>% bind_cols(., std_Cij)
   
   #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(demcuts, nrow = nrow(obs), ncol = length(demcuts), 
+  dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
                          byrow = TRUE)
   
   demij <- obs %>% dplyr::select(variable_names$std_Cij_varnames) %>% 
