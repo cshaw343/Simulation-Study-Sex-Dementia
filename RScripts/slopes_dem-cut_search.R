@@ -247,16 +247,17 @@ best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
 cluster <- makeCluster(detectCores() - 5, type = "PSOCK")
 clusterEvalQ(cl = cluster, {
+  if (!require("pacman")) 
+    install.packages("pacman", repos='http://cran.us.r-project.org')
+  
+  p_load("tidyverse", "magrittr", "MASS")
+  
   source("RScripts/sex-dementia_sim_parA.R") 
   source("RScripts/variable_names.R") 
   source("RScripts/cognitive_function_model.R") 
   source("RScripts/survival_times.R") 
   source("RScripts/dementia_onset.R")
   
-  if (!require("pacman")) 
-    install.packages("pacman", repos='http://cran.us.r-project.org')
-  
-  p_load("tidyverse", "magrittr", "MASS")
 }) 
 
 clusterExport(cl = cluster, 
@@ -280,9 +281,40 @@ best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <-
   parameters[(length(parameters)/2 + 1):length(parameters)]
 best_slopes_cuts[length(parameters)/2, "diff"] <- opt$value
 write_csv(best_slopes_cuts[1:(length(parameters)/2), ], 
-          "Results/slopes_dem-cut_search.csv")
+          paste("Results/slopes_dem-cut_search_", 
+                format(Sys.time(), "%d-%b-%Y %H.%M"), ".csv", 
+          sep = ""))
 
 #Finding parameters based on the older cohorts
+#Trying to repeat the optimization many times and take an average (like lambda search)
+
+#For Visit Age 75:
+last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
+this_slot <- last_slot + 1
+index <- this_slot - 3
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]]))
+search_75 <- replicate(5, 
+                       optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
+                                     age = dem_inc_table[[index, "Visit_Age"]], 
+                                     pub_inc = 
+                                       dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
+                                     obs = old_cohort, 
+                                     old_slopes = best_slopes_cuts[1:max(which(!is.na(
+                                       best_slopes_cuts[, "slope"]))), "slope"], 
+                                     old_demcuts = best_slopes_cuts[1:max(which(!is.na(
+                                       best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
+                                     upper = c(0, (slopes_cuts[2] + 0.75)), 
+                                     lower = c(-0.15, slopes_cuts[2]), 
+                                     parallel = list(cl = cluster)))
+
+avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
+  colMeans()
+avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
+  colMeans()
+
+
+
+
 for(i in 2:nrow(dem_inc_table)){
   if(i == 2){
     last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
