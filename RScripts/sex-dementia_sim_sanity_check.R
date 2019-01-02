@@ -266,8 +266,7 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
   
 #---- Comparing with dementia incidence data ----
-#Make sure the appropriate return values are "turned on" in the simulation script
-sample_sim <- replicate(35, sex_dem_sim())
+
 dem_1000py <- sample_sim["obs", ] %>% do.call(rbind, .) %>% 
   dplyr::select(dput(dem_varnames)) %>% 
   map_dbl(.f = 
