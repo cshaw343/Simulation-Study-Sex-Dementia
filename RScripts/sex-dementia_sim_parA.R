@@ -41,6 +41,11 @@ search_results <-
   read_csv(paste0("C:/Users/Staff/Dropbox/Gender_dementia_FineGray/", 
                   "/Simulation-Study-Sex-Dementia/Results/", 
                   "slopes_dem-cut_search_01022019.csv"))
+#Filling in rows based on new average values
+search_results[5, 2:4] <- best_slopes_cuts[5, 2:4]
+search_results[6, 2:4] <- best_slopes_cuts[6, 2:4]
+search_results[7, 2:4] <- best_slopes_cuts[7, 2:4]
+search_results[8, 2:4] <- best_slopes_cuts[8, 2:4]
 #Filling in the intermediate results table (just to check)
 search_results[9:10, 2] <- 0
 search_results[9:10, 3] <- search_results[8, 3]
