@@ -12,7 +12,7 @@ par_file <- "RScripts/sex-dementia_sim_parA.R" #This syntax is used for file nam
 source(par_file)
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/life_table2014.R")
-source("RScripts/dementia_incidence2000-2013.R")
+source("RScripts/dementia_incidence_EURODEM_pooled.R")
 source("RScripts/sex-dementia_sim_run.R")
 
 #---- Checking one simulated dataset----
@@ -266,12 +266,33 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
   
 #---- Comparing with dementia incidence data ----
-#Make sure the appropriate return values are "turned on" in the simulation script
-sample_sim <- replicate(35, sex_dem_sim())
-dem_1000py <- sample_sim["obs", ] %>% do.call(rbind, .) %>% 
-  dplyr::select(dput(dem_varnames)) %>% 
-  map_dbl(.f = 
-            ~1000*sum(., na.rm = TRUE)/(int_time*(length(.) - sum(is.na(.)))))
+#These cases start at age 55
+cases_py1000 <- vector(length = num_tests)
+names(cases_py1000) <- variable_names$age_varnames[-1]
+contributed <- (results_mat$timetodem_death)%%5
+for(slot in 1:num_tests + 1){
+    dem_last_wave <- paste("dem", (slot - 1), sep = "")
+    dem_this_wave <- paste("dem", slot, sep = "")
+    death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
+    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+      
+    PY_data <- results_mat %>% dplyr::select(death_last_wave, death_this_wave, 
+                                               dem_last_wave, dem_this_wave) %>% 
+      cbind(., contributed) %>% 
+      filter(!! as.name(death_last_wave) == 0 & 
+                 !! as.name(dem_last_wave) == 0) %>% 
+      mutate("person_years" = 
+                case_when(!! as.name(death_this_wave) == 1 | 
+                            !! as.name(dem_this_wave) == 1 ~ contributed, 
+                          TRUE ~ 5))
+      
+    cases_py1000[slot] = 1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+      sum(PY_data$person_years)
+  }
+
+  
+  
+
 
 
 
