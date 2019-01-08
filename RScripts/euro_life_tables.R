@@ -10,7 +10,7 @@ p_load("tidyverse", "magrittr")
 
 #---- Source Files ----
 source("RScripts/misc_custom_functions.R")
-source("RScripts/life_table2014.R")
+source("RScripts/life_table2014.R") #For the purposes of comparing Euro with US data
 
 #---- Hazard Function ----
 haz <- function(age, logprobs){
