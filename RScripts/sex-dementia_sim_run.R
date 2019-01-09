@@ -32,7 +32,9 @@ for(r in 1:nrow(sim_results)){
   results_mat[, r] <- unlist(sim_results[r, ])
 }
 
-results_mat %<>% as.data.frame() %>% set_colnames(dimnames(sim_results)[[1]])
+results_mat %<>% as.data.frame() %>% 
+  set_colnames(dimnames(sim_results)[[1]]) %>%
+  saveRDS("Data/test_sim_results")
 
 
 
