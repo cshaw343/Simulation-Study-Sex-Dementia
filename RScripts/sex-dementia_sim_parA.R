@@ -6,6 +6,11 @@
 # Remaining LE at age 50:  33.2 years for F and 29.6 years for M
 # This is a test change
 #*******************************************************************************
+#---- Package Loading and Options ----
+if (!require("pacman")) 
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+
+p_load("tidyverse")
 
 #---- Number of observations ----
 num_obs <- 1000
@@ -37,18 +42,12 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 
 #---- Parameters for Cij ----
 #Read in the parameter table from the slopes_dem-cut_search.R script
-search_results <- 
-  read_csv(paste0("C:/Users/Staff/Dropbox/Gender_dementia_FineGray/", 
-                  "/Simulation-Study-Sex-Dementia/Results/", 
-                  "slopes_dem-cut_search_01022019.csv"))
-#Filling in rows based on new average values
-search_results[5, 2:4] <- best_slopes_cuts[5, 2:4]
-search_results[6, 2:4] <- best_slopes_cuts[6, 2:4]
-search_results[7, 2:4] <- best_slopes_cuts[7, 2:4]
-search_results[8, 2:4] <- best_slopes_cuts[8, 2:4]
+path_to_data <- "/Users/crystal/Desktop/Simulation-Study-Sex-Dementia/Data/"
+best_slopes_cuts <- read_csv(paste0(path_to_data, "best_slopes_cuts.csv"))
+
 #Filling in the intermediate results table (just to check)
-search_results[9:10, 2] <- 0
-search_results[9:10, 3] <- search_results[8, 3]
+best_slopes_cuts[8:10, "slope"] <- 0
+best_slopes_cuts[8:10, "dem_cut"] <- best_slopes_cuts[7, "dem_cut"]
 
 #Cognitive function for person i at time j
 b00 <- 0      #Cognitive intercept for females
@@ -60,7 +59,7 @@ b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive interce
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 cij_knots <- seq(55, 95, by = 5) #Specify which ages to place knots
-cij_slopes <- head(c(0, search_results$slope), -1)
+cij_slopes <- head(c(0, best_slopes_cuts$slope), -1)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -83,4 +82,4 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script
-dem_cuts <- head(c(-2.5, search_results$dem_cut), -1)
+dem_cuts <- head(c(-2.5, best_slopes_cuts$dem_cut), -1)
