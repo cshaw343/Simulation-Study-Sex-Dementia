@@ -232,9 +232,6 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 
 #---- Running the optimization ----
 dem_inc_table <- EURODEM_inc_rates
-young_cohort <- generate_base_data(n = 10000)
-old_cohort <- generate_base_data(n = 20000)
-very_old_cohort <- generate_base_data(n = 100000)
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 4) %>% as.data.frame()
 colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", #"dem_inc_rate", 
@@ -266,24 +263,28 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #Finding the parameters based on the young cohort
-slopes_cuts = c(rep(0, 4), rep(-2.5, 4))
-opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
-                     age = dem_inc_table[[1, "Visit_Age"]], 
-                     pub_inc = dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
-                     obs = young_cohort,
-                     upper = c(rep(0, 4), rep(-1.75, 4)), 
-                     lower = c(rep(-0.05, 4), rep(-2.5, 4)), 
-                     parallel = list(cl = cluster))
-parameters <- opt$par
+slopes_cuts = c(seq(0, 0.15, by = 0.05)*-1, rep(-2.5, 4))
+first_search <- 
+  replicate(10, 
+            optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
+                          age = dem_inc_table[[1, "Visit_Age"]], 
+                          pub_inc = 
+                            dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
+                          obs = generate_base_data(n = 10000),
+                          upper = c(rep(0, 4), rep(-2, 4)), 
+                          lower = c(rep(-0.05, 4), rep(-2.5, 4)), 
+                          parallel = list(cl = cluster)))
+avg_first_pars <- as_tibble(do.call(rbind, first_search["par", ])) %>%
+  colMeans()
+avg_first_diffs <- as_tibble(do.call(rbind, first_search["value", ])) %>%
+  colMeans()
 best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
   parameters[1:(length(parameters)/2)]
 best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <- 
   parameters[(length(parameters)/2 + 1):length(parameters)]
 best_slopes_cuts[length(parameters)/2, "diff"] <- opt$value
 write_csv(best_slopes_cuts[1:(length(parameters)/2), ], 
-          paste("Results/slopes_dem-cut_search_", 
-                format(Sys.time(), "%d-%b-%Y %H.%M"), ".csv", 
-          sep = ""))
+          "Data/best_slopes_cuts.csv")
 
 #Finding parameters based on the older cohorts
 #Trying to repeat the optimization many times and take an average (like lambda search)
@@ -399,7 +400,7 @@ avg_diffs_90 <- as_tibble(do.call(rbind, search_90["value", ])) %>%
   colMeans()
 best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_90, avg_diffs_90)
 write_csv(best_slopes_cuts[this_slot, ], 
-          "Results/slopes_dem-cut_search.csv", append = TRUE)
+          "Data/best_slopes_cuts.csv", append = TRUE)
 
 
 
