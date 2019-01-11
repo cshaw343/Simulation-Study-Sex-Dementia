@@ -141,7 +141,7 @@ sex_dem_sim <- function(){
   dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
                          byrow = TRUE)
   
-  demij <- obs %>% dplyr::select(variable_names$std_Cij_varnames) %>% 
+  demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
   
