@@ -174,7 +174,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   dem_cuts_mat <- matrix(demcuts, nrow = nrow(obs), ncol = length(demcuts), 
                          byrow = TRUE)
   
-  demij <- obs %>% dplyr::select(variable_names$std_Cij_varnames) %>% 
+  demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
 
@@ -258,12 +258,11 @@ clusterEvalQ(cl = cluster, {
 }) 
 
 clusterExport(cl = cluster, 
-              varlist = c("dem_inc_table", "young_cohort", "old_cohort", 
-                          "very_old_cohort", "best_slopes_cuts"), 
+              varlist = c("dem_inc_table", "best_slopes_cuts"), 
               envir = environment())
 
 #Finding the parameters based on the young cohort
-slopes_cuts = c(seq(0, 0.15, by = 0.05)*-1, rep(-2.5, 4))
+slopes_cuts = c(seq(0, 0.15, by = 0.05)*-1, seq())
 first_search <- 
   replicate(10, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -271,8 +270,8 @@ first_search <-
                           pub_inc = 
                             dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
                           obs = generate_base_data(n = 10000),
-                          upper = c(rep(0, 4), rep(-2, 4)), 
-                          lower = c(rep(-0.05, 4), rep(-2.5, 4)), 
+                          upper = c(rep(0, 4), rep(-2.5, 4)), 
+                          lower = c(rep(-0.05, 4), rep(-4, 4)), 
                           parallel = list(cl = cluster)))
 avg_first_pars <- as_tibble(do.call(rbind, first_search["par", ])) %>%
   colMeans()
