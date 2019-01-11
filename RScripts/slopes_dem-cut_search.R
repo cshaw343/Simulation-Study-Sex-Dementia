@@ -262,7 +262,7 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #Finding the parameters based on the young cohort
-slopes_cuts = c(seq(0, 0.15, by = 0.05)*-1, seq())
+slopes_cuts = c(seq(0, 0.15, by = 0.05)*-1, seq(2.5, 4, by = 0.5)*-1)
 first_search <- 
   replicate(10, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -271,7 +271,7 @@ first_search <-
                             dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
                           obs = generate_base_data(n = 10000),
                           upper = c(rep(0, 4), rep(-2.5, 4)), 
-                          lower = c(rep(-0.05, 4), rep(-4, 4)), 
+                          lower = c(rep(-0.15, 4), rep(-5, 4)), 
                           parallel = list(cl = cluster)))
 avg_first_pars <- as_tibble(do.call(rbind, first_search["par", ])) %>%
   colMeans()
