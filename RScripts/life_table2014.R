@@ -35,7 +35,8 @@ life <- tibble("Age" = ages,
                "Prob" = Survivors/100000, 
                "logProb" = log(Prob), 
                "CP" = cond_prob(Survivors), 
-               "Haz" = haz(age = Age, logprobs = logProb)) 
+               "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv("Data/US_cohort_table_MF.csv")
 
 male_life <- tibble("MAge" = ages, 
                     "MSurvivors" = c(100000, 88505, 87184, 86156, 84440, 82252, 
@@ -45,7 +46,8 @@ male_life <- tibble("MAge" = ages,
                     "MProb" = MSurvivors/100000,
                     "MlogProb" = log(MProb),
                     "CP" = cond_prob(MSurvivors), 
-                    "MHaz" = haz(age = MAge, logprobs = MlogProb)) 
+                    "MHaz" = haz(age = MAge, logprobs = MlogProb)) %>% 
+  write_csv("Data/US_cohort_table_M.csv")
 
 female_life <- tibble("FAge" = ages, 
                       "FSurvivors" = c(100000, 90380, 89186, 88247, 86556, 
@@ -55,7 +57,8 @@ female_life <- tibble("FAge" = ages,
                       "FProb" = FSurvivors/100000,
                       "FlogProb" = log(FProb),
                       "CP" = cond_prob(FSurvivors), 
-                      "FHaz" = haz(age = FAge, logprobs = FlogProb)) 
+                      "FHaz" = haz(age = FAge, logprobs = FlogProb)) %>% 
+  write_csv("Data/US_cohort_table_F.csv")
 
 Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
 colnames(Hratio) <- c("ratio")
