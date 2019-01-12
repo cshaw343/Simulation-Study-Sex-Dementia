@@ -23,6 +23,7 @@ source("RScripts/variable_names.R")
 source("RScripts/cognitive_function_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
+source("RScripts/misc_custom_functions.R")
 
 #---- Data generation ----
 #Can generate data all the way up to generating cognitive function
@@ -254,6 +255,7 @@ clusterEvalQ(cl = cluster, {
   source("RScripts/cognitive_function_model.R") 
   source("RScripts/survival_times.R") 
   source("RScripts/dementia_onset.R")
+  source("Rscripts/misc_custom_functions.R")
   
 }) 
 
@@ -277,13 +279,15 @@ avg_first_pars <- as_tibble(do.call(rbind, first_search["par", ])) %>%
   colMeans()
 avg_first_diffs <- as_tibble(do.call(rbind, first_search["value", ])) %>%
   colMeans()
-best_slopes_cuts[1:(length(parameters)/2), "slope"] <- 
-  parameters[1:(length(parameters)/2)]
-best_slopes_cuts[1:(length(parameters)/2), "dem_cut"] <- 
-  parameters[(length(parameters)/2 + 1):length(parameters)]
-best_slopes_cuts[length(parameters)/2, "diff"] <- opt$value
-write_csv(best_slopes_cuts[1:(length(parameters)/2), ], 
-          "Data/best_slopes_cuts.csv")
+first_slopes <- avg_first_pars[1:4]
+first_dem_cuts <- avg_first_pars[5:8] %>% force_dec()
+best_slopes_cuts[1:(length(avg_first_pars)/2), "slope"] <- 
+  first_slopes
+best_slopes_cuts[1:(length(avg_first_pars)/2), "dem_cut"] <- 
+  first_dem_cuts
+best_slopes_cuts[length(avg_first_pars)/2, "diff"] <- avg_first_diffs
+write_csv(best_slopes_cuts[1:(length(avg_first_pars)/2), ], 
+          paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"))
 
 #Finding parameters based on the older cohorts
 #Trying to repeat the optimization many times and take an average (like lambda search)
@@ -314,7 +318,8 @@ avg_diffs_75 <- as_tibble(do.call(rbind, search_75["value", ])) %>%
   colMeans()
 best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_75, avg_diffs_75)
 write_csv(best_slopes_cuts[this_slot, ], 
-          "Results/slopes_dem-cut_search.csv", append = TRUE)
+          paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
+          append = TRUE)
 
 #For Visit Age 80:
 last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
