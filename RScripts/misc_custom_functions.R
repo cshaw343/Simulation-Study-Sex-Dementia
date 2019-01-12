@@ -1,4 +1,4 @@
-#---- Conditional Probabilities Function ----
+#---- Conditional probabilities function ----
 cond_prob <- function(x){
   probs <- vector(length = length(x))
   for(i in 2:length(probs)){
@@ -8,7 +8,7 @@ cond_prob <- function(x){
   return(probs)
 }
 
-#---- Recursive Subtraction Function ----
+#---- Recursive subtraction function ----
 sub_recurse <- function(x){
   diffs <- vector(length = length(x))
   for(i in 2:length(diffs)){
@@ -16,4 +16,16 @@ sub_recurse <- function(x){
   }
   diffs[1] <- x[1]
   return(diffs)
+}
+
+#---- Descending vector function ----
+#Force the initial vector of dementia cutoffs in the slopes_dem_cut search to be descending 
+
+force_dec <- function(x){
+  for(i in 2:length(x)){
+    if(x[i] > x[i - 1]){
+      x[i] <- x[i - 1]
+    }
+  }
+  return(x)
 }
