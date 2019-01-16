@@ -17,7 +17,9 @@ options(warnings = -1)
 source("RScripts/sex-dementia_sim_parA.R")
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/euro_life_tables.R")
+source("RScripts/life_table2014.R")
 source("RScripts/variable_names.R")
+
 
 #---- Create datasets for the search ----
 data_gen <- function(){
@@ -158,7 +160,7 @@ find_lambda <- function(unexposed, life_table){
 #actual simulation
 lambda_searches <- 
   replicate(35, find_lambda(unexposed = 0, 
-                           life_table = female_life_netherlands))
+                           life_table = female_life))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
