@@ -16,6 +16,7 @@ options(warn = -1)
 source("RScripts/sex-dementia_sim_parA.R")
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/life_table2014.R")
+source("RScripts/variable_names.R")
 
 #---- Create datsets for the search ----
 data_gen <- function(){
@@ -26,18 +27,20 @@ data_gen <- function(){
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = length(age_varnames)))
-  for(j in 1:length(age_varnames)){
+  ages <- as_tibble(matrix(NA, nrow = num_obs, ncol = 
+                             length(variable_names$age_varnames)))
+  for(j in 1:length(variable_names$age_varnames)){
     if(j == 1){
       ages[, j] = age0 #Creates column of baseline ages
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
   }
-  colnames(ages) <- age_varnames
+  colnames(ages) <- variable_names$age_varnames
   obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% set_colnames(., agec_varnames)
+  c_ages <- as_tibble(ages - mean(age0)) %>% 
+    set_colnames(., variable_names$agec_varnames)
   obs %<>% bind_cols(., c_ages)
   
   #---- Generating "true" cognitive function Cij ----
@@ -62,21 +65,21 @@ data_gen <- function(){
   #Generating noise terms
   eps <- as_tibble(mvrnorm(n = num_obs, 
                            mu = rep(0, num_visits), Sigma = cov_mat)) %>%
-    set_colnames(., eps_varnames)
+    set_colnames(., variable_names$eps_varnames)
   obs %<>% bind_cols(., eps)
   
   #---- Calculating Cij for each individual ----
   #Store Cij values and slope values for each assessment
   compute_Cij <- cog_func(obs)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., Cij_varnames)
+    set_colnames(., variable_names$Cij_varnames)
   slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    set_colnames(., slopeij_varnames)
+    set_colnames(., variable_names$slopeij_varnames)
   obs %<>% bind_cols(., Cij, slopeij)
   
   #---- Calculating mean Cij by sex ----
   mean_Cij <- obs %>% mutate_at("sex", as.factor) %>% group_by(sex) %>% 
-    dplyr::select(sex, Cij_varnames) %>% summarise_all(mean) %>%
+    dplyr::select(sex, variable_names$Cij_varnames) %>% summarise_all(mean) %>%
     set_colnames(mean_Cij_varnames)
   
   #---- Generate survival time for each person ----
@@ -86,14 +89,15 @@ data_gen <- function(){
   #See Additional notes in README file
   
   #---- Generating uniform random variables per interval for Sij ----
-  USij <- as_tibble(replicate(num_tests, 
+  rij <- as_tibble(replicate(num_tests, 
                               runif(num_obs, min = 0, max = 1))) %>%
-    set_colnames(USij_varnames)
-  obs %<>% bind_cols(., USij)
+    set_colnames(variable_names$rij_varnames)
+  obs %<>% bind_cols(., rij)
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda)) %>% set_colnames(Sij_varnames)
+  Sij <- as.data.frame(survival(obs, lambda)) %>% 
+    set_colnames(variable_names$Sij_varnames)
   obs %<>% bind_cols(., Sij)
   
   return("obs" = obs)
