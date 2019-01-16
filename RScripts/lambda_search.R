@@ -13,9 +13,9 @@ p_load("tidyverse", "magrittr")
 options(warn = -1)
 
 #---- Specify source files ----
-source("sex-dementia_sim_parA.R")
-source("sex-dementia_sim_script.R")
-source("life_table2014.R")
+source("RScripts/sex-dementia_sim_parA.R")
+source("RScripts/sex-dementia_sim_script.R")
+source("RScripts/life_table2014.R")
 
 #---- Create datsets for the search ----
 data_gen <- function(){
