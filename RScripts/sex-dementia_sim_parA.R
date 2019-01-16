@@ -34,7 +34,7 @@ psex <- 0.49
 
 #---- Variances and correlations ----
 cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- 0.005 #Variance of random cognitive slope
+cij_var1 <- 0.01 #Variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -44,8 +44,7 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 #Read in the parameter table from the slopes_dem-cut_search.R script
 search_results <-
   read_csv(paste0(here("Data", 
-                  paste0("best_slopes_cuts_", 
-                         gsub("-", "", Sys.Date()), ".csv"))))
+                  paste0("best_slopes_cuts_20190115.csv"))))
 
 #Filling in the intermediate results table (just to check)
 if(nrow(search_results != 10)){
@@ -66,14 +65,11 @@ b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive interce
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 cij_knots <- seq(55, 95, by = 5) #Specify which ages to place knots
-<<<<<<< HEAD
-#cij_slopes <- head(c(0, best_slopes_cuts$slope), -1)
 #test slopes
-cij_slopes <- c(0, 0, 0, 0, -0.15, 0, 0, -0.25, 0, 0)
-=======
+#cij_slopes <- c(0, 0, 0, 0, -0.15, 0, 0, -0.25, 0, 0)
+
 cij_slopes <- head(c(0, search_results$slope), -1)
 
->>>>>>> a9da94c2461f41c3798a9a9cefe585954bfd15fe
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
@@ -99,10 +95,9 @@ lambda <- c(0.0211, 0.0227, 0.0243, 0.0262, 0.0280, 0.0299, 0.0327, 0.0359,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script
-<<<<<<< HEAD
+
 #dem_cuts <- head(c(-2.5, best_slopes_cuts$dem_cut), -1)
 #test dem_cuts
-dem_cuts <- rep(-3, 10)
-=======
+#dem_cuts <- rep(-3, 10)
 dem_cuts <- head(c(search_results$dem_cut[1], search_results$dem_cut), -1)
->>>>>>> a9da94c2461f41c3798a9a9cefe585954bfd15fe
+
