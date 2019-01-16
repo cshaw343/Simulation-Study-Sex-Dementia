@@ -10,7 +10,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse")
+p_load("tidyverse", "here")
 
 #---- Number of observations ----
 num_obs <- 1000
@@ -42,12 +42,19 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 
 #---- Parameters for Cij ----
 #Read in the parameter table from the slopes_dem-cut_search.R script
-# path_to_data <- "/Users/crystal/Desktop/Simulation-Study-Sex-Dementia/Data/"
-# best_slopes_cuts <- read_csv(paste0(path_to_data, "best_slopes_cuts.csv"))
-# 
-# #Filling in the intermediate results table (just to check)
-# best_slopes_cuts[8:10, "slope"] <- 0
-# best_slopes_cuts[8:10, "dem_cut"] <- best_slopes_cuts[7, "dem_cut"]
+search_results <-
+  read_csv(paste0(here("Data", 
+                  paste0("best_slopes_cuts_", 
+                         gsub("-", "", Sys.Date()), ".csv"))))
+
+#Filling in the intermediate results table (just to check)
+if(nrow(search_results != 10)){
+  row <- nrow(search_results)
+  search_results[(row + 1):10, "slope"] <- 0
+  search_results[(row + 1):10, "dem_cut"] <- search_results[row, "dem_cut"]
+  search_results[, "age"] <- seq(55, 100, by = 5)
+}
+
 
 #Cognitive function for person i at time j
 b00 <- 0      #Cognitive intercept for females
@@ -59,9 +66,14 @@ b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive interce
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 cij_knots <- seq(55, 95, by = 5) #Specify which ages to place knots
+<<<<<<< HEAD
 #cij_slopes <- head(c(0, best_slopes_cuts$slope), -1)
 #test slopes
 cij_slopes <- c(0, 0, 0, 0, -0.15, 0, 0, -0.25, 0, 0)
+=======
+cij_slopes <- head(c(0, search_results$slope), -1)
+
+>>>>>>> a9da94c2461f41c3798a9a9cefe585954bfd15fe
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope
@@ -87,6 +99,10 @@ lambda <- c(0.0211, 0.0227, 0.0243, 0.0262, 0.0280, 0.0299, 0.0327, 0.0359,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script
+<<<<<<< HEAD
 #dem_cuts <- head(c(-2.5, best_slopes_cuts$dem_cut), -1)
 #test dem_cuts
 dem_cuts <- rep(-3, 10)
+=======
+dem_cuts <- head(c(search_results$dem_cut[1], search_results$dem_cut), -1)
+>>>>>>> a9da94c2461f41c3798a9a9cefe585954bfd15fe
