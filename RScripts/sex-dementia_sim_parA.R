@@ -42,14 +42,19 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 
 #---- Parameters for Cij ----
 #Read in the parameter table from the slopes_dem-cut_search.R script
-best_slopes_cuts <-
+search_results <-
   read_csv(paste0(here("Data", 
                   paste0("best_slopes_cuts_", 
                          gsub("-", "", Sys.Date()), ".csv"))))
- 
+
 #Filling in the intermediate results table (just to check)
-best_slopes_cuts[5:10, "slope"] <- 0
-best_slopes_cuts[5:10, "dem_cut"] <- best_slopes_cuts[4, "dem_cut"]
+if(nrow(search_results != 10)){
+  row <- nrow(search_results)
+  search_results[(row + 1):10, "slope"] <- 0
+  search_results[(row + 1):10, "dem_cut"] <- search_results[row, "dem_cut"]
+  search_results[, "age"] <- seq(55, 100, by = 5)
+}
+
 
 #Cognitive function for person i at time j
 b00 <- 0      #Cognitive intercept for females
@@ -61,7 +66,7 @@ b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive interce
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 cij_knots <- seq(55, 95, by = 5) #Specify which ages to place knots
-cij_slopes <- head(c(0, best_slopes_cuts$slope), -1)
+cij_slopes <- head(c(0, search_results$slope), -1)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -84,4 +89,4 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script
-dem_cuts <- head(c(best_slopes_cuts$dem_cut[1], best_slopes_cuts$dem_cut), -1)
+dem_cuts <- head(c(search_results$dem_cut[1], search_results$dem_cut), -1)

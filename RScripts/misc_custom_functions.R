@@ -24,7 +24,7 @@ sub_recurse <- function(x){
 force_dec <- function(x){
   for(i in 2:length(x)){
     if(x[i] > x[i - 1]){
-      x[i] <- x[i - 1]
+      x[i-1] <- x[i]
     }
   }
   return(x)
