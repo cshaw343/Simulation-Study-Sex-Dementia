@@ -107,19 +107,22 @@ Netherlands_total %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Netherlands_cohort_MF_calcs"))
 
 Netherlands_M %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Netherlands_cohort_M_calcs"))
 
 Netherlands_F %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Netherlands_cohort_F_calcs"))
 
 Denmark_total %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
