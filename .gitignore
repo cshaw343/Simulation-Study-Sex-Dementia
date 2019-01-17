@@ -27,3 +27,6 @@ vignettes/*.pdf
 
 # Meeting files
 Meetings/*
+
+#Test simulation results
+Data/test_sim_results*
