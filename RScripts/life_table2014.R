@@ -35,29 +35,35 @@ life <- tibble("Age" = ages,
                "Prob" = Survivors/100000, 
                "logProb" = log(Prob), 
                "CP" = cond_prob(Survivors), 
-               "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+               "Haz" = haz(age = Age, logprobs = logProb), 
+               "Country" = "US", 
+               "Sex" = "both") %>% 
   write_csv("Data/US_cohort_table_MF.csv")
 
-male_life <- tibble("MAge" = ages, 
-                    "MSurvivors" = c(100000, 88505, 87184, 86156, 84440, 82252, 
+male_life <- tibble("Age" = ages, 
+                    "Survivors" = c(100000, 88505, 87184, 86156, 84440, 82252, 
                                      79890, 77514, 74432, 71244, 67553, 62965, 
                                      56917, 49218, 39668, 28316, 17128, 7920, 
                                      2527, 556, 62), 
-                    "MProb" = MSurvivors/100000,
-                    "MlogProb" = log(MProb),
-                    "CP" = cond_prob(MSurvivors), 
-                    "MHaz" = haz(age = MAge, logprobs = MlogProb)) %>% 
+                    "Prob" = Survivors/100000,
+                    "logProb" = log(Prob),
+                    "CP" = cond_prob(Survivors), 
+                    "Haz" = haz(age = Age, logprobs = logProb), 
+                    "Country" = "US", 
+                    "Sex" = "Male") %>% 
   write_csv("Data/US_cohort_table_M.csv")
 
-female_life <- tibble("FAge" = ages, 
-                      "FSurvivors" = c(100000, 90380, 89186, 88247, 86556, 
+female_life <- tibble("Age" = ages, 
+                      "Survivors" = c(100000, 90380, 89186, 88247, 86556, 
                                        84135, 81463, 78713, 75907, 72954, 69452, 
                                        65099, 59438, 52126, 42741, 31344, 19613, 
                                        9515, 3314, 728, 72), 
-                      "FProb" = FSurvivors/100000,
-                      "FlogProb" = log(FProb),
-                      "CP" = cond_prob(FSurvivors), 
-                      "FHaz" = haz(age = FAge, logprobs = FlogProb)) %>% 
+                      "Prob" = Survivors/100000,
+                      "logProb" = log(Prob),
+                      "CP" = cond_prob(Survivors), 
+                      "Haz" = haz(age = Age, logprobs = logProb), 
+                      "Country" = "US", 
+                      "Sex" = "Female") %>% 
   write_csv("Data/US_cohort_table_F.csv")
 
 Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
