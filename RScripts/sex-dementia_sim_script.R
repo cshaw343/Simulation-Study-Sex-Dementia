@@ -44,16 +44,25 @@ sex_dem_sim <- function(){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #Generating random terms for slope and intercept
-    #Covariance matrix for random slope and intercept terms
-    cij_slope_int_cov <- matrix(c(cij_var0, cij_cov, cij_cov, cij_var1), 
-                                nrow = 2, byrow = TRUE)
-  
+    #Covariance matrices for random slope and intercept terms
+    cij_slope_int_cov <- lapply(1:(num_tests + 1), 
+                                function(x) matrix(NA, nrow = 2, ncol = 2))
+    for(i in 1:(num_tests + 1)){
+      cij_slope_int_cov[[i]] <- matrix(c(cij_var0, cij_cov, 
+                                         cij_cov, cij_var1[i]), 
+                                       nrow = 2, byrow = TRUE)
+    }
+    
     #Generate random terms for each individual
-    cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                             Sigma = cij_slope_int_cov)) %>% 
-      set_colnames(., c("z0i", "z1i"))
-    obs %<>% bind_cols(., cij_slope_int_noise)
-  
+    for(i in 1:(num_tests + 1)){
+      cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+                                               Sigma = 
+                                                 cij_slope_int_cov[[i]])) %>% 
+      set_colnames(., c(paste0("z0_", (i - 1), "i"), 
+                        paste0("z1_", (i - 1), "i")))
+      obs %<>% bind_cols(., cij_slope_int_noise)
+    }
+    
   #Generating noise term (unexplained variance in Cij) for each visit
     #Creating AR(1) correlation matrix
     num_visits = num_tests + 1

@@ -13,16 +13,18 @@ cog_func <- function(knots_ages, slopes, obs){
     t = visit_times[j]
     test_num = test_nums[j]
     eps <- paste("eps", test_num, sep = "")
+    z0 <- paste0("z0_", (j - 1), "i")
+    z1 <- paste0("z1_", (j - 1), "i")
     if(ages[j] <= knots_ages[1]){
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] + 
+      Cij[j] = b00 + obs[, z0] + b01*obs[, "sex"] + 
         b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
-        (extend_slopes[1] + obs[, "z1i"] + b11*obs[, "sex"] +
+        (extend_slopes[1] + obs[, z1] + b11*obs[, "sex"] +
            b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
     } else{
-      Cij[j] = b00 + obs[, "z0i"] + b01*obs[, "sex"] +
+      Cij[j] = b00 + obs[, z0] + b01*obs[, "sex"] +
         b02*obs[, "age0_c50"] + b03*obs[, "U"] + obs[, eps] +
         sum(testXslope[1:(test_num - 1)]) +
-        (sum(extend_slopes[1:test_num]) + obs[, "z1i"] + b11*obs[, "sex"] +
+        (sum(extend_slopes[1:test_num]) + obs[, z1] + b11*obs[, "sex"] +
            b12*obs[, "age0_c50"] + b13*obs[, "U"])*t
     }
   }
