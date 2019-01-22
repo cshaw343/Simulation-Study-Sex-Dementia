@@ -71,10 +71,10 @@ colnames(Hratio) <- c("ratio")
 
 #---- Hazard Plots ----
 #Creating plot data
-female_hazards <- female_life %>% dplyr::select(c("FAge", "FHaz")) %>%
+female_hazards <- female_life %>% dplyr::select(c("Age", "Haz")) %>%
   mutate("Age" = FAge) %>% dplyr::select(-FAge) %>% melt(., id.vars = "Age")
 
-male_hazards <- male_life %>% dplyr::select(c("MAge", "MHaz")) %>%
+male_hazards <- male_life %>% dplyr::select(c("Age", "Haz")) %>%
   mutate("Age" = MAge) %>% dplyr::select(-MAge) %>% melt(., id.vars = "Age")
 
 haz_ratios <- Hratio %>% cbind(ages) %>% 
@@ -85,9 +85,9 @@ haz_plot_data <- rbind(female_hazards, male_hazards, haz_ratios)
 
 #Creating plot
 hazard_plot<- ggplot(haz_plot_data, aes(Age, value), color = variable) + 
-  geom_line(data = subset(haz_plot_data, variable == "FHaz"), 
+  geom_line(data = subset(haz_plot_data, variable == "Haz"), 
             aes(color = variable), size = 1) + 
-  geom_line(data = subset(haz_plot_data, variable == "MHaz"), 
+  geom_line(data = subset(haz_plot_data, variable == "Haz"), 
             aes(color = variable), size = 1, alpha = 0.6) + 
   geom_line(data = subset(haz_plot_data, variable == "ratio"), 
             aes(color = variable), size = 1) + ylim(0, 1.25) + 
