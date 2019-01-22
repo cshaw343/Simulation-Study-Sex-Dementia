@@ -34,7 +34,7 @@ psex <- 0.49
 
 #---- Variances and correlations ----
 cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- 0.01 #Variance of random cognitive slope
+cij_var1 <- seq(0.001, 0.01, len = 11) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -53,7 +53,6 @@ if(nrow(search_results != 10)){
   search_results[(row + 1):10, "dem_cut"] <- search_results[row, "dem_cut"]
   search_results[, "age"] <- seq(55, 100, by = 5)
 }
-
 
 #Cognitive function for person i at time j
 b00 <- 0      #Cognitive intercept for females
