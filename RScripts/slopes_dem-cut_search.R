@@ -67,7 +67,7 @@ generate_base_data <- function(n){
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+    cij_slope_int_noise <- as_tibble(mvrnorm(n = nrow(obs), mu = rep(0, 2), 
                                              Sigma = 
                                                cij_slope_int_cov[[i]])) %>% 
       set_colnames(., c(paste0("z0_", (i - 1), "i"), 
