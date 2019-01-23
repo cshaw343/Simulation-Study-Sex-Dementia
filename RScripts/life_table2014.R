@@ -72,10 +72,10 @@ colnames(Hratio) <- c("ratio")
 #---- Hazard Plots ----
 #Creating plot data
 female_hazards <- female_life %>% dplyr::select(c("Age", "Haz")) %>%
-  mutate("Age" = FAge) %>% dplyr::select(-FAge) %>% melt(., id.vars = "Age")
+  mutate("Age" = Age) %>% dplyr::select(-Age) %>% melt(., id.vars = "Age")
 
 male_hazards <- male_life %>% dplyr::select(c("Age", "Haz")) %>%
-  mutate("Age" = MAge) %>% dplyr::select(-MAge) %>% melt(., id.vars = "Age")
+  mutate("Age" = Age) %>% dplyr::select(-Age) %>% melt(., id.vars = "Age")
 
 haz_ratios <- Hratio %>% cbind(ages) %>% 
   mutate("Age" = ages) %>% dplyr::select(-ages) %>% 
