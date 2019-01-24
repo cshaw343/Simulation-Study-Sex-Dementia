@@ -305,7 +305,7 @@ write_csv(best_slopes_cuts[1:(length(avg_first_pars)/2), ],
 last_slot <- max(which(!is.na(best_slopes_cuts[, "slope"])))
 this_slot <- last_slot + 1
 index <- this_slot - 3
-slopes_cuts = c(-0.04, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
 search_75 <- 
   replicate(5, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -317,7 +317,7 @@ search_75 <-
                                        best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
-                          upper = c(-0.04, best_slopes_cuts[[last_slot, "dem_cut"]]), 
+                          upper = c(0, best_slopes_cuts[[last_slot, "dem_cut"]]), 
                           lower = c(-0.15, best_slopes_cuts[[last_slot, "dem_cut"]] - 1), 
                           parallel = list(cl = cluster)))
 
@@ -334,7 +334,7 @@ write_csv(best_slopes_cuts[this_slot, ],
 last_slot <- max(which(!is.na(best_slopes_cuts[, "slope"])))
 this_slot <- last_slot + 1
 index <- this_slot - 3
-slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
+slopes_cuts = c(0, -6)
 search_80 <- 
   replicate(5, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -346,8 +346,8 @@ search_80 <-
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
-                          upper = c(0, -4.6), 
-                          lower = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 1)), 
+                          upper = c(0, -5.9), 
+                          lower = c(0, -7), 
                           parallel = list(cl = cluster)))
 
 avg_pars_80 <- as_tibble(do.call(rbind, search_80["par", ])) %>%
@@ -363,7 +363,7 @@ write_csv(best_slopes_cuts[this_slot, ],
 last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
 this_slot <- last_slot + 1
 index <- this_slot - 3
-slopes_cuts = c(-0.03332, (best_slopes_cuts[[last_slot, "dem_cut"]] + 0.4))
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
 search_85 <- 
   replicate(5, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -375,8 +375,8 @@ search_85 <-
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
-                          upper = c(-0.03332, (slopes_cuts[2] + 0.75)), 
-                          lower = c(-0.03332, slopes_cuts[2]), 
+                          upper = c(0, best_slopes_cuts[[last_slot, "dem_cut"]]), 
+                          lower = c(-0.15, (best_slopes_cuts[[last_slot, "dem_cut"]] - 1)), 
                           parallel = list(cl = cluster)))
 
 avg_pars_85 <- as_tibble(do.call(rbind, search_85["par", ])) %>%
@@ -385,14 +385,14 @@ avg_diffs_85 <- as_tibble(do.call(rbind, search_85["value", ])) %>%
   colMeans()
 best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_85, avg_diffs_85)
 write_csv(best_slopes_cuts[this_slot, ], 
-          "Results/slopes_dem-cut_search.csv", append = TRUE)
+          paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
+          append = TRUE)
 
 #For Visit Age 90:
 last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
 this_slot <- last_slot + 1
 index <- this_slot - 3
-#slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] + 0.25))
-slopes_cuts = c(0, (-0.5658))
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
 search_90 <- 
   replicate(1, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -404,8 +404,8 @@ search_90 <-
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
-                          upper = c(0, -0.5658), 
-                          lower = c(-0.4,-0.5658), 
+                          upper = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]])), 
+                          lower = c(-0.4,(best_slopes_cuts[[last_slot, "dem_cut"]] - 1)), 
                           parallel = list(cl = cluster)))
 
 avg_pars_90 <- as_tibble(do.call(rbind, search_90["par", ])) %>%
@@ -414,7 +414,37 @@ avg_diffs_90 <- as_tibble(do.call(rbind, search_90["value", ])) %>%
   colMeans()
 best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_90, avg_diffs_90)
 write_csv(best_slopes_cuts[this_slot, ], 
-          "Data/best_slopes_cuts.csv", append = TRUE)
+          paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
+          append = TRUE)
+
+#For Visit Age 95:
+last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
+this_slot <- last_slot + 1
+index <- this_slot - 3
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
+search_95 <- 
+  replicate(1, 
+            optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
+                          age = dem_inc_table[[index, "Visit_Age"]], 
+                          pub_inc = 
+                            dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
+                          obs = generate_base_data(n = 100000), 
+                          old_slopes = best_slopes_cuts[1:max(which(!is.na(
+                            best_slopes_cuts[, "slope"]))), "slope"], 
+                          old_demcuts = best_slopes_cuts[1:max(which(!is.na(
+                            best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
+                          upper = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]])), 
+                          lower = c(-0.4,(best_slopes_cuts[[last_slot, "dem_cut"]] - 1)), 
+                          parallel = list(cl = cluster)))
+
+avg_pars_95 <- as_tibble(do.call(rbind, search_95["par", ])) %>%
+  colMeans()
+avg_diffs_95 <- as_tibble(do.call(rbind, search_95["value", ])) %>%
+  colMeans()
+best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_95, avg_diffs_95)
+write_csv(best_slopes_cuts[this_slot, ], 
+          paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
+          append = TRUE)
 
 
 
