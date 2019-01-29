@@ -71,7 +71,7 @@ cij_slopes <- head(c(0, search_results$slope), -1)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
-b13 <- -0.05  #Effect of U on cognitive slope
+b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from euro_life_tables.R 
@@ -85,18 +85,14 @@ g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search_euro.R script
 #Based on 35x3000 = 105000 observations
-#lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            #0.10918, 0.20142, 0.33345)
+lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
+            0.10918, 0.20142, 0.33345)
 
 #Test US hazards
-lambda <- c(0.0211, 0.0227, 0.0243, 0.0262, 0.0280, 0.0299, 0.0327, 0.0359, 
-            0.0387, 0.0420)
+#lambda <- c(0.0211, 0.0227, 0.0243, 0.0262, 0.0280, 0.0299, 0.0327, 0.0359, 
+#            0.0387, 0.0420)
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script
-
-#dem_cuts <- head(c(-2.5, best_slopes_cuts$dem_cut), -1)
-#test dem_cuts
-#dem_cuts <- rep(-3, 10)
 dem_cuts <- head(c(search_results$dem_cut[1], search_results$dem_cut), -1)
 
