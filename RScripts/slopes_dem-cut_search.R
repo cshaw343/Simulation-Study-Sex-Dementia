@@ -441,7 +441,7 @@ avg_pars_95 <- as_tibble(do.call(rbind, search_95["par", ])) %>%
   colMeans()
 avg_diffs_95 <- as_tibble(do.call(rbind, search_95["value", ])) %>%
   colMeans()
-best_slopes_cuts[this_slot, 2:4] <- c(avg_pars_95, avg_diffs_95)
+best_slopes_cuts[this_slot, ] <- c(age, avg_pars_95, avg_diffs_95)
 write_csv(best_slopes_cuts[this_slot, ], 
           paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
           append = TRUE)
