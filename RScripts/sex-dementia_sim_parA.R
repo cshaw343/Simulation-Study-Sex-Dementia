@@ -34,7 +34,7 @@ psex <- 0.49
 
 #---- Variances and correlations ----
 cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- c(seq(0.001, 0.003, len = 7), 0.011, 0.02, rep(0.25, 2)) #Time-dependent variance of random cognitive slope
+cij_var1 <- c(seq(0.001, 0.00233, len = 5), 0.0035, 0.005, 0.011, 0.015, 0.3, 0.4) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -44,7 +44,7 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 #Read in the parameter table from the slopes_dem-cut_search.R script
 search_results <-
   read_csv(paste0(here("Data", 
-                  paste0("best_slopes_cuts_20190130.csv"))))
+                  paste0("best_slopes_cuts_20190202.csv"))))
 
 #Filling in the intermediate results table (just to check)
 if(nrow(search_results != 10)){
