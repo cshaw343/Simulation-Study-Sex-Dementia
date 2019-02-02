@@ -334,7 +334,7 @@ write_csv(best_slopes_cuts[this_slot, ],
 last_slot <- max(which(!is.na(best_slopes_cuts[, "slope"])))
 this_slot <- last_slot + 1
 index <- this_slot - 3
-slopes_cuts = c(0, -6)
+slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]] - 0.5))
 search_80 <- 
   replicate(5, 
             optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
@@ -346,8 +346,8 @@ search_80 <-
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "dem_cut"]))), "dem_cut"], 
-                          upper = c(0, -5.9), 
-                          lower = c(0, -7), 
+                          upper = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]])), 
+                          lower = c(-0.15, best_slopes_cuts[[last_slot, "dem_cut"]] - 1), 
                           parallel = list(cl = cluster)))
 
 avg_pars_80 <- as_tibble(do.call(rbind, search_80["par", ])) %>%
