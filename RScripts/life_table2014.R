@@ -2,7 +2,7 @@
 # 2014 Life Table
 # Source: National Vital Statistics Reports, Vol. 66, No. 4, 
 # August 14, 2017 (pg 48-49)
-# Birth cohort:  1919 - 1921
+# Birth cohort: 1919 - 1921
 # **Used data with race aggregated**
 #***************************************************************
 
@@ -66,16 +66,16 @@ female_life <- tibble("Age" = ages,
                       "Sex" = "Female") %>% 
   write_csv("Data/US_cohort_table_F.csv")
 
-Hratio <- as.data.frame(male_life$MHaz/female_life$FHaz)
+Hratio <- as.data.frame(male_life$Haz/female_life$Haz)
 colnames(Hratio) <- c("ratio")
 
 #---- Hazard Plots ----
 #Creating plot data
-female_hazards <- female_life %>% dplyr::select(c("Age", "Haz")) %>%
-  mutate("Age" = Age) %>% dplyr::select(-Age) %>% melt(., id.vars = "Age")
+female_hazards <- female_life %>% dplyr::select(c("Age", "Haz")) %>% 
+  melt(., id.vars = "Age")
 
-male_hazards <- male_life %>% dplyr::select(c("Age", "Haz")) %>%
-  mutate("Age" = Age) %>% dplyr::select(-Age) %>% melt(., id.vars = "Age")
+male_hazards <- male_life %>% dplyr::select(c("Age", "Haz")) %>% 
+  melt(., id.vars = "Age")
 
 haz_ratios <- Hratio %>% cbind(ages) %>% 
   mutate("Age" = ages) %>% dplyr::select(-ages) %>% 
