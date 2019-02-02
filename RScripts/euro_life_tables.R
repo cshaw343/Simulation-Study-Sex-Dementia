@@ -128,38 +128,44 @@ Denmark_total %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Denmark_cohort_MF_calcs"))
 
 Denmark_M %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Denmark_cohort_M_calcs"))
 
 Denmark_F %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
-  
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "Denmark_cohort_F_calcs"))
+
 France_total %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "France_cohort_MF_calcs"))
 
 France_M %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "France_cohort_M_calcs"))
 
 France_F %<>% group_by(Year) %>%
   mutate("Prob" = lx/100000, 
          "logProb" = log(Prob), 
          "CP" = cond_prob(lx), 
-         "Haz" = haz(age = Age, logprobs = logProb))
-
+         "Haz" = haz(age = Age, logprobs = logProb)) %>% 
+  write_csv(here("Data", "France_cohort_F_calcs"))
+  
 #---- Combine tables into one dataset ----
 all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F, 
                     Denmark_total, Denmark_M, Denmark_F, 
