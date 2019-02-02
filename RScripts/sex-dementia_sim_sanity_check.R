@@ -264,7 +264,6 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
                           sep = ""), width = 10, height = 7, 
          plot = survival_male_plot)
   
-  
 #---- Comparing with dementia incidence data ----
 #These cases start at age 55
 results_mat <- readRDS(here("Data", "test_sim_results_20190130"))
