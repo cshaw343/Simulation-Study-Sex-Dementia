@@ -23,7 +23,7 @@ age0 <- rep(50, num_obs)
 int_time <- 5
 
 #Number of assessments
-num_tests <- 10
+num_tests <- 9
 
 #Resulting visit times
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
@@ -34,40 +34,27 @@ psex <- 0.49
 
 #---- Variances and correlations ----
 cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- c(seq(0.001, 0.00233, len = 5), 0.0035, 0.005, 0.011, 0.015, 0.3, 0.4) #Time-dependent variance of random cognitive slope
+cij_var1 <- c(seq(0.001, 0.00233, len = 5), 0.0035, 0.005, 0.011, 0.015, 0.3) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
 #cij_var4 <- 0.19     #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
-#Read in the parameter table from the slopes_dem-cut_search.R script
-search_results <-
-  read_csv(paste0(here("Data", 
-                  paste0("best_slopes_cuts_20190202.csv"))))
-
-#Filling in the intermediate results table (just to check)
-if(nrow(search_results != 10)){
-  row <- nrow(search_results)
-  search_results[(row + 1):10, "slope"] <- 0
-  search_results[(row + 1):10, "dem_cut"] <- search_results[row, "dem_cut"]
-  search_results[, "age"] <- seq(55, 100, by = 5)
-}
-
 #Cognitive function for person i at time j
 b00 <- 0      #Cognitive intercept for females
 b01 <- 0      #Effect of sex on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
+cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
+
 #First value is cognitive slope, the remaining values are changes in cognitive slopes
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
-cij_knots <- seq(55, 95, by = 5) #Specify which ages to place knots
-#test slopes
-#cij_slopes <- c(0, 0, 0, 0, -0.15, 0, 0, -0.25, 0, 0)
-
-cij_slopes <-search_results$slope
+#Based on slopes_dem-cut_search.R script (results from 20190202)
+cij_slopes <- c(-0.00607, -0.0184, -0.0277, -0.0379, -0.00000108, -0.0274, 
+                -0.0326, -0.202, -0.150)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -76,23 +63,20 @@ b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from euro_life_tables.R 
 g1 <- log(c(1.62, 1.90, 2.13, 2.27, 2.22, 2.09, 1.85, 1.61, 1.39, 1.26, 1.18)) 
-g2 <- 0       #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
-g3 <- 0       #Effect of U on log hazard of death
-g4 <- 0       #Interaction effect of sex and age on log hazard of death
-g5 <- 0       #Effect of cognitive slope at time j on log hazard of death
-g6 <- 0       #Effect of cognitive function at time j on log hazard of death
+g2 <- 0     #Effect of age at time j on log hazard of death (exp(0.095) = 1.10)
+g3 <- 0     #Effect of U on log hazard of death
+g4 <- 0     #Interaction effect of sex and age on log hazard of death
+g5 <- 0     #Effect of cognitive slope at time j on log hazard of death
+g6 <- 0     #Effect of cognitive function at time j on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search_euro.R script
 #Based on 35x3000 = 105000 observations
 lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            0.10918, 0.20142, 0.33345)
-
-#Test US hazards
-#lambda <- c(0.0211, 0.0227, 0.0243, 0.0262, 0.0280, 0.0299, 0.0327, 0.0359, 
-#            0.0387, 0.0420)
+            0.10918, 0.20142) 
+            #0.33345)
 
 #---- Dementia Cut Point ----
-#Based on slopes_dem-cut_search.R script
-dem_cuts <- head(c(search_results$dem_cut[1], search_results$dem_cut), -1)
+#Based on slopes_dem-cut_search.R script (results from 20190202)
+dem_cuts <- c(-3.51, -3.56, -3.82, -4.70, -5.29, -5.55, -6.12, -6.45, -6.50)
 
