@@ -74,7 +74,7 @@ g6 <- 0     #Effect of cognitive function at time j on log hazard of death
 #Based on 35x3000 = 105000 observations
 lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
             0.10918, 0.20142) 
-            #0.33345)
+            #0.33345) #Not using HR for age 100
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
