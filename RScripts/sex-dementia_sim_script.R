@@ -139,12 +139,12 @@ sex_dem_sim <- function(){
     }
   }
   
-  #---- Standardize Cij values ----
-  std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
-    map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-    set_colnames(variable_names$std_Cij_varnames)
-  
-  obs %<>% bind_cols(., std_Cij)
+  # #---- Standardize Cij values ----
+  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
+  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
+  #   set_colnames(variable_names$std_Cij_varnames)
+  # 
+  # obs %<>% bind_cols(., std_Cij)
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
@@ -181,6 +181,17 @@ sex_dem_sim <- function(){
            "ageatdem_death" = age0 + timetodem_death,
            "dem_alive" = case_when(dem_death == 1 ~ 1,
                                    TRUE ~ 0))
+  
+  #---- Censor demij based on death data ----
+  for(i in 1:num_obs){
+    if(obs[i, "study_death"] == 1){
+      death_int <- (min(which(deathij[i, ] == 1)))
+      dems <- c(variable_names$dem_varnames[(death_int + 1):
+                                              nrow(variable_names)])
+      obs[i, dems] <- NA
+    }
+  }
+  
 
   return("obs" = obs)
 }
