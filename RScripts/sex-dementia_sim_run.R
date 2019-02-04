@@ -12,7 +12,7 @@ source("RScripts/misc_custom_functions.R")    #Other functions needed
 
 # #---- Running the simulation in parallel----
 # use_cores <- detectCores() - 1                 #Use one less than number of available cores
-# cl <- makeCluster(use_cores, type = "FORK")    #Make a cluster from your cores 
+# cl <- makeCluster(use_cores, type = "FORK")    #Make a cluster from your cores
 #                                                #"FORKING" environment only works on Mac
 # runs = 100
 # #Storing the results of the simulation
@@ -23,7 +23,7 @@ source("RScripts/misc_custom_functions.R")    #Other functions needed
 # proc.time() - start
 
 #---- Running simulation on one core ----
-runs = 100
+runs = 500
 sim_results <- replicate(runs, sex_dem_sim())
 
 #---- Converting results to usable format ----
@@ -34,7 +34,7 @@ for(r in 1:nrow(sim_results)){
 
 results_mat %<>% as.data.frame() %>% 
   set_colnames(dimnames(sim_results)[[1]]) %>%
-  saveRDS("Data/test_sim_results_20190202")
+  saveRDS("Data/test_sim_results_20190203")
 
 
 
