@@ -54,7 +54,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 cij_slopes <- c(-0.00607, -0.0184, -0.0277, -0.0379, -0.00000108, -0.0274, 
-                -0.0326, -0.202, -0.150)
+                -0.0326, -0.202, -0.4)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -78,5 +78,6 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cuts <- c(-3.51, -3.56, -3.82, -4.70, -5.29, -5.55, -6.12, -6.45, -6.50)
+dem_cuts <- c(-4, -3.51, -3.56, -3.82, -4.70, -5.29, -5.55, -6.12, -6.6, 
+              -6.65)
 
