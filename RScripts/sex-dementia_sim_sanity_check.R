@@ -266,7 +266,7 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
   
 #---- Comparing with dementia incidence data ----
 #These cases start at age 55
-results_mat <- readRDS(here("Data", "test_sim_results_20190130"))
+results_mat <- readRDS(here("Data", "test_sim_results_20190203"))
 cases_py1000 <- vector(length = num_tests)
 names(cases_py1000) <- variable_names$age_varnames[-1]
 contributed <- (results_mat$timetodem_death)%%5
