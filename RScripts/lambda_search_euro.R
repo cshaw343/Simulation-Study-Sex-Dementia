@@ -14,12 +14,11 @@ p_load("tidyverse", "magrittr")
 options(warnings = -1)
 
 #---- Specify source files ----
-source("RScripts/sex-dementia_sim_parA.R")
+source("RScripts/sex-dementia_sim_parB.R")
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/euro_life_tables.R")
 source("RScripts/life_table2014.R")
 source("RScripts/variable_names.R")
-
 
 #---- Create datasets for the search ----
 data_gen <- function(){
@@ -50,15 +49,24 @@ data_gen <- function(){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #Generating random terms for slope and intercept
-  #Covariance matrix for random slope and intercept terms
-  cij_slope_int_cov <- matrix(c(cij_var0, cij_cov, cij_cov, cij_var1), 
-                              nrow = 2, byrow = TRUE)
+  #Covariance matrices for random slope and intercept terms
+  cij_slope_int_cov <- lapply(1:(num_tests + 1), 
+                              function(x) matrix(NA, nrow = 2, ncol = 2))
+  for(i in 1:(num_tests + 1)){
+    cij_slope_int_cov[[i]] <- matrix(c(cij_var0, cij_cov, 
+                                       cij_cov, cij_var1[i]), 
+                                     nrow = 2, byrow = TRUE)
+  }
   
   #Generate random terms for each individual
-  cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                           Sigma = cij_slope_int_cov)) %>% 
-    set_colnames(., c("z0i", "z1i"))
-  obs %<>% bind_cols(., cij_slope_int_noise)
+  for(i in 1:(num_tests + 1)){
+    cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
+                                             Sigma = 
+                                               cij_slope_int_cov[[i]])) %>% 
+      set_colnames(., c(paste0("z0_", (i - 1), "i"), 
+                        paste0("z1_", (i - 1), "i")))
+    obs %<>% bind_cols(., cij_slope_int_noise)
+  }
   
   #Generating noise term (unexplained variance in Cij) for each visit
   #Creating AR(1) correlation matrix
@@ -109,7 +117,7 @@ lambdas <- function(sim_data, cp){
   #Function we are trying to optimize
   survivors <- function(L, obs, cp){
     time_left = -log(obs[rij])/(L*exp(g1*obs[, "sex"] + g2*obs[, agec] + 
-                                       g3*obs[, "U"] + 
+                                        g3*obs[, "U"] + 
                                         g4*obs[, "sex"]*obs[, agec] + 
                                         g5*obs[, slope] + g6*obs[, C]))
     alive <- (time_left > 5) * 1
@@ -137,7 +145,7 @@ lambdas <- function(sim_data, cp){
     } else {
       sim_data %<>% filter(alive == 1)
       lambdas[j] = optimise(survivors, 
-                            interval = c(lambdas[j - 1], 2*lambdas[j - 1]), 
+                            interval = c(lambdas[j - 1], 2.75*lambdas[j - 1]), 
                             obs = sim_data, cp = life_prob)$minimum
       Sij <- survival(obs = sim_data, lambda = lambdas)
       alive_now <- (Sij[[j]] > 5)*1
@@ -160,7 +168,7 @@ find_lambda <- function(unexposed, life_table){
 #actual simulation
 lambda_searches <- 
   replicate(35, find_lambda(unexposed = 0, 
-                           life_table = female_life))
+                            life_table = female_life_netherlands))
 
 avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
   colMeans()
