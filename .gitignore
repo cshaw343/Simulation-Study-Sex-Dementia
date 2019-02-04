@@ -32,3 +32,5 @@ Data/test_sim_results*
 DAGs/*
 #Results files
 Results/*
+#Plots
+Plots/*
