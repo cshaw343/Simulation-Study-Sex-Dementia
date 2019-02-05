@@ -5,7 +5,7 @@ if (!require("pacman"))
 p_load("tidyverse", "MASS", "reshape", "magrittr")
 
 options(scipen = 999) #Standard Notation
-options(digits = 3)   #Round to 3 decimal places
+options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 set.seed(10789)

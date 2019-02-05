@@ -12,6 +12,7 @@ if (!require("pacman"))
 
 p_load("tidyverse", "here")
 
+options(digits = 6)
 #---- Number of observations ----
 num_obs <- 1000
 
