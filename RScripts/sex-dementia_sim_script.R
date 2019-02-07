@@ -130,12 +130,17 @@ sex_dem_sim <- function(){
   obs %<>% mutate("survtime" = survtime, 
                   "age_death" = age0 + survtime) #Age at death
   
-  #---- Censor Cij based on death data ----
+  #---- Censor Cij and Sij based on death data ----
   for(i in 1:num_obs){
     if(obs[i, "study_death"] == 1){
       death_int <- (min(which(deathij[i, ] == 1)))
-      Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
-      obs[i, Cs] <- NA
+      if(death_int < 9){
+        Cs <- c(variable_names$Cij_varnames[(death_int + 1):
+                                              nrow(variable_names)])
+        Ss <- c(variable_names$Sij_varnames[(death_int + 1):
+                                              (nrow(variable_names) - 1)])
+        obs[i, c(Cs, Ss)] <- NA
+      }
     }
   }
   
@@ -192,7 +197,6 @@ sex_dem_sim <- function(){
     }
   }
   
-
   return("obs" = obs)
 }
 
