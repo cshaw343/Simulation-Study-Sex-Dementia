@@ -5,7 +5,7 @@ if (!require("pacman"))
 p_load("parallel")
 
 #---- Source Files ----
-source("RScripts/sex-dementia_sim_parA.R")    #The parameter file
+source("RScripts/sex-dementia_sim_parB.R")    #The parameter file
 source("RScripts/variable_names.R")           #Creates all the variable names
 source("RScripts/sex-dementia_sim_script.R")  #The simulation script
 source("RScripts/misc_custom_functions.R")    #Other functions needed
@@ -34,7 +34,7 @@ for(r in 1:nrow(sim_results)){
 
 results_mat %<>% as.data.frame() %>% 
   set_colnames(dimnames(sim_results)[[1]]) %>%
-  saveRDS("Data/test_sim_results_A_20190208")
+  saveRDS("Data/test_sim_results_B_20190208")
 
 
 
