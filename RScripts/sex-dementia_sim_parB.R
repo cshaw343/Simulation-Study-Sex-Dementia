@@ -74,9 +74,8 @@ g6 <- 0       #Effect of cognitive function at time j on log hazard of death
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search_euro.R script
 #Based on 35x3000 = 105000 observations
-lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            0.10918, 0.20142) 
-#0.33345) #Not using HR for age 100
+lambda <- c(0.00334, 0.00486, 0.00719, 0.01116, 0.01933, 0.03444, 0.06568, 
+            0.13646, 0.32339) 
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
