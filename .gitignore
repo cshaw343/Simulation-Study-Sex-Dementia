@@ -28,9 +28,12 @@ vignettes/*.pdf
 Meetings/*
 #Test simulation results
 Data/test_sim_results*
+#Debugging files
+RScripts/debugging*
 #DAGs
 DAGs/*
 #Results files
 Results/*
 #Plots
 Plots/*
+
