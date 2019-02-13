@@ -130,20 +130,6 @@ sex_dem_sim <- function(){
   obs %<>% mutate("survtime" = survtime, 
                   "age_death" = age0 + survtime) #Age at death
   
-  #---- Censor Cij and Sij based on death data ----
-  for(i in 1:num_obs){
-    if(obs[i, "study_death"] == 1){
-      death_int <- (min(which(deathij[i, ] == 1)))
-      if(death_int < 9){
-        Cs <- c(variable_names$Cij_varnames[(death_int + 1):
-                                              nrow(variable_names)])
-        Ss <- c(variable_names$Sij_varnames[(death_int + 1):
-                                              (nrow(variable_names) - 1)])
-        obs[i, c(Cs, Ss)] <- NA
-      }
-    }
-  }
-  
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
   #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
@@ -187,15 +173,59 @@ sex_dem_sim <- function(){
            "dem_alive" = case_when(dem_death == 1 ~ 1,
                                    TRUE ~ 0))
   
-  #---- Censor demij based on death data ----
+  #---- Censor Cij, Sij, and demij based on death data ----
   for(i in 1:num_obs){
     if(obs[i, "study_death"] == 1){
-      death_int <- (min(which(deathij[i, ] == 1)))
-      dems <- c(variable_names$dem_varnames[(death_int + 1):
-                                              nrow(variable_names)])
-      obs[i, dems] <- NA
+      death_slot <- (min(which(deathij[i, ] == 1)))
+      death_varname <- variable_names$deathij_varnames[death_slot]
+      death_int <- str_remove(death_varname, "death")
+      end_int <- str_sub(death_int, str_length(death_int)) 
+      
+      first_C <- paste0("Ci", end_int)
+      first_dem <- paste0("dem", death_int)
+      
+      #Things to censor
+      Cs <- 
+        variable_names$Cij_varnames[
+          c(which(variable_names$Cij_varnames == first_C):
+              length(variable_names$Cij_varnames))]
+      dems <- 
+        variable_names$dem_varnames[
+          c(which(variable_names$dem_varnames == first_dem):
+              length(variable_names$dem_varnames))]
+      
+      if(death_int != "8-9"){
+        end_int_num <- end_int %>% as.numeric()
+        next_end_num <- end_int_num + 1
+        first_S <- paste0("survtime", end_int_num, "-", next_end_num)
+        
+        Ss <- 
+          variable_names$Sij_varnames[
+            c(which(variable_names$Sij_varnames == first_S):
+                length(variable_names$Sij_varnames) - 1)]
+        #Censoring
+        obs[i, c(Ss)] <- NA
+      }
+      #Censoring
+      obs[i, c(Cs, dems)] <- NA
     }
   }
+  
+  #---- Contributed time ----
+  contributed_time <- matrix(nrow = num_obs, ncol = num_tests)
+  for(i in 1:nrow(contributed_time)){
+    last_full_slot <- floor(obs[i, "timetodem_death"]/5)
+    contributed_time[i, 1:last_full_slot] <- 5
+    if(last_full_slot != 9){
+      partial_slot <- last_full_slot + 1
+      contributed_time[i, partial_slot] <- obs[i, "timetodem_death"]%%5
+    }
+  }
+  
+  contributed_time %<>% as.data.frame() %>% 
+    set_colnames(head(variable_names$contributed_varnames, -1))
+  
+  obs %<>% cbind(., contributed_time)
   
   return("obs" = obs)
 }
