@@ -202,7 +202,7 @@ sex_dem_sim <- function(){
         Ss <- 
           variable_names$Sij_varnames[
             c(which(variable_names$Sij_varnames == first_S):
-                length(variable_names$Sij_varnames) - 1)]
+                (length(variable_names$Sij_varnames) - 1))]
         #Censoring
         obs[i, c(Ss)] <- NA
       }
