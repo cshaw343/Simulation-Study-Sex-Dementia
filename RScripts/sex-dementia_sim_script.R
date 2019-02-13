@@ -1,4 +1,4 @@
-#---- Package loading, options, seed ----
+#---- Package loading, options ----
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
@@ -7,8 +7,6 @@ p_load("tidyverse", "MASS", "reshape", "magrittr")
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
-
-set.seed(10789)
 
 #---- Source files ----
 source("RScripts/cognitive_function_model.R")
