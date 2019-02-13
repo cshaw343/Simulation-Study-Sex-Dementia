@@ -56,7 +56,8 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("Sij_varnames", c(survtime, interval_times), sep = "", 
         remove = FALSE) %>%
   #Contributed time labels
-  unite("contributed_varnames", c(contributed, interval_times))
+  unite("contributed_varnames", c(contributed, interval_times), sep = "", 
+        remove = FALSE)
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
