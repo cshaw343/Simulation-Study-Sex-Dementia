@@ -14,7 +14,7 @@ p_load("tidyverse", "magrittr")
 options(warnings = -1)
 
 #---- Specify source files ----
-source("RScripts/sex-dementia_sim_parB.R")
+source("RScripts/sex-dementia_sim_parA.R")
 source("RScripts/sex-dementia_sim_script.R")
 source("RScripts/euro_life_tables.R")
 source("RScripts/life_table2014.R")
