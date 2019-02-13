@@ -21,10 +21,13 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "cij_slope" = rep("cij_slope", num_tests + 1),
                          "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
-                         "survtime" = rep("survtime", num_tests + 1)) %>% 
+                         "survtime" = rep("survtime", num_tests + 1), 
+                         "contributed" = rep("contributed", num_tests + 1)) %>% 
   #Interval timepoints
   unite("interval_times", c(timepoints, timepoints_nobase), sep = "-", 
         remove = FALSE) %>%
+  #Interval timepoints + baseline
+  mutate("interval_times_base" = c(0, head(interval_times, -1))) %>%
   #Age labels
   unite("age_varnames", c(age, timepoints), sep = "", remove = FALSE) %>% 
   #Centered age labels
@@ -32,7 +35,8 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
   #Dementia labels
-  unite("dem_varnames", c(dem, timepoints), sep = "", remove = FALSE) %>% 
+  unite("dem_varnames", c(dem, interval_times_base), sep = "", 
+        remove = FALSE) %>% 
   #Cij labels
   unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
   #Standardized Cij labels
@@ -49,4 +53,12 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("deathij_varnames", c(death, interval_times), sep = "", 
         remove = FALSE) %>%
   #Survival time labels
-  unite("Sij_varnames", c(survtime, interval_times), sep = "", remove = FALSE)
+  unite("Sij_varnames", c(survtime, interval_times), sep = "", 
+        remove = FALSE) %>%
+  #Contributed time labels
+  unite("contributed_varnames", c(contributed, interval_times))
+
+#NAs for those intervals that don't exist in the data set
+variable_names[nrow(variable_names), 
+               c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
+                 "Sij_varnames", "contributed_varnames")] <- NA
