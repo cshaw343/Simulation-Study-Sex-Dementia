@@ -220,7 +220,7 @@ sex_dem_sim <- function(){
                                    TRUE ~ 0))
   
   #---- Contributed time ----
-  contributed_time <- matrix(nrow = num_obs, ncol = num_tests)
+  contributed_time <- matrix(nrow = nrow(obs), ncol = num_tests)
   for(i in 1:nrow(contributed_time)){
     last_full_slot <- floor(obs[i, "timetodem_death"]/5)
     contributed_time[i, 1:last_full_slot] <- 5
