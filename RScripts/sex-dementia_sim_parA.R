@@ -14,7 +14,7 @@ p_load("tidyverse", "here")
 
 options(digits = 6)
 #---- Number of observations ----
-num_obs <- 1000
+num_obs <- 100
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -80,6 +80,6 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cuts <- c(-4, -3.51, -3.56, -3.82, -4.70, -5.29, -5.55, -6.12, -6.6, 
+dem_cuts <- c(-3.51, -3.51, -3.56, -3.82, -4.70, -5.29, -5.55, -6.12, -6.6, 
               -6.65)
 
