@@ -143,12 +143,20 @@ sex_dem_sim <- function(){
   demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
+  for(i in 1:nrow(demij)){
+    dem_time <- min(which(demij[i, ] == 1))
+    if(is.finite(dem_time)){
+      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+    } 
+  }
   obs %<>% cbind(., demij) %>% filter(`dem0` == 0)
   
   #---- Censor Cij, Sij, and demij based on death data ----
-  for(i in 1:num_obs){
+  filtered_deathij <- obs %>% #Need filtered death because we got rid of people with dementia at baseline
+    dplyr::select(head(variable_names$deathij_varnames, -1))
+  for(i in 1:nrow(obs)){
     if(obs[i, "study_death"] == 1){
-      death_slot <- (min(which(deathij[i, ] == 1)))
+      death_slot <- (min(which(filtered_deathij[i, ] == 1)))
       death_varname <- variable_names$deathij_varnames[death_slot]
       death_int <- str_remove(death_varname, "death")
       end_int <- str_sub(death_int, str_length(death_int)) 
@@ -184,13 +192,12 @@ sex_dem_sim <- function(){
     }
   }
   
-  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
-  for(i in 1:nrow(demij)){
-    dem_time <- min(which(demij[i, ] == 1))
-    if(is.finite(dem_time)){
-      demij[i, dem_time:min(which(is.na(demij[i, ])))] = 1  #Changes dementia indicators to 1 after initial diagnosis
-      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
-    } else{
+  filtered_dem <- obs %>% dplyr::select(variable_names$dem_varnames)
+  dem_wave <- vector(length = nrow(filtered_dem))
+  for(i in 1:length(dem_wave)){
+    if(is.finite(min(which(filtered_dem[i, ] == 1)))){
+      dem_wave[i] <- (min(which(filtered_dem[i, ] == 1)) - 1)
+    } else {
       dem_wave[i] = NA
     }
   }
