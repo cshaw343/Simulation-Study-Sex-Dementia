@@ -103,7 +103,8 @@ sex_dem_sim <- function(){
   
   #---- Calculating death data for each individual ----
   #Compute death indicator for each interval
-  #Change death indicators to 1 after death
+  #Change death indicators to 1 after death, 
+  #thus deathi-j means the individual died in that interval or a prior one
   deathij <- as.tibble((Sij < int_time)*1) %>% 
     set_colnames(head(variable_names$deathij_varnames, -1))
   
@@ -142,34 +143,7 @@ sex_dem_sim <- function(){
   demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
-  
-  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
-  for(i in 1:nrow(demij)){
-    dem_time <- min(which(demij[i, ] == 1))
-    if(is.finite(dem_time)){
-      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
-      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
-    } else{
-      dem_wave[i] = NA
-    }
-  }
-  
-  obs %<>% cbind(., demij) %>%
-    mutate("dem_wave" = dem_wave) %>%
-    mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
-           "timetodem" = dem_onset(., dem_cuts),    #Time to dementia diagnosis
-           "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
-           "dem_death" =                  #Dementia status at death
-             case_when(dem == 1 & timetodem <= survtime ~ 1,
-                       study_death == 1 &
-                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~
-                         2)) %>%
-    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
-    mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
-                                       survtime),
-           "ageatdem_death" = age0 + timetodem_death,
-           "dem_alive" = case_when(dem_death == 1 ~ 1,
-                                   TRUE ~ 0))
+  obs %<>% cbind(., demij)
   
   #---- Censor Cij, Sij, and demij based on death data ----
   for(i in 1:num_obs){
@@ -206,8 +180,37 @@ sex_dem_sim <- function(){
       }
       #Censoring
       obs[i, c(Cs, dems)] <- NA
+      demij[i, dems] <- NA
     }
   }
+  
+  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
+  for(i in 1:nrow(demij)){
+    dem_time <- min(which(demij[i, ] == 1))
+    if(is.finite(dem_time)){
+      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
+    } else{
+      dem_wave[i] = NA
+    }
+  }
+  
+  obs %<>%
+    mutate("dem_wave" = dem_wave) %>%
+    mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
+           "timetodem" = dem_onset(., dem_cuts),    #Time to dementia diagnosis
+           "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
+           "dem_death" =                  #Dementia status at death
+             case_when(dem == 1 & timetodem <= survtime ~ 1,
+                       study_death == 1 &
+                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~
+                         2)) %>%
+    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
+    mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
+                                       survtime),
+           "ageatdem_death" = age0 + timetodem_death,
+           "dem_alive" = case_when(dem_death == 1 ~ 1,
+                                   TRUE ~ 0))
   
   #---- Contributed time ----
   contributed_time <- matrix(nrow = num_obs, ncol = num_tests)
