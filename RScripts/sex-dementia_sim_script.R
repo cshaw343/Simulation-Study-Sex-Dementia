@@ -143,7 +143,7 @@ sex_dem_sim <- function(){
   demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
     set_colnames(variable_names$dem_varnames)
   demij <- (demij < dem_cuts_mat)*1
-  obs %<>% cbind(., demij)
+  obs %<>% cbind(., demij) %>% filter(`dem0` == 0)
   
   #---- Censor Cij, Sij, and demij based on death data ----
   for(i in 1:num_obs){
@@ -188,7 +188,7 @@ sex_dem_sim <- function(){
   for(i in 1:nrow(demij)){
     dem_time <- min(which(demij[i, ] == 1))
     if(is.finite(dem_time)){
-      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
+      demij[i, dem_time:min(which(is.na(demij[i, ])))] = 1  #Changes dementia indicators to 1 after initial diagnosis
       dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
     } else{
       dem_wave[i] = NA
