@@ -149,7 +149,7 @@ sex_dem_sim <- function(){
       demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
     } 
   }
-  obs %<>% cbind(., demij) %>% filter(`dem0` == 0)
+  obs %<>% cbind(., demij) #%>% filter(`dem0` == 0)
   
   #---- Censor Cij, Sij, and demij based on death data ----
   filtered_deathij <- obs %>% #Need filtered death because we got rid of people with dementia at baseline
