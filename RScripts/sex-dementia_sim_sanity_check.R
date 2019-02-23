@@ -265,31 +265,35 @@ ggsave(filename = paste("Plots/mean_Fij_parA_", lgd, ".jpeg",
          plot = survival_male_plot)
   
 #---- Comparing with dementia incidence data ----
-#These cases start at age 55
-results_mat <- readRDS(here("Data", "test_sim_results_A_20190208"))
+results_mat <- readRDS(here("Data", "test_sim_results_A_20190222")) 
 cases_py1000 <- vector(length = num_tests)
-names(cases_py1000) <- variable_names$age_varnames[-1]
-contributed <- (results_mat$timetodem_death)%%5
-for(slot in 1:num_tests + 1){
-    dem_last_wave <- paste("dem", (slot - 1), sep = "")
-    dem_this_wave <- paste("dem", slot, sep = "")
-    death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
-    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
-      
-    PY_data <- results_mat %>% dplyr::select(death_last_wave, death_this_wave, 
-                                               dem_last_wave, dem_this_wave) %>% 
-      cbind(., contributed) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-                 !! as.name(dem_last_wave) == 0) %>% 
-      mutate("person_years" = 
-                case_when(!! as.name(death_this_wave) == 1 | 
-                            !! as.name(dem_this_wave) == 1 ~ contributed, 
-                          TRUE ~ 5))
-      
-    cases_py1000[slot] = 1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/
-      sum(PY_data$person_years)
+  
+#Computing female incidence rates
+for(slot in 1:num_tests){
+  if(slot == 1){
+    dem_last_wave <- paste0("dem", (slot - 1))
+    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+    death_last_wave <- paste0("death", (slot - 1))
+    death_this_wave <- paste0("death", (slot - 1), "-", slot)
+    contributed <- paste0("contributed", (slot - 1), "-", slot)
+  } else {
+    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
+    death_this_wave <- paste0("death", (slot - 1), "-", slot)
+    contributed <- paste0("contributed", (slot - 1), "-", slot)
   }
-
+  PY_data <- results_mat %>% 
+    dplyr::select(death_last_wave, death_this_wave, 
+                  dem_last_wave, dem_this_wave, contributed) %>% 
+    filter(!! as.name(death_last_wave) == 0 & 
+             !! as.name(dem_last_wave) == 0) 
+  
+  cases_py1000[slot] = round(1000*(sum(PY_data[, dem_this_wave], 
+                                       na.rm = TRUE)/
+                                     sum(PY_data[, contributed])), 3)
+}
+  
   
   
 
