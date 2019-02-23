@@ -105,16 +105,20 @@ sex_dem_sim <- function(){
   #Compute death indicator for each interval
   #Change death indicators to 1 after death, 
   #thus deathi-j means the individual died in that interval or a prior one
-  deathij <- as.tibble((Sij < int_time)*1) %>% 
-    set_colnames(head(variable_names$deathij_varnames, -1))
+  deathij <- (Sij < int_time)*1 
   
   for(i in 1:nrow(deathij)){
-    death <- min(which(deathij[i, ] == 1))
-    if(is.finite(death)){
-      deathij[i, death:ncol(deathij)] = 1 
+    death_int <- min(which(deathij[i, ] == 1))
+    if(is.finite(death_int)){
+      deathij[i, death_int:ncol(deathij)] = 1 
     }
   }
+  
+  deathij %<>% as.data.frame() %>% 
+    set_colnames(head(variable_names$deathij_varnames, -1))
+  
   obs %<>% bind_cols(., deathij) %>% 
+    mutate("death0" = 0) %>%
     mutate("study_death" = (rowSums(deathij) > 0)*1) #Study death indicator
   
   #Compute overall survival times
@@ -140,15 +144,18 @@ sex_dem_sim <- function(){
   dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
                          byrow = TRUE)
   
-  demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
-    set_colnames(variable_names$dem_varnames)
-  demij <- (demij < dem_cuts_mat)*1
+  demij <- (Cij < dem_cuts_mat)*1 
+  
   for(i in 1:nrow(demij)){
-    dem_time <- min(which(demij[i, ] == 1))
-    if(is.finite(dem_time)){
-      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
-    } 
+    dem_int <- min(which(demij[i, ] == 1))
+    if(is.finite(dem_int)){
+      demij[i, dem_int:ncol(demij)] = 1 #Changes dementia indicator to 1 after dementia diagnosis
+    }
   }
+  
+  demij %<>% as.data.frame() %>% 
+    set_colnames(variable_names$dem_varnames)
+  
   obs %<>% cbind(., demij) #%>% filter(`dem0` == 0)
   
   #---- Censor Cij, Sij, and demij based on death data ----
@@ -235,7 +242,70 @@ sex_dem_sim <- function(){
   
   obs %<>% cbind(., contributed_time)
   
-  return("obs" = obs)
+  #---- Dementia Incidence Rates by Sex ----
+  sim_rates_by_sex <- matrix(ncol = 9, nrow = 2)
+  colnames(sim_rates_by_sex) <- head(variable_names$interval_ages, -1)
+  rownames(sim_rates_by_sex) <- c("Female", "Male")
+  
+  female_data <- obs %>% filter(sex == 0)
+  male_data <- obs %>% filter(sex == 1)
+  
+  #Computing female incidence rates
+  for(slot in 1:num_tests){
+    if(slot == 1){
+      dem_last_wave <- paste0("dem", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      death_last_wave <- paste0("death", (slot - 1))
+      death_this_wave <- paste0("death", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    } else {
+      dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
+      death_this_wave <- paste0("death", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    }
+    PY_data <- female_data %>% 
+      dplyr::select(death_last_wave, death_this_wave, 
+                    dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(death_last_wave) == 0 & 
+               !! as.name(dem_last_wave) == 0) 
+    
+    sim_rates_by_sex[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
+                                                na.rm = TRUE)/
+                                              sum(PY_data[, contributed])), 3)
+  }
+  
+  #Computing male incidence rates
+  for(slot in 1:num_tests){
+    if(slot == 1){
+      dem_last_wave <- paste0("dem", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      death_last_wave <- paste0("death", (slot - 1))
+      death_this_wave <- paste0("death", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    } else {
+      dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
+      death_this_wave <- paste0("death", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    }
+    PY_data <- male_data %>% 
+      dplyr::select(death_last_wave, death_this_wave, 
+                    dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(death_last_wave) == 0 & 
+               !! as.name(dem_last_wave) == 0) 
+    
+    sim_rates_by_sex[2, slot] = round(1000*sum(PY_data[, dem_this_wave], 
+                                               na.rm = TRUE)/
+                                        sum(PY_data[, contributed]), 3)
+  }
+  
+  IRRs <- unlist(sim_rates_by_sex[1, ]/sim_rates_by_sex[2, ]) %>% t()
+  logIRRs <- log(IRRs) %>% as.data.frame()
+  
+  return("logIRRs" = logIRRs)
 }
 
 
