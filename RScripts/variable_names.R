@@ -10,6 +10,8 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "timepoints_nobase" = seq(from = 1, 
                                                    to = (num_tests + 1), 
                                                    by = 1),
+                         "start_ages" = seq(50, 95, by = 5), 
+                         "end_ages" = seq(55, 100, by = 5),
                          "c50" = rep("c50", num_tests + 1),
                          "age" = rep("age", num_tests + 1), 
                          "eps" = rep("eps", num_tests + 1),
@@ -28,6 +30,9 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
         remove = FALSE) %>%
   #Interval timepoints + baseline
   mutate("interval_times_base" = c(0, head(interval_times, -1))) %>%
+  #Interval ages
+  unite("interval_ages", c(start_ages, end_ages), sep = "-", 
+        remove = FALSE) %>%
   #Age labels
   unite("age_varnames", c(age, timepoints), sep = "", remove = FALSE) %>% 
   #Centered age labels
