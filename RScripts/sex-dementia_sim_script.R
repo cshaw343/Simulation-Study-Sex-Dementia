@@ -305,6 +305,7 @@ sex_dem_sim <- function(){
   IRRs <- unlist(sim_rates_by_sex[1, ]/sim_rates_by_sex[2, ]) %>% t()
   logIRRs <- log(IRRs) %>% as.data.frame()
   
+  #---- Values to return ----
   return("logIRRs" = logIRRs)
 }
 
