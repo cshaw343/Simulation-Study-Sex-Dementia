@@ -14,7 +14,7 @@ p_load("tidyverse", "here")
 
 options(digits = 6)
 #---- Number of observations ----
-num_obs <- 100
+num_obs <- 100000
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
@@ -35,7 +35,7 @@ psex <- 0.49
 
 #---- Variances and correlations ----
 cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- c(seq(0.001, 0.00233, len = 5), 0.0035, 0.005, 0.011, 0.015, 0.015) #Time-dependent variance of random cognitive slope
+cij_var1 <- c(seq(0.001, 0.00233, len = 5), 0.0035, 0.005, 0.011, 0.0185, 0.035) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -55,7 +55,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 cij_slopes <- c(-0.00607, -0.0184, -0.0277, -0.0379, -0.00000108, -0.0274, 
-                -0.0326, -0.202, -0.325)
+                -0.0326, -0.202, -0.40)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
