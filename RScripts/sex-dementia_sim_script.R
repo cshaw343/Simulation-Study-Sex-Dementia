@@ -78,17 +78,15 @@ sex_dem_sim <- function(){
                             mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
       set_colnames(., variable_names$eps_varnames)
   
-  #First data-binding
-  
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
+  compute_Cij <- cog_func(cij_knots, cij_slopes, obs, eps, cij_slope_int_noise, 
+                          c_ages)
   Cij <- as.data.frame(compute_Cij$Cij) %>% 
     set_colnames(., variable_names$Cij_varnames)
   cij_slopeij <- as.data.frame(compute_Cij$slopes) %>% 
     #remove the last variable name because there are only 10 intervals
     set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
-  obs %<>% bind_cols(., Cij, cij_slopeij)
   
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
@@ -98,16 +96,15 @@ sex_dem_sim <- function(){
                               runif(num_obs, min = 0, max = 1))) %>%
     #remove the last variable name because there are only 10 intervals
     set_colnames(head(variable_names$rij_varnames, -1))
-  obs %<>% bind_cols(., rij)
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda)) %>% 
+  Sij <- as.data.frame(survival(obs, lambda, rij, c_ages, cij_slopeij, Cij)) %>% 
     set_colnames(head(variable_names$Sij_varnames, -1))
-  obs %<>% bind_cols(., Sij)
   
   #---- Survival censoring matrix ----
-  censor <- Sij/Sij
+  censor <- Sij/Sij 
+  censor %<>% cbind(1, .)
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
@@ -115,23 +112,26 @@ sex_dem_sim <- function(){
   deathij <- (Sij < int_time)*1 
   
   deathij %<>% as.data.frame() %>% 
-    set_colnames(head(variable_names$deathij_varnames, -1))
-  
-  obs %<>% bind_cols(., deathij) %>% 
-    mutate("death0" = 0) %>%
+    set_colnames(head(variable_names$deathij_varnames, -1)) %>% 
+    mutate("death0" = 0) %>% dplyr::select("death0", everything()) %>%
     mutate("study_death" = rowSums(deathij, na.rm = TRUE)) #Study death indicator
-  
+    
   #Compute overall survival times
   survtime <- vector(length = num_obs)
-  survtime[which(obs$study_death == 0)] = num_tests*int_time
+  survtime[which(deathij$study_death == 0)] = num_tests*int_time
   for(i in 1:length(survtime)){
     if(survtime[i] == 0){
       death_int <- min(which(deathij[i, ] == 1)) 
-      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
+      survtime[i] = int_time*(death_int - 1) + Sij[i, (death_int - 1)]
     } 
   }
-  obs %<>% mutate("survtime" = survtime, 
-                  "age_death" = age0 + survtime) #Age at death
+  
+  survtime %<>% as.data.frame() %>% 
+    mutate("age_death" = age0 + survtime) %>% #Age at death
+    set_colnames(c("survtime", "age_death"))
+  
+  #---- Censor Cij data ----
+  Cij <- Cij*censor
   
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
