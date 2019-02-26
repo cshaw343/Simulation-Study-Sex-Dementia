@@ -30,13 +30,11 @@ sex_dem_sim <- function(){
     } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
   }
   colnames(ages) <- variable_names$age_varnames
-  obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
   c_ages <- as_tibble(ages - mean(age0)) %>% 
     set_colnames(., variable_names$agec_varnames)
-  obs %<>% bind_cols(., c_ages)
   
   #---- Generating "true" cognitive function Cij ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
@@ -52,14 +50,20 @@ sex_dem_sim <- function(){
     }
     
     #Generate random terms for each individual
+    cij_slope_int_noise <- matrix(nrow = num_obs, ncol = 2*(num_tests + 1)) 
     for(i in 1:(num_tests + 1)){
-      cij_slope_int_noise <- as_tibble(mvrnorm(n = num_obs, mu = rep(0, 2), 
-                                               Sigma = 
-                                                 cij_slope_int_cov[[i]])) %>% 
-      set_colnames(., c(paste0("z0_", (i - 1), "i"), 
-                        paste0("z1_", (i - 1), "i")))
-      obs %<>% bind_cols(., cij_slope_int_noise)
+      noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
+                       Sigma = cij_slope_int_cov[[i]]) 
+      cij_slope_int_noise[ , (2*i - 1):(2*i)] <- noise
     }
+    
+    noise_names <- vector(length = 2*(num_tests + 1))
+    for(i in 1:(num_tests + 1)){
+      noise_names[(2*i - 1):(2*i)] <- c(paste0("z0_", (i - 1), "i"), 
+                                        paste0("z1_", (i - 1), "i"))
+    }
+    
+    cij_slope_int_noise %<>% as.data.frame() %>% set_colnames(noise_names)
     
   #Generating noise term (unexplained variance in Cij) for each visit
     #Creating AR(1) correlation matrix
@@ -73,7 +77,8 @@ sex_dem_sim <- function(){
     eps <- as_tibble(mvrnorm(n = num_obs, 
                             mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
       set_colnames(., variable_names$eps_varnames)
-    obs %<>% bind_cols(., eps)
+  
+  #First data-binding
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
@@ -101,25 +106,20 @@ sex_dem_sim <- function(){
     set_colnames(head(variable_names$Sij_varnames, -1))
   obs %<>% bind_cols(., Sij)
   
-  #---- Calculating death data for each individual ----
-  #Compute death indicator for each interval
-  #Change death indicators to 1 after death, 
-  #thus deathi-j means the individual died in that interval or a prior one
-  deathij <- (Sij < int_time)*1 
+  #---- Survival censoring matrix ----
+  censor <- Sij/Sij
   
-  for(i in 1:nrow(deathij)){
-    death_int <- min(which(deathij[i, ] == 1))
-    if(is.finite(death_int)){
-      deathij[i, death_int:ncol(deathij)] = 1 
-    }
-  }
+  #---- Calculating death data for each individual ----
+  #Indicator of 1 means the individual died in that interval
+  #NAs mean the individual died in a prior interval
+  deathij <- (Sij < int_time)*1 
   
   deathij %<>% as.data.frame() %>% 
     set_colnames(head(variable_names$deathij_varnames, -1))
   
   obs %<>% bind_cols(., deathij) %>% 
     mutate("death0" = 0) %>%
-    mutate("study_death" = (rowSums(deathij) > 0)*1) #Study death indicator
+    mutate("study_death" = rowSums(deathij, na.rm = TRUE)) #Study death indicator
   
   #Compute overall survival times
   survtime <- vector(length = num_obs)
@@ -241,6 +241,9 @@ sex_dem_sim <- function(){
     set_colnames(head(variable_names$contributed_varnames, -1))
   
   obs %<>% cbind(., contributed_time)
+  
+  #---- Bind all data into one dataframe ----
+  obs %<>% bind_cols(ages, c_ages)
   
   #---- Dementia Incidence Rates by Sex ----
   sim_rates_by_sex <- matrix(ncol = 9, nrow = 2)
