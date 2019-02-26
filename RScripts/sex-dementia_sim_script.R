@@ -158,47 +158,6 @@ sex_dem_sim <- function(){
   
   obs %<>% cbind(., demij) #%>% filter(`dem0` == 0)
   
-  #---- Censor Cij, Sij, and demij based on death data ----
-  filtered_deathij <- obs %>% #Need filtered death because we got rid of people with dementia at baseline
-    dplyr::select(head(variable_names$deathij_varnames, -1))
-  for(i in 1:nrow(obs)){
-    if(obs[i, "study_death"] == 1){
-      death_slot <- (min(which(filtered_deathij[i, ] == 1)))
-      death_varname <- variable_names$deathij_varnames[death_slot]
-      death_int <- str_remove(death_varname, "death")
-      end_int <- str_sub(death_int, str_length(death_int)) 
-      
-      first_C <- paste0("Ci", end_int)
-      first_dem <- paste0("dem", death_int)
-      
-      #Things to censor
-      Cs <- 
-        variable_names$Cij_varnames[
-          c(which(variable_names$Cij_varnames == first_C):
-              length(variable_names$Cij_varnames))]
-      dems <- 
-        variable_names$dem_varnames[
-          c(which(variable_names$dem_varnames == first_dem):
-              length(variable_names$dem_varnames))]
-      
-      if(death_int != "8-9"){
-        end_int_num <- end_int %>% as.numeric()
-        next_end_num <- end_int_num + 1
-        first_S <- paste0("survtime", end_int_num, "-", next_end_num)
-        
-        Ss <- 
-          variable_names$Sij_varnames[
-            c(which(variable_names$Sij_varnames == first_S):
-                (length(variable_names$Sij_varnames) - 1))]
-        #Censoring
-        obs[i, c(Ss)] <- NA
-      }
-      #Censoring
-      obs[i, c(Cs, dems)] <- NA
-      demij[i, dems] <- NA
-    }
-  }
-  
   filtered_dem <- obs %>% dplyr::select(variable_names$dem_varnames)
   dem_wave <- vector(length = nrow(filtered_dem))
   for(i in 1:length(dem_wave)){
