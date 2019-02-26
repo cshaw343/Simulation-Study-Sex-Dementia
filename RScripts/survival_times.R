@@ -9,10 +9,11 @@ survival <- function(obs_matrix, lambda){
       agec <- variable_names$agec_varnames[j]
       cij_slope <- variable_names$cij_slopeij_varnames[j]
       C <- variable_names$Cij_varnames[j]
-      survtime = -log(obs[i, r])/
-        (lambda[j]*exp(g1[j]*obs[i, "sex"] + g2*obs[i, agec] + 
-                         g3*obs[i, "U"] + g4*obs[i, "sex"]*obs[i, agec] + 
-                         g5*obs[i, cij_slope] + g6*obs[i, C]))
+      survtime = -log(obs_matrix[i, r])/
+        (lambda[j]*exp(g1[j]*obs_matrix[i, "sex"] + g2*obs_matrix[i, agec] + 
+                         g3*obs_matrix[i, "U"] + 
+                         g4*obs_matrix[i, "sex"]*obs_matrix[i, agec] + 
+                         g5*obs_matrix[i, cij_slope] + g6*obs_matrix[i, C]))
       survtimes[j] <- as.numeric(survtime)
       if(survtime < 5){
         break
