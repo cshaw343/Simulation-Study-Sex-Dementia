@@ -18,26 +18,22 @@ source("RScripts/dementia_onset.R")
 data_gen <- function(){
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
-    as.data.frame()
+    as.data.frame() %>% set_colnames(column_names)
   
-  
-  
-  obs$id <- seq(1, num_obs, 1)
   #---- Generating IDs, sex, U ----
-  obs <- tibble("id" = seq(from = 1, to = num_obs, by = 1), 
-                "sex" = rbinom(num_obs, size = 1, prob = psex), 
-                "U" = rnorm(num_obs, mean = 0, sd = 1))
+  obs$id <- seq(from = 1, to = num_obs, by = 1)
+  obs$sex <- rbinom(num_obs, size = 1, prob = psex)
+  obs$U <- rnorm(num_obs, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = num_obs, 
-                           ncol = length(nrow(variable_names))))
-  for(j in 1:nrow(variable_names)){
+  for(j in 1:length(variable_names$age_varnames)){
     if(j == 1){
-      ages[, j] = age0 #Creates column of baseline ages
-    } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
+      obs[, variable_names$age_varnames[j]] = age0 #Creates column of baseline ages
+    } else 
+      obs[, variable_names$age_varnames[j]] = 
+        obs[, variable_names$age_varnames[j - 1]] + int_time #Creates ages at following timepoints
   }
-  colnames(ages) <- variable_names$age_varnames
   
   #---- Generating centered age data ----
   #Creating centered ages at each timepoint j
