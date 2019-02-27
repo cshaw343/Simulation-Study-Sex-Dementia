@@ -5,7 +5,9 @@ install.packages("pacman", repos='http://cran.us.r-project.org')
 p_load("tidyverse")
 
 #---- Generating variable names for dataset ----
-variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
+variable_names <- tibble("exo_var" = c("id", "sex", "U", 
+                                       rep(NA, (num_tests + 1) - 3)),
+                         "timepoints" = seq(from = 0, to = num_tests, by = 1),
                          #have to go to timepoint 11 just to make enough rows
                          "timepoints_nobase" = seq(from = 1, 
                                                    to = (num_tests + 1), 
@@ -59,11 +61,16 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   #Contributed time labels
   unite("contributed_varnames", c(contributed, interval_times), sep = "", 
         remove = FALSE) %>% 
-  dplyr::select("")
+  dplyr::select("exo_var", "cij_slopeij_varnames", "rij_varnames", 
+                "deathij_varnames", "Sij_varnames", "contributed_varnames", 
+                "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
                  "Sij_varnames", "contributed_varnames")] <- NA
 
-columns_needed <- 
+column_names <- c(na.omit(variable_names$exo_var), 
+                  na.omit(variable_names$age_varnames), 
+                  na.omit(variable_names$agec_varnames))
+
