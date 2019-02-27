@@ -36,9 +36,9 @@ data_gen <- function(){
   }
   
   #---- Generating centered age data ----
-  #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% 
-    set_colnames(., variable_names$agec_varnames)
+  #Creating baseline-mean-centered ages at each timepoint j
+  obs[, variable_names$agec_varnames] <- 
+    obs[, variable_names$age_varnames] - mean(age0)
   
   #---- Generating "true" cognitive function Cij ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
