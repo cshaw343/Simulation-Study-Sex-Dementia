@@ -8,7 +8,7 @@ p_load("tidyverse")
 variable_names <- tibble("exo_var" = c("id", "sex", "U", 
                                        rep(NA, (num_tests + 1) - 3)),
                          "timepoints" = seq(from = 0, to = num_tests, by = 1),
-                         #have to go to timepoint 11 just to make enough rows
+                         #have to go to timepoint 1 + num_tests just to make enough rows (because of baseline)
                          "timepoints_nobase" = seq(from = 1, 
                                                    to = (num_tests + 1), 
                                                    by = 1),
@@ -17,6 +17,9 @@ variable_names <- tibble("exo_var" = c("id", "sex", "U",
                          "c50" = rep("c50", num_tests + 1),
                          "age" = rep("age", num_tests + 1), 
                          "eps" = rep("eps", num_tests + 1),
+                         "z0" = rep("z0", num_tests + 1),
+                         "z1" = rep("z1", num_tests + 1),
+                         "i" = rep("i", num_tests + 1),
                          "delta" = rep("delta", num_tests + 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
@@ -40,6 +43,11 @@ variable_names <- tibble("exo_var" = c("id", "sex", "U",
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
   #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
+  #Slope-int noise labels
+  unite("int_noise", c(z0, timepoints), sep = "_", remove = FALSE) %>%
+  unite("int_noise_names", c(int_noise, i), sep = "", remove = FALSE) %>%
+  unite("slope_noise", c(z1, timepoints), sep = "_", remove = FALSE) %>%
+  unite("slope_noise_names", c(slope_noise, i), sep = "", remove = FALSE) %>%
   #Dementia labels
   unite("dem_varnames", c(dem, interval_times_base), sep = "", 
         remove = FALSE) %>% 
@@ -61,7 +69,8 @@ variable_names <- tibble("exo_var" = c("id", "sex", "U",
   #Contributed time labels
   unite("contributed_varnames", c(contributed, interval_times), sep = "", 
         remove = FALSE) %>% 
-  dplyr::select("exo_var", "cij_slopeij_varnames", "rij_varnames", 
+  dplyr::select("exo_var", "int_noise_names", "slope_noise_names", 
+                "cij_slopeij_varnames", "rij_varnames", 
                 "deathij_varnames", "Sij_varnames", "contributed_varnames", 
                 "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames")
 
@@ -70,7 +79,7 @@ variable_names[nrow(variable_names),
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
                  "Sij_varnames", "contributed_varnames")] <- NA
 
-column_names <- c(na.omit(variable_names$exo_var), 
-                  na.omit(variable_names$age_varnames), 
-                  na.omit(variable_names$agec_varnames))
+column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
+                  variable_names$agec_varnames, variable_names$int_noise_names, 
+                  variable_names$slope_noise_names)
 
