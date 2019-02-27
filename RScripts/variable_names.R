@@ -19,7 +19,6 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
                          "std_Ci" = rep("std_Ci", num_tests + 1),
-                         "mean" = rep("mean", num_tests + 1), 
                          "cij_slope" = rep("cij_slope", num_tests + 1),
                          "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
@@ -46,9 +45,6 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
   #Standardized Cij labels
   unite("std_Cij_varnames", c(std_Ci, timepoints), sep = "", remove = FALSE) %>%
-  #Mean Cij labels
-  unite("mean_Cij_varnames", c(mean, Cij_varnames), sep = "", 
-        remove = FALSE) %>%
   #Interval slope labels
   unite("cij_slopeij_varnames", c(cij_slope, interval_times), sep = "", 
         remove = FALSE) %>%
@@ -62,9 +58,12 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
         remove = FALSE) %>%
   #Contributed time labels
   unite("contributed_varnames", c(contributed, interval_times), sep = "", 
-        remove = FALSE)
+        remove = FALSE) %>% 
+  dplyr::select("")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
                  "Sij_varnames", "contributed_varnames")] <- NA
+
+columns_needed <- 
