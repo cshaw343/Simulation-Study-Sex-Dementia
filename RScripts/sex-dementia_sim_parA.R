@@ -6,15 +6,9 @@
 # Remaining LE at age 50:  33.2 years for F and 29.6 years for M
 # This is a test change
 #*******************************************************************************
-#---- Package Loading and Options ----
-if (!require("pacman")) 
-  install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "here")
-
-options(digits = 6)
 #---- Number of observations ----
-num_obs <- 100000
+num_obs <- 100
 
 #---- Baseline age ----
 age0 <- rep(50, num_obs)
