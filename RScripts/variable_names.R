@@ -84,5 +84,6 @@ column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames,
                   variable_names$slope_noise_names, variable_names$eps_varnames, 
                   variable_names$Cij_varnames, 
                   na.omit(variable_names$cij_slopeij_varnames), 
-                  na.omit(variable_names$rij_varnames))
+                  na.omit(variable_names$rij_varnames), 
+                  na.omit(variable_names$Sij_varnames))
 
