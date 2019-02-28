@@ -15,6 +15,7 @@ survival <- function(obs_matrix){
                          g4*obs_matrix[i, "sex"]*obs_matrix[i, agec_name] + 
                          g5*obs_matrix[i, cij_slope_name] + 
                          g6*obs_matrix[i, C_name]))
+      
       survtimes[j] <- as.numeric(survtime)
       if(survtime < 5){
         break
@@ -22,6 +23,7 @@ survival <- function(obs_matrix){
     }
     Sij[i, ] <- survtimes
   }
-  return("Sij" = Sij)
+  Sij[Sij > 5] <- 5
+  return(list("Sij" = Sij, "survtimes" = rowSums(Sij, na.rm = TRUE)))
 }
 
