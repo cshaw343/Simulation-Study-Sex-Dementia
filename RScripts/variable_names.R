@@ -72,7 +72,8 @@ variable_names <- tibble("exo_var" = c("id", "sex", "U",
   dplyr::select("exo_var", "int_noise_names", "slope_noise_names", 
                 "cij_slopeij_varnames", "rij_varnames", 
                 "deathij_varnames", "Sij_varnames", "contributed_varnames", 
-                "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames")
+                "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames", 
+                "dem_varnames")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
@@ -87,5 +88,6 @@ column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames,
                   na.omit(variable_names$rij_varnames), 
                   na.omit(variable_names$Sij_varnames), 
                   "death0", na.omit(variable_names$deathij_varnames), 
-                  "study_death", "survtime", "age_death")
+                  "study_death", "survtime", "age_death", 
+                  variable_names$dem_varnames)
 
