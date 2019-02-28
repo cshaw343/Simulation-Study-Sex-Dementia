@@ -87,8 +87,7 @@ data_gen <- function(){
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda, rij, c_ages, cij_slopeij, Cij)) %>% 
-    set_colnames(head(variable_names$Sij_varnames, -1))
+  obs[, na.omit(variable_names$Sij_varnames)] <- survival(obs)
   
   #---- Survival censoring matrix ----
   censor <- Sij/Sij 
