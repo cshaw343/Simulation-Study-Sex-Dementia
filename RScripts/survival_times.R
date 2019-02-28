@@ -1,5 +1,5 @@
 #---- Model for Survival Time ----
-survival <- function(obs_matrix, lambda, rij, agec, cij_slope, Cij){
+survival <- function(obs_matrix){
   #Calculate survival times for each interval
   Sij <- matrix(nrow = nrow(obs_matrix), ncol = (length(visit_times) - 1))
   for(i in 1:nrow(obs_matrix)){
@@ -9,11 +9,12 @@ survival <- function(obs_matrix, lambda, rij, agec, cij_slope, Cij){
       agec_name <- variable_names$agec_varnames[j]
       cij_slope_name <- variable_names$cij_slopeij_varnames[j]
       C_name <- variable_names$Cij_varnames[j]
-      survtime = -log(rij[i, r_name])/
-        (lambda[j]*exp(g1[j]*obs_matrix[i, "sex"] + g2*agec[i, agec_name] + 
-                         g3*obs_matrix[i, "U"] + 
-                         g4*obs_matrix[i, "sex"]*agec[i, agec_name] + 
-                         g5*cij_slope[i, cij_slope_name] + g6*Cij[i, C_name]))
+      survtime = -log(obs_matrix[i, r_name])/
+        (lambda[j]*exp(g1[j]*obs_matrix[i, "sex"] + 
+                         g2*obs_matrix[i, agec_name] + g3*obs_matrix[i, "U"] + 
+                         g4*obs_matrix[i, "sex"]*obs_matrix[i, agec_name] + 
+                         g5*obs_matrix[i, cij_slope_name] + 
+                         g6*obs_matrix[i, C_name]))
       survtimes[j] <- as.numeric(survtime)
       if(survtime < 5){
         break
