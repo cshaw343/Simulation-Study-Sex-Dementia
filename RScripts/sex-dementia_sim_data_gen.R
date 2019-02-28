@@ -69,9 +69,8 @@ data_gen <- function(){
   cij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
-  eps <- as_tibble(mvrnorm(n = num_obs, 
-                           mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
-    set_colnames(., variable_names$eps_varnames)
+  obs[, variable_names$eps_varnames] <- 
+    mvrnorm(n = num_obs, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
