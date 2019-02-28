@@ -90,18 +90,20 @@ data_gen <- function(){
   obs[, na.omit(variable_names$Sij_varnames)] <- survival(obs)
   
   #---- Survival censoring matrix ----
-  censor <- Sij/Sij 
+  censor <- 
+    obs[, na.omit(variable_names$Sij_varnames)]/
+    obs[, na.omit(variable_names$Sij_varnames)]
   censor %<>% cbind(1, .)
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  deathij <- (Sij < int_time)*1 
+  obs[, "death0"] <- 0
+  obs[, na.omit(variable_names$deathij_varnames)] <- 
+    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
   
-  deathij %<>% as.data.frame() %>% 
-    set_colnames(head(variable_names$deathij_varnames, -1)) %>% 
-    mutate("death0" = 0) %>% dplyr::select("death0", everything()) %>%
-    mutate("study_death" = rowSums(deathij, na.rm = TRUE)) #Study death indicator
+  obs[, "study_death"] <- 
+    rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
   
   #Compute overall survival times
   survtime <- vector(length = num_obs)
