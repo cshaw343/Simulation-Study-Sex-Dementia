@@ -86,8 +86,10 @@ data_gen <- function(){
     replicate(num_tests, runif(num_obs, min = 0, max = 1))
   
   #---- Calculating Sij for each individual ----
-  #Store Sij values
-  obs[, na.omit(variable_names$Sij_varnames)] <- survival(obs)
+  #Store Sij values and survival time
+  survival_data <- survival(obs)
+  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+  obs[, "survtime"] <- survival_data$survtime
   
   #---- Survival censoring matrix ----
   censor <- 
@@ -104,20 +106,8 @@ data_gen <- function(){
   
   obs[, "study_death"] <- 
     rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
-  
-  #Compute overall survival times
-  survtime <- vector(length = num_obs)
-  survtime[which(deathij$study_death == 0)] = num_tests*int_time
-  for(i in 1:length(survtime)){
-    if(survtime[i] == 0){
-      death_int <- min(which(deathij[i, ] == 1)) 
-      survtime[i] = int_time*(death_int - 1) + Sij[i, (death_int - 1)]
-    } 
-  }
-  
-  survtime %<>% as.data.frame() %>% 
-    mutate("age_death" = age0 + survtime) %>% #Age at death
-    set_colnames(c("survtime", "age_death"))
+
+  obs[, "age_death"] <- age0 + obs[, "survtime"]
   
   #---- Censor Cij data ----
   Cij <- Cij*censor
