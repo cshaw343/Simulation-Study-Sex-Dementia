@@ -110,7 +110,8 @@ data_gen <- function(){
   obs[, "age_death"] <- age0 + obs[, "survtime"]
   
   #---- Censor Cij data ----
-  Cij <- Cij*censor
+  obs[, variable_names$Cij_varnames] <- 
+    obs[, variable_names$Cij_varnames]*censor
   
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
