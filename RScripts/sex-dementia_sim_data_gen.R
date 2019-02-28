@@ -54,20 +54,11 @@ data_gen <- function(){
   }
   
   #Generate random terms for each individual
-  cij_slope_int_noise <- matrix(nrow = num_obs, ncol = 2*(num_tests + 1)) 
   for(i in 1:(num_tests + 1)){
     noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
-    cij_slope_int_noise[ , (2*i - 1):(2*i)] <- noise
+    obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
-  
-  noise_names <- vector(length = 2*(num_tests + 1))
-  for(i in 1:(num_tests + 1)){
-    noise_names[(2*i - 1):(2*i)] <- c(paste0("z0_", (i - 1), "i"), 
-                                      paste0("z1_", (i - 1), "i"))
-  }
-  
-  cij_slope_int_noise %<>% as.data.frame() %>% set_colnames(noise_names)
   
   #Generating noise term (unexplained variance in Cij) for each visit
   #Creating AR(1) correlation matrix
