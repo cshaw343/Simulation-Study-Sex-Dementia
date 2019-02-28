@@ -74,13 +74,9 @@ data_gen <- function(){
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(cij_knots, cij_slopes, obs, eps, cij_slope_int_noise, 
-                          c_ages)
-  Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., variable_names$Cij_varnames)
-  cij_slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
+  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
+  obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
+  obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
   
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
