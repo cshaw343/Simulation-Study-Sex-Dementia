@@ -87,5 +87,5 @@ column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames,
                   na.omit(variable_names$rij_varnames), 
                   na.omit(variable_names$Sij_varnames), 
                   "death0", na.omit(variable_names$deathij_varnames), 
-                  "study_death")
+                  "study_death", "survtime", "age_death")
 
