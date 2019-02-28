@@ -82,10 +82,8 @@ data_gen <- function(){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  rij <- as_tibble(replicate(num_tests, 
-                             runif(num_obs, min = 0, max = 1))) %>%
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(head(variable_names$rij_varnames, -1))
+  obs[, na.omit(variable_names$rij_varnames)]<- 
+    replicate(num_tests, runif(num_obs, min = 0, max = 1))
   
   #---- Calculating Sij for each individual ----
   #Store Sij values
