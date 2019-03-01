@@ -8,10 +8,11 @@
 #*******************************************************************************
 
 #---- Number of observations ----
-num_obs <- 100
+#Multiples of 1000
+num_obs <- 10000
 
 #---- Baseline age ----
-age0 <- rep(50, num_obs)
+age0 <- 50
 
 #---- Assessment parameters ----
 #Time between assessments (measured in years)
