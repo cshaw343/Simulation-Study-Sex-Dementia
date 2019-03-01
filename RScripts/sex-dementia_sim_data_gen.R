@@ -124,17 +124,20 @@ data_gen <- function(){
   dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
                          byrow = TRUE)
   
-  demij <- (Cij < dem_cuts_mat)*1 
+  obs[, variable_names$dem_varnames] <- 
+    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
   
-  for(i in 1:nrow(demij)){
-    dem_int <- min(which(demij[i, ] == 1))
+  obs %<>% filter(dem0 == 0)
+  
+  for(i in 1:nrow(obs)){
+    dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
     if(is.finite(dem_int)){
-      demij[i, dem_int:ncol(demij)] = 1 #Changes dementia indicator to 1 after dementia diagnosis
+      obs[i, variable_names$dem_varnames[dem_int:]]  demij[i, dem_int:ncol(demij)] = 1 #Changes dementia indicator to 1 after dementia diagnosis
+      obs[, "dem_wave"] <- (dem_int - 1)
+    } else {
+      obs[i, "dem_wave"] = NA
     }
   }
-  
-  demij %<>% as.data.frame() %>% 
-    set_colnames(variable_names$dem_varnames)
   
   #---- Censor Cij data ----
   demij <- demij*censor
@@ -142,9 +145,9 @@ data_gen <- function(){
   dem_wave <- vector(length = nrow(obs))
   for(i in 1:length(dem_wave)){
     if(is.finite(min(which(demij[i, ] == 1)))){
-      dem_wave[i] <- (min(which(demij[i, ] == 1)) - 1)
+      
     } else {
-      dem_wave[i] = NA
+      
     }
   }
   
