@@ -185,6 +185,6 @@ data_gen <- function(){
   }
   
   #---- Values to return ----
-  return("data" = obs)
+  return(obs)
 }
   
