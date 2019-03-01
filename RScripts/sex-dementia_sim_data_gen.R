@@ -14,16 +14,16 @@ source("RScripts/cognitive_function_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 
-#---- The data generation function ----
-data_gen <- function(){
+#---- The small batch data generation function ----
+small_batch_gen <- function(small_batch_n){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
+  obs <- matrix(NA, nrow = small_batch_n, ncol = length(column_names)) %>% 
     as.data.frame() %>% set_colnames(column_names)
   
   #---- Generating IDs, sex, U ----
-  obs$id <- seq(from = 1, to = num_obs, by = 1)
-  obs$sex <- rbinom(num_obs, size = 1, prob = psex)
-  obs$U <- rnorm(num_obs, mean = 0, sd = 1)
+  obs$id <- seq(from = 1, to = small_batch_n, by = 1)
+  obs$sex <- rbinom(small_batch_n, size = 1, prob = psex)
+  obs$U <- rnorm(small_batch_n, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
@@ -55,7 +55,7 @@ data_gen <- function(){
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
+    noise <- mvrnorm(n = small_batch_n, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -70,7 +70,7 @@ data_gen <- function(){
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = num_obs, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = small_batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
@@ -83,7 +83,7 @@ data_gen <- function(){
   
   #---- Generating uniform random variables per interval for Sij ----
   obs[, na.omit(variable_names$rij_varnames)]<- 
-    replicate(num_tests, runif(num_obs, min = 0, max = 1))
+    replicate(num_tests, runif(small_batch_n, min = 0, max = 1))
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -135,8 +135,15 @@ data_gen <- function(){
   for(i in 1:nrow(obs)){
     dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
     if(is.finite(dem_int)){
-      obs[i, variable_names$dem_varnames[dem_int:nrow(variable_names)]] = 1 #Changes dementia indicator to 1 after dementia diagnosis
       obs[i, "dem_wave"] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[i, variable_names$dem_varnames])))
+      if(dem_int < 9 & is.finite(first_censor)){
+        obs[i, variable_names$dem_varnames[dem_int:(first_censor - 1)]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+      if(dem_int < 9 & !is.finite(first_censor)){
+        last_1 <- length(variable_names$dem_varnames)
+        obs[i, variable_names$dem_varnames[dem_int:last_1]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
     } else {
       obs[i, "dem_wave"] = NA
     }
@@ -187,4 +194,30 @@ data_gen <- function(){
   #---- Values to return ----
   return(obs)
 }
+
+#---- Data Generation ----
+data_gen <- function(){
+  small_batch_n <- 1000
+  num_reps <- num_obs/small_batch_n
+  
+  if(num_obs %% small_batch_n != 0){
+    stop(paste0("Number of observations must be a multiple of ", 
+                small_batch_n, "."))
+  }
+  
+  data <- replicate(num_reps, small_batch_gen(small_batch_n))
+  data <- apply(data, 1, function(x) t(x))
+  data_mat <- matrix(unlist(data), ncol = length(column_names), byrow = FALSE)
+  
+  data_mat %<>% as.data.frame() %>% set_colnames(names(data))
+  data_mat[, 1] <- seq(from = 1, to = nrow(data_mat), by = 1)
+  
+  return(data_mat)
+}
+
+
+
+
+
+
   
