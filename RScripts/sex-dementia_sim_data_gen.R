@@ -143,10 +143,11 @@ data_gen <- function(){
     obs[, variable_names$dem_varnames]*censor
   
   #---- Dementia calcs ----
+  obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
   
   demij %<>%
-    mutate("dem_wave" = dem_wave) %>%
-    mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
+    
+    mutate("dem" = ), 
            "timetodem" = dem_onset(., dem_cuts),    #Time to dementia diagnosis
            "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
            "dem_death" =                  #Dementia status at death
