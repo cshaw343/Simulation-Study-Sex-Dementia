@@ -170,17 +170,9 @@ data_gen <- function(){
     }
   }
   
-
-  
-   
-           
-           
-   
-    mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
-                                       survtime),
-           "ageatdem_death" = age0 + timetodem_death,
-           "dem_alive" = case_when(dem_death == 1 ~ 1,
-                                   TRUE ~ 0))
+  obs[, "ageatdem_death"] <- obs[, "age0"] + obs[, "timetodem_death"]
+  obs[obs[, "dem_death"] == 1, "dem_alive"] <- 1
+  obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
   
   #---- Contributed time ----
   contributed_time <- matrix(nrow = nrow(obs), ncol = num_tests)
