@@ -91,5 +91,5 @@ column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames,
                   "study_death", "survtime", "age_death", 
                   variable_names$dem_varnames, "dem_wave", "dem", "timetodem", 
                   "ageatdem", "dem_death", "timetodem_death", "ageatdem_death", 
-                  "dem_alive")
+                  "dem_alive", variable_names$contributed_varnames)
 
