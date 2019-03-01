@@ -120,9 +120,8 @@ data_gen <- function(){
   obs %<>% filter(dem0 == 0)
   
   #---- Survival censoring matrix ----
-  censor <- 
-    obs[, na.omit(variable_names$Sij_varnames)]/
-    obs[, na.omit(variable_names$Sij_varnames)]
+  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
+  censor[censor == 0] <- NA
   censor %<>% cbind(1, .)
   
   #---- Censor Cij and dem data ----
