@@ -126,8 +126,8 @@ data_gen <- function(){
   for(i in 1:nrow(obs)){
     dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
     if(is.finite(dem_int)){
-      obs[i, variable_names$dem_varnames[dem_int:]]  demij[i, dem_int:ncol(demij)] = 1 #Changes dementia indicator to 1 after dementia diagnosis
-      obs[, "dem_wave"] <- (dem_int - 1)
+      obs[i, variable_names$dem_varnames[dem_int:nrow(variable_names)]] = 1 #Changes dementia indicator to 1 after dementia diagnosis
+      obs[i, "dem_wave"] <- (dem_int - 1)
     } else {
       obs[i, "dem_wave"] = NA
     }
