@@ -14,7 +14,7 @@ source("RScripts/cognitive_function_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 
-#---- The simulation function ----
+#---- The data generation function ----
 data_gen <- function(){
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
@@ -89,7 +89,7 @@ data_gen <- function(){
   #Store Sij values and survival time
   survival_data <- survival(obs)
   obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-  obs[, "survtime"] <- survival_data$survtime
+  obs[, "survtime"] <- survival_data$survtimes
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
