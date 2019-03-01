@@ -91,12 +91,6 @@ data_gen <- function(){
   obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
   obs[, "survtime"] <- survival_data$survtime
   
-  #---- Survival censoring matrix ----
-  censor <- 
-    obs[, na.omit(variable_names$Sij_varnames)]/
-    obs[, na.omit(variable_names$Sij_varnames)]
-  censor %<>% cbind(1, .)
-  
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
@@ -139,7 +133,13 @@ data_gen <- function(){
     }
   }
   
-  #---- Censor Cij data ----
+  #---- Survival censoring matrix ----
+  censor <- 
+    obs[, na.omit(variable_names$Sij_varnames)]/
+    obs[, na.omit(variable_names$Sij_varnames)]
+  censor %<>% cbind(1, .)
+  
+  #---- Censor Cij and dem data ----
   demij <- demij*censor
   
   dem_wave <- vector(length = nrow(obs))
