@@ -101,7 +101,7 @@ data_gen <- function(){
   obs[, "study_death"] <- 
     rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
 
-  obs[, "age_death"] <- age0 + obs[, "survtime"]
+  obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
   
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
