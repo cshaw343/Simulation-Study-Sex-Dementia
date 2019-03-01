@@ -39,12 +39,8 @@ cog_func <- function(knots_ages, slopes, obs_matrix){
   
   slopes <- matrix(NA, nrow = nrow(obs_matrix), ncol= (length(visit_times) - 1))
   
-  for(i in 1:nrow(Cij)){
-    for(j in 1:ncol(slopes)){
-      b <- Cij[i, j + 1]
-      a <- Cij[i, j]
-      slopes[i, j] = (b-a)/int_time
-    }
+  for(i in 1:ncol(slopes)){
+    slopes[, i] <- (Cij[, i + 1] - Cij[, i])/int_time
   }
   
   return(list("Cij" = Cij, "slopes" = slopes))
