@@ -119,6 +119,20 @@ data_gen <- function(){
   
   obs %<>% filter(dem0 == 0)
   
+  #---- Survival censoring matrix ----
+  censor <- 
+    obs[, na.omit(variable_names$Sij_varnames)]/
+    obs[, na.omit(variable_names$Sij_varnames)]
+  censor %<>% cbind(1, .)
+  
+  #---- Censor Cij and dem data ----
+  obs[, variable_names$Cij_varnames] <- 
+    obs[, variable_names$Cij_varnames]*censor
+  
+  obs[, variable_names$dem_varnames] <- 
+    obs[, variable_names$dem_varnames]*censor
+  
+  #---- Dementia indicators ----
   for(i in 1:nrow(obs)){
     dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
     if(is.finite(dem_int)){
@@ -129,26 +143,11 @@ data_gen <- function(){
     }
   }
   
-  #---- Survival censoring matrix ----
-  censor <- 
-    obs[, na.omit(variable_names$Sij_varnames)]/
-    obs[, na.omit(variable_names$Sij_varnames)]
-  censor %<>% cbind(1, .)
-  
-  #---- Censor Cij data and dem data ----
-  obs[, variable_names$Cij_varnames] <- 
-    obs[, variable_names$Cij_varnames]*censor
-  
-  obs[, variable_names$dem_varnames] <- 
-    obs[, variable_names$dem_varnames]*censor
-  
   #---- Dementia calcs ----
   obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
+  obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
   
-  demij %<>%
-    
-    mutate("dem" = ), 
-           "timetodem" = dem_onset(., dem_cuts),    #Time to dementia diagnosis
+   
            "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
            "dem_death" =                  #Dementia status at death
              case_when(dem == 1 & timetodem <= survtime ~ 1,
@@ -178,9 +177,7 @@ data_gen <- function(){
   
   obs %<>% cbind(., contributed_time)
   
-  #---- Bind all data into one dataframe ----
-  obs %<>% bind_cols(ages, c_ages)
-
+  #---- Values to return ----
   return("data" = obs)
 }
   
