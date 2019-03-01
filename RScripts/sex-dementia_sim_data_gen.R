@@ -103,10 +103,6 @@ data_gen <- function(){
 
   obs[, "age_death"] <- age0 + obs[, "survtime"]
   
-  #---- Censor Cij data ----
-  obs[, variable_names$Cij_varnames] <- 
-    obs[, variable_names$Cij_varnames]*censor
-  
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
   #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
@@ -139,17 +135,14 @@ data_gen <- function(){
     obs[, na.omit(variable_names$Sij_varnames)]
   censor %<>% cbind(1, .)
   
-  #---- Censor Cij and dem data ----
-  demij <- demij*censor
+  #---- Censor Cij data and dem data ----
+  obs[, variable_names$Cij_varnames] <- 
+    obs[, variable_names$Cij_varnames]*censor
   
-  dem_wave <- vector(length = nrow(obs))
-  for(i in 1:length(dem_wave)){
-    if(is.finite(min(which(demij[i, ] == 1)))){
-      
-    } else {
-      
-    }
-  }
+  obs[, variable_names$dem_varnames] <- 
+    obs[, variable_names$dem_varnames]*censor
+  
+  #---- Dementia calcs ----
   
   demij %<>%
     mutate("dem_wave" = dem_wave) %>%
