@@ -175,20 +175,15 @@ data_gen <- function(){
   obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
   
   #---- Contributed time ----
-  contributed_time <- matrix(nrow = nrow(obs), ncol = num_tests)
-  for(i in 1:nrow(contributed_time)){
+  for(i in 1:nrow(obs)){
     last_full_slot <- floor(obs[i, "timetodem_death"]/5)
-    contributed_time[i, 1:last_full_slot] <- 5
+    obs[i, na.omit(variable_names$contributed_varnames)[1:last_full_slot]] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
-      contributed_time[i, partial_slot] <- obs[i, "timetodem_death"]%%5
+      obs[i, na.omit(variable_names$contributed_varnames)[partial_slot]] <- 
+        obs[i, "timetodem_death"]%%5
     }
   }
-  
-  contributed_time %<>% as.data.frame() %>% 
-    set_colnames(head(variable_names$contributed_varnames, -1))
-  
-  obs %<>% cbind(., contributed_time)
   
   #---- Values to return ----
   return("data" = obs)
