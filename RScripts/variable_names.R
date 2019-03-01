@@ -73,12 +73,12 @@ variable_names <- tibble("exo_var" = c("id", "sex", "U",
                 "cij_slopeij_varnames", "rij_varnames", 
                 "deathij_varnames", "Sij_varnames", "contributed_varnames", 
                 "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames", 
-                "dem_varnames")
+                "dem_varnames", "interval_ages")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
-                 "Sij_varnames", "contributed_varnames")] <- NA
+                 "Sij_varnames", "contributed_varnames", "interval_ages")] <- NA
 
 column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
                   variable_names$agec_varnames, variable_names$int_noise_names, 
