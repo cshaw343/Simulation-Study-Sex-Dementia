@@ -161,6 +161,16 @@ data_gen <- function(){
     }
   }
   
+  #Time to dem_death
+  for(i in 1:nrow(obs)){
+    if(obs[i, "dem"] == 0){
+      obs[i, "timetodem_death"] <- obs[i, "survtime"]
+    } else {
+      obs[i, "timetodem_death"] <- min(obs[i, "timetodem"], obs[i, "survtime"])
+    }
+  }
+  
+
   
    
            
