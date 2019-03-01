@@ -146,9 +146,10 @@ data_gen <- function(){
   #---- Dementia calcs ----
   obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
   obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
+  obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
   
    
-           "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
+           
            "dem_death" =                  #Dementia status at death
              case_when(dem == 1 & timetodem <= survtime ~ 1,
                        study_death == 1 &
