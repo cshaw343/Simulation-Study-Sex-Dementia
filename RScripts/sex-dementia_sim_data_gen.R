@@ -148,14 +148,24 @@ data_gen <- function(){
   obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
   obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
   
+  #Dementia status at death
+  for(i in 1:nrow(obs)){
+    if(obs[i, "dem"] == 1 & obs[i, "timetodem"] <= obs[i, "survtime"]){
+      obs[i, "dem_death"] <- 1
+    } else if(obs[i, "study_death"] == 1 & 
+              (obs[i, "dem"] == 0 | (obs[i, "dem"] == 1 & 
+               obs[i, "timetodem"] > obs[i, "survtime"]))){
+      obs[i, "dem_death"] <- 2
+    } else {
+      obs[i, "dem_death"] <- 0
+    }
+  }
+  
+  
    
            
-           "dem_death" =                  #Dementia status at death
-             case_when(dem == 1 & timetodem <= survtime ~ 1,
-                       study_death == 1 &
-                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~
-                         2)) %>%
-    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
+           
+   
     mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
                                        survtime),
            "ageatdem_death" = age0 + timetodem_death,
