@@ -26,7 +26,7 @@ results_mat <- matrix(unlist(sim_IRRs),
 
 results_mat %>% as.data.frame() %>% 
   set_colnames(dimnames(sim_IRRs)[[2]]) %>%
-  saveRDS("Data/logIRRs_A_20190301")
+  saveRDS(here("Data", "logIRRs_A_20190301"))
 
 
 
