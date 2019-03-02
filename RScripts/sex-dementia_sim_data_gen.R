@@ -128,8 +128,8 @@ small_batch_gen <- function(small_batch_n){
   obs[, variable_names$Cij_varnames] <- 
     obs[, variable_names$Cij_varnames]*censor
   
-  obs[, variable_names$dem_varnames] <- 
-    obs[, variable_names$dem_varnames]*censor
+  obs[, variable_names$dem_varnames[-1]] <- 
+    obs[, variable_names$dem_varnames]*censor[, 1:(ncol(censor) - 1)]
   
   #---- Dementia indicators ----
   for(i in 1:nrow(obs)){
