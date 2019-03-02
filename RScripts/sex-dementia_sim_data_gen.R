@@ -137,10 +137,10 @@ small_batch_gen <- function(small_batch_n){
     if(is.finite(dem_int)){
       obs[i, "dem_wave"] <- (dem_int - 1)
       first_censor <- min(which(is.na(obs[i, variable_names$dem_varnames])))
-      if(dem_int < 9 & is.finite(first_censor)){
+      if(dem_int < 10 & is.finite(first_censor)){
         obs[i, variable_names$dem_varnames[dem_int:(first_censor - 1)]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
-      if(dem_int < 9 & !is.finite(first_censor)){
+      if(dem_int < 10 & !is.finite(first_censor)){
         last_1 <- length(variable_names$dem_varnames)
         obs[i, variable_names$dem_varnames[dem_int:last_1]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
