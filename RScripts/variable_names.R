@@ -5,8 +5,10 @@ install.packages("pacman", repos='http://cran.us.r-project.org')
 p_load("tidyverse")
 
 #---- Generating variable names for dataset ----
-variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
-                         #have to go to timepoint 11 just to make enough rows
+variable_names <- tibble("exo_var" = c("id", "sex", "U", 
+                                       rep(NA, (num_tests + 1) - 3)),
+                         "timepoints" = seq(from = 0, to = num_tests, by = 1),
+                         #have to go to timepoint 1 + num_tests just to make enough rows (because of baseline)
                          "timepoints_nobase" = seq(from = 1, 
                                                    to = (num_tests + 1), 
                                                    by = 1),
@@ -15,11 +17,13 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
                          "c50" = rep("c50", num_tests + 1),
                          "age" = rep("age", num_tests + 1), 
                          "eps" = rep("eps", num_tests + 1),
+                         "z0" = rep("z0", num_tests + 1),
+                         "z1" = rep("z1", num_tests + 1),
+                         "i" = rep("i", num_tests + 1),
                          "delta" = rep("delta", num_tests + 1),
                          "dem" = rep("dem", num_tests + 1), 
                          "Ci" = rep("Ci", num_tests + 1), 
                          "std_Ci" = rep("std_Ci", num_tests + 1),
-                         "mean" = rep("mean", num_tests + 1), 
                          "cij_slope" = rep("cij_slope", num_tests + 1),
                          "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
@@ -39,6 +43,11 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
   #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
+  #Slope-int noise labels
+  unite("int_noise", c(z0, timepoints), sep = "_", remove = FALSE) %>%
+  unite("int_noise_names", c(int_noise, i), sep = "", remove = FALSE) %>%
+  unite("slope_noise", c(z1, timepoints), sep = "_", remove = FALSE) %>%
+  unite("slope_noise_names", c(slope_noise, i), sep = "", remove = FALSE) %>%
   #Dementia labels
   unite("dem_varnames", c(dem, interval_times_base), sep = "", 
         remove = FALSE) %>% 
@@ -46,9 +55,6 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
   unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
   #Standardized Cij labels
   unite("std_Cij_varnames", c(std_Ci, timepoints), sep = "", remove = FALSE) %>%
-  #Mean Cij labels
-  unite("mean_Cij_varnames", c(mean, Cij_varnames), sep = "", 
-        remove = FALSE) %>%
   #Interval slope labels
   unite("cij_slopeij_varnames", c(cij_slope, interval_times), sep = "", 
         remove = FALSE) %>%
@@ -62,9 +68,28 @@ variable_names <- tibble("timepoints" = seq(from = 0, to = num_tests, by = 1),
         remove = FALSE) %>%
   #Contributed time labels
   unite("contributed_varnames", c(contributed, interval_times), sep = "", 
-        remove = FALSE)
+        remove = FALSE) %>% 
+  dplyr::select("exo_var", "int_noise_names", "slope_noise_names", 
+                "cij_slopeij_varnames", "rij_varnames", 
+                "deathij_varnames", "Sij_varnames", "contributed_varnames", 
+                "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames", 
+                "dem_varnames", "interval_ages")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
-                 "Sij_varnames", "contributed_varnames")] <- NA
+                 "Sij_varnames", "contributed_varnames", "interval_ages")] <- NA
+
+column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
+                  variable_names$agec_varnames, variable_names$int_noise_names, 
+                  variable_names$slope_noise_names, variable_names$eps_varnames, 
+                  variable_names$Cij_varnames, 
+                  na.omit(variable_names$cij_slopeij_varnames), 
+                  na.omit(variable_names$rij_varnames), 
+                  na.omit(variable_names$Sij_varnames), 
+                  "death0", na.omit(variable_names$deathij_varnames), 
+                  "study_death", "survtime", "age_death", 
+                  variable_names$dem_varnames, "dem_wave", "dem", "timetodem", 
+                  "ageatdem", "dem_death", "timetodem_death", "ageatdem_death", 
+                  "dem_alive", na.omit(variable_names$contributed_varnames))
+
