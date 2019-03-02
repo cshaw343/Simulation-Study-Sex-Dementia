@@ -9,7 +9,7 @@
 
 #---- Number of observations ----
 #Multiples of 1000
-num_obs <- 10000
+num_obs <- 100000
 
 #---- Baseline age ----
 age0 <- 50
