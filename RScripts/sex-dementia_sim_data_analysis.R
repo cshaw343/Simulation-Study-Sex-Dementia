@@ -78,7 +78,7 @@ sex_dem_sim <- function(){
                                         sum(PY_data[, contributed]), 3)
   }
   
-  IRRs <- unlist(sim_rates_by_sex[1, ]/sim_rates_by_sex[2, ]) %>% t()
+  IRRs <- unlist(sim_rates_by_sex[2, ]/sim_rates_by_sex[1, ]) %>% t()
   logIRRs <- log(IRRs) %>% as.data.frame()
   
   #---- Return ----
