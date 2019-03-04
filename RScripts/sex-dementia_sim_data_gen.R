@@ -185,7 +185,8 @@ small_batch_gen <- function(small_batch_n){
   #---- Contributed time ----
   for(i in 1:nrow(obs)){
     last_full_slot <- floor(obs[i, "timetodem_death"]/5)
-    obs[i, na.omit(variable_names$contributed_varnames)[1:last_full_slot]] <- 5
+    full_slots <- na.omit(variable_names$contributed_varnames)[1:last_full_slot]
+    obs[i, full_slots] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
       obs[i, na.omit(variable_names$contributed_varnames)[partial_slot]] <- 
