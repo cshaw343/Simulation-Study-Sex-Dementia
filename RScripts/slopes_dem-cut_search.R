@@ -28,29 +28,29 @@ source("RScripts/misc_custom_functions.R")
 #---- Data generation ----
 #Can generate data all the way up to generating cognitive function
 generate_base_data <- function(n){
+  #---- Create a blank dataset ----
+  obs <- matrix(NA, nrow = n, ncol = length(search_column_names)) %>% 
+    as.data.frame() %>% set_colnames(search_column_names)
+  
   #---- Generating IDs, sex, U ----
-  obs <- tibble("id" = seq(from = 1, to = n, by = 1),
-                "sex" = rbinom(n, size = 1, prob = psex), 
-                "U" = rnorm(n, mean = 0, sd = 1), 
-                "age0" = rep(50, n))
+  obs$id <- seq(from = 1, to = n, by = 1)
+  obs$sex <- rbinom(n, size = 1, prob = psex)
+  obs$U <- rnorm(n, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  ages <- as_tibble(matrix(NA, nrow = n, 
-                           ncol = length(nrow(variable_names))))
-  for(j in 1:nrow(variable_names)){
+  for(j in 1:length(variable_names$age_varnames)){
     if(j == 1){
-      ages[, j] = obs$age0 #Creates column of baseline ages
-    } else ages[, j] = ages[, (j-1)] + int_time #Creates ages at following timepoints
+      obs[, variable_names$age_varnames[j]] = age0 #Creates column of baseline ages
+    } else 
+      obs[, variable_names$age_varnames[j]] = 
+        obs[, variable_names$age_varnames[j - 1]] + int_time #Creates ages at following timepoints
   }
-  colnames(ages) <- variable_names$age_varnames
-  obs %<>% bind_cols(., ages)
   
   #---- Generating centered age data ----
-  #Creating centered ages at each timepoint j
-  c_ages <- as_tibble(ages - mean(age0)) %>% 
-    set_colnames(., variable_names$agec_varnames)
-  obs %<>% bind_cols(., c_ages)
+  #Creating baseline-mean-centered ages at each timepoint j
+  obs[, variable_names$agec_varnames] <- 
+    obs[, variable_names$age_varnames] - mean(age0)
   
   #---- Generating "true" cognitive function Cij ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
@@ -67,12 +67,9 @@ generate_base_data <- function(n){
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    cij_slope_int_noise <- as_tibble(mvrnorm(n = nrow(obs), mu = rep(0, 2), 
-                                             Sigma = 
-                                               cij_slope_int_cov[[i]])) %>% 
-      set_colnames(., c(paste0("z0_", (i - 1), "i"), 
-                        paste0("z1_", (i - 1), "i")))
-    obs %<>% bind_cols(., cij_slope_int_noise)
+    noise <- mvrnorm(n = n, mu = rep(0, 2), 
+                     Sigma = cij_slope_int_cov[[i]]) 
+    obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
   
   #Generating noise term (unexplained variance in Cij) for each visit
@@ -84,10 +81,9 @@ generate_base_data <- function(n){
   cij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
-  eps <- as_tibble(mvrnorm(n = n, 
-                           mu = rep(0, num_visits), Sigma = cij_cov_mat)) %>%
-    set_colnames(., variable_names$eps_varnames)
-  obs %<>% bind_cols(., eps)
+  obs[, variable_names$eps_varnames] <- 
+    mvrnorm(n = n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+  
   return(obs)
 }
 
@@ -172,13 +168,6 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
       obs[i, Cs] <- NA
     }
   }
-  
-  #---- Standardize Cij values ----
-  std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
-    map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-    set_colnames(variable_names$std_Cij_varnames)
-
-  obs %<>% bind_cols(., std_Cij)
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(demcuts, nrow = nrow(obs), ncol = length(demcuts), 
@@ -446,113 +435,6 @@ write_csv(best_slopes_cuts[this_slot, ],
           paste0("Data/best_slopes_cuts_", gsub("-", "", Sys.Date()), ".csv"), 
           append = TRUE)
 
-
-
-
-
-
-
-for(i in 2:nrow(dem_inc_table)){
-  if(i == 2){
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
-    this_slot <- last_slot + 1
-    slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]]))
-    opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
-                         age = dem_inc_table[[i, "Visit_Age"]], 
-                         pub_inc = 
-                           dem_inc_table[[i, "Total_All_Dementia_1000PY"]], 
-                         obs = old_cohort, 
-                         old_slopes = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "slope"]))), "slope"], 
-                         old_demcuts = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = c(0, (slopes_cuts[2] + 0.75)), 
-                         lower = c(-0.15, slopes_cuts[2]), 
-                         parallel = list(cl = cluster))
-    parameters <- opt$par
-    best_slopes_cuts[this_slot, "slope"] <- 
-      parameters[1]
-    best_slopes_cuts[this_slot, "dem_cut"] <- 
-      parameters[2]
-    best_slopes_cuts[this_slot, "diff"] <- opt$value
-    write_csv(best_slopes_cuts[this_slot, ], 
-              "Results/slopes_dem-cut_search.csv", append = TRUE)
-  } else if(i == 3){
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
-    this_slot <- last_slot + 1
-    slopes_cuts = c(0, (best_slopes_cuts[[last_slot, "dem_cut"]]))
-    opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
-                         age = dem_inc_table[[i, "Visit_Age"]], 
-                         pub_inc = 
-                           dem_inc_table[[i, "Total_All_Dementia_1000PY"]], 
-                         obs = old_cohort, 
-                         old_slopes = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "slope"]))), "slope"], 
-                         old_demcuts = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = c(0, (slopes_cuts[2] + 0.75)), 
-                         lower = c(-0.15, slopes_cuts[2]), 
-                         parallel = list(cl = cluster))
-    parameters <- opt$par
-    best_slopes_cuts[this_slot, "slope"] <- 
-      parameters[1]
-    best_slopes_cuts[this_slot, "dem_cut"] <- 
-      parameters[2]
-    best_slopes_cuts[this_slot, "diff"] <- opt$value
-    write_csv(best_slopes_cuts[this_slot, ], 
-              "Results/slopes_dem-cut_search.csv", append = TRUE) 
-  } else if(i == 4){
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
-    this_slot <- last_slot + 1
-    slopes_cuts = c(-0.025, (best_slopes_cuts[[last_slot, "dem_cut"]] + 0.5))
-    opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
-                         age = dem_inc_table[[i, "Visit_Age"]], 
-                         pub_inc = 
-                           dem_inc_table[[i, "Total_All_Dementia_1000PY"]], 
-                         obs = old_cohort, 
-                         old_slopes = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "slope"]))), "slope"], 
-                         old_demcuts = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = c(0, (slopes_cuts[2] + 1)), 
-                         lower = c(-0.15, slopes_cuts[2]), 
-                         parallel = list(cl = cluster))
-    parameters <- opt$par
-    best_slopes_cuts[this_slot, "slope"] <- 
-      parameters[1]
-    best_slopes_cuts[this_slot, "dem_cut"] <- 
-      parameters[2]
-    best_slopes_cuts[this_slot, "diff"] <- opt$value
-    write_csv(best_slopes_cuts[this_slot, ], 
-              "Results/slopes_dem-cut_search.csv", append = TRUE) 
-  } else {
-    last_slot <- max(which(!is.na(best_slopes_cuts[, "dem_cut"])))
-    slopes_cuts = c(0, best_slopes_cuts[[last_slot, "dem_cut"]] + 0.5)
-    opt <- optimParallel(par = slopes_cuts, fn = dem_irate_1000py, 
-                         age = dem_inc_table[[i, "Visit_Age"]], 
-                         pub_inc = 
-                           dem_inc_table[[i, "Total_All_Dementia_1000PY"]], 
-                         obs = very_old_cohort, 
-                         old_slopes = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "slope"]))), "slope"], 
-                         old_demcuts = best_slopes_cuts[1:max(which(!is.na(
-                           best_slopes_cuts[, "dem_cut"]))), "dem_cut"],
-                         upper = c(0, (slopes_cuts[2] + 0.75)),
-                         lower = c(-0.40, (slopes_cuts[2])), 
-                         parallel = list(cl = cluster))
-    parameters <- opt$par
-    best_slopes_cuts[this_slot, "slope"] <- 
-      parameters[1]
-    best_slopes_cuts[this_slot, "dem_cut"] <- 
-      parameters[2]
-    best_slopes_cuts[this_slot, "diff"] <- opt$value
-    write_csv(best_slopes_cuts, "Results/slopes_dem-cut_search_12282018.csv")
-    write_csv(best_slopes_cuts[this_slot, ], 
-              "Results/slopes_dem-cut_search.csv", append = TRUE)
-  }
-}
-
-write_csv(best_slopes_cuts, "Results/slopes_dem-cut_search_12142018.csv")
 
 #---- testing code ----
 obs <- generate_base_data(n = 1000)
