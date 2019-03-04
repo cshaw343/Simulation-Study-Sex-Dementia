@@ -29,8 +29,8 @@ source("RScripts/misc_custom_functions.R")
 #Can generate data all the way up to generating cognitive function
 generate_base_data <- function(n){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = n, ncol = length(search_column_names)) %>% 
-    as.data.frame() %>% set_colnames(search_column_names)
+  obs <- matrix(NA, nrow = n, ncol = length(column_names)) %>% 
+    as.data.frame() %>% set_colnames(column_names)
   
   #---- Generating IDs, sex, U ----
   obs$id <- seq(from = 1, to = n, by = 1)
@@ -109,102 +109,113 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(cij_knots, slopes, obs)
-  Cij <- as.data.frame(compute_Cij$Cij) %>% 
-    set_colnames(., variable_names$Cij_varnames)
-  cij_slopeij <- as.data.frame(compute_Cij$slopes) %>% 
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(., head(variable_names$cij_slopeij_varnames, -1)) 
-  obs %<>% bind_cols(., Cij, cij_slopeij)
+  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
+  obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
+  obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
   
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  rij <- as_tibble(replicate(num_tests, 
-                             runif(n = nrow(obs), min = 0, max = 1))) %>%
-    #remove the last variable name because there are only 10 intervals
-    set_colnames(head(variable_names$rij_varnames, -1))
-  obs %<>% bind_cols(., rij)
+  obs[, na.omit(variable_names$rij_varnames)]<- 
+    replicate(num_tests, runif(small_batch_n, min = 0, max = 1))
   
   #---- Calculating Sij for each individual ----
-  #Store Sij values
-  Sij <- as.data.frame(survival(obs, lambda)) %>% 
-    set_colnames(head(variable_names$Sij_varnames, -1))
-  obs %<>% bind_cols(., Sij)
+  #Store Sij values and survival time
+  survival_data <- survival(obs)
+  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+  obs[, "survtime"] <- survival_data$survtimes
   
   #---- Calculating death data for each individual ----
-  #Compute death indicator for each interval
-  #Change death indicators to 1 after death
-  deathij <- as.tibble((Sij < int_time)*1) %>% 
-    set_colnames(head(variable_names$deathij_varnames, -1))
+  #Indicator of 1 means the individual died in that interval
+  #NAs mean the individual died in a prior interval
+  obs[, "death0"] <- 0
+  obs[, na.omit(variable_names$deathij_varnames)] <- 
+    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
   
-  for(i in 1:nrow(deathij)){
-    death <- min(which(deathij[i, ] == 1))
-    if(is.finite(death)){
-      deathij[i, death:ncol(deathij)] = 1 
-    }
-  }
-  obs %<>% bind_cols(., deathij) %>% 
-    mutate("study_death" = (rowSums(deathij) > 0)*1) #Study death indicator
+  obs[, "study_death"] <- 
+    rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
   
-  #Compute overall survival times
-  survtime <- vector(length = nrow(obs))
-  survtime[which(obs$study_death == 0)] = num_tests*int_time
-  for(i in 1:length(survtime)){
-    if(survtime[i] == 0){
-      death_int <- min(which(deathij[i, ] == 1)) 
-      survtime[i] = int_time*(death_int - 1) + Sij[i, death_int]
-    } 
-  }
-  obs %<>% mutate("survtime" = survtime, 
-                  "age_death" = age0 + survtime) #Age at death
+  obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
   
-  #---- Censor Cij based on death data ----
-  for(i in 1:nrow(obs)){
-    if(obs[i, "study_death"] == 1){
-      death_int <- (min(which(deathij[i, ] == 1)))
-      Cs <- c(variable_names$Cij_varnames[(death_int + 1):nrow(variable_names)])
-      obs[i, Cs] <- NA
-    }
-  }
+  # #---- Standardize Cij values ----
+  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
+  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
+  #   set_colnames(variable_names$std_Cij_varnames)
+  # 
+  # obs %<>% bind_cols(., std_Cij)
   
   #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(demcuts, nrow = nrow(obs), ncol = length(demcuts), 
+  dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
                          byrow = TRUE)
   
-  demij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>% 
-    set_colnames(variable_names$dem_varnames)
-  demij <- (demij < dem_cuts_mat)*1
-
-  dem_wave <- vector(length = nrow(obs))  #Wave at which dementia was diagnosed
-  for(i in 1:nrow(demij)){
-    dem_time <- min(which(demij[i, ] == 1))
-    if(is.finite(dem_time)){
-      demij[i, dem_time:ncol(demij)] = 1  #Changes dementia indicators to 1 after initial diagnosis
-      dem_wave[i] = dem_time - 1          #Fills in wave of dementia diagnosis
-    } else{
-      dem_wave[i] = NA
+  obs[, variable_names$dem_varnames] <- 
+    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
+  
+  obs %<>% filter(dem0 == 0)
+  
+  #---- Survival censoring matrix ----
+  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
+  censor[censor == 0] <- NA
+  censor %<>% cbind(1, .)
+  
+  #---- Censor Cij and dem data ----
+  obs[, variable_names$Cij_varnames] <- 
+    obs[, variable_names$Cij_varnames]*censor
+  
+  obs[, variable_names$dem_varnames[-1]] <- 
+    obs[, variable_names$dem_varnames]*censor[, 1:(ncol(censor) - 1)]
+  
+  #---- Dementia indicators ----
+  for(i in 1:nrow(obs)){
+    dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
+    if(is.finite(dem_int)){
+      obs[i, "dem_wave"] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[i, variable_names$dem_varnames])))
+      if(dem_int < 10 & is.finite(first_censor)){
+        obs[i, variable_names$dem_varnames[dem_int:(first_censor - 1)]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+      if(dem_int < 10 & !is.finite(first_censor)){
+        last_1 <- length(variable_names$dem_varnames)
+        obs[i, variable_names$dem_varnames[dem_int:last_1]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+    } else {
+      obs[i, "dem_wave"] = NA
     }
   }
-
-  obs %<>% cbind(., demij) %>%
-    mutate("dem_wave" = dem_wave) %>%
-    mutate("dem" = (1 - is.na(dem_wave)), #Dementia diagnosis indicator
-           "timetodem" = dem_onset(., demcuts),    #Time to dementia diagnosis
-           "ageatdem" = age0 + timetodem, #Age at dementia diagnosis
-           "dem_death" =                  #Dementia status at death
-             case_when(dem == 1 & timetodem <= survtime ~ 1,
-                       study_death == 1 &
-                         (dem == 0 | (dem == 1 & timetodem > survtime)) ~
-                         2)) %>%
-    mutate_at("dem_death", funs(replace(., is.na(.), 0))) %>%
-    mutate("timetodem_death" = if_else(dem == 1, pmin(timetodem, survtime),
-                                       survtime),
-           "ageatdem_death" = age0 + timetodem_death,
-           "dem_alive" = case_when(dem_death == 1 ~ 1,
-                                   TRUE ~ 0))
-
+  
+  #---- Dementia calcs ----
+  obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
+  obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
+  obs <- compare_survtime_timetodem(obs)
+  obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
+  
+  #Dementia status at death
+  for(i in 1:nrow(obs)){
+    if(obs[i, "dem"] == 1 & obs[i, "timetodem"] <= obs[i, "survtime"]){
+      obs[i, "dem_death"] <- 1
+    } else if(obs[i, "study_death"] == 1 & 
+              (obs[i, "dem"] == 0 | (obs[i, "dem"] == 1 & 
+                                     obs[i, "timetodem"] > obs[i, "survtime"]))){
+      obs[i, "dem_death"] <- 2
+    } else {
+      obs[i, "dem_death"] <- 0
+    }
+  }
+  
+  #Time to dem_death
+  for(i in 1:nrow(obs)){
+    if(obs[i, "dem"] == 0){
+      obs[i, "timetodem_death"] <- obs[i, "survtime"]
+    } else {
+      obs[i, "timetodem_death"] <- min(obs[i, "timetodem"], obs[i, "survtime"])
+    }
+  }
+  
+  obs[, "ageatdem_death"] <- obs[, "age0"] + obs[, "timetodem_death"]
+  obs[obs[, "dem_death"] == 1, "dem_alive"] <- 1
+  obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
+  
   #---- Compute person years ----
   contributed <- (obs$timetodem_death)%%5
   slot <- (age - 50)/5
@@ -241,7 +252,7 @@ best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 #If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
 #option instead and comment out the clusterEvalQ() lines
 
-cluster <- makeCluster(detectCores() - 5, type = "PSOCK")
+cluster <- makeCluster(detectCores() - 2, type = "PSOCK")
 clusterEvalQ(cl = cluster, {
   if (!require("pacman")) 
     install.packages("pacman", repos='http://cran.us.r-project.org')
