@@ -244,8 +244,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
 dem_inc_table <- EURODEM_inc_rates
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 4) %>% as.data.frame()
-colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", #"dem_inc_rate", 
-                                "diff")
+colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "diff")
 best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
 
 #Setting up cluster for parallel optimization
@@ -264,8 +263,8 @@ clusterEvalQ(cl = cluster, {
   source("RScripts/cognitive_function_model.R") 
   source("RScripts/survival_times.R") 
   source("RScripts/dementia_onset.R")
-  source("Rscripts/misc_custom_functions.R")
-  
+  source("RScripts/misc_custom_functions.R")
+  source("RScripts/compare_survtime_timetodem.R")
 }) 
 
 clusterExport(cl = cluster, 
