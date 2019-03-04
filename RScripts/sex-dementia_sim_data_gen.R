@@ -13,6 +13,7 @@ source("RScripts/variable_names.R")
 source("RScripts/cognitive_function_model.R")
 source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
+source("RScripts/compare_survtime_timetodem.R")
 
 #---- The small batch data generation function ----
 small_batch_gen <- function(small_batch_n){
@@ -152,6 +153,7 @@ small_batch_gen <- function(small_batch_n){
   #---- Dementia calcs ----
   obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
   obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
+  obs <- compare_survtime_timetodem(obs)
   obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
   
   #Dementia status at death
