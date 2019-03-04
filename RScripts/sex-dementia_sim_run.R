@@ -16,6 +16,7 @@ source("RScripts/misc_custom_functions.R")          #Other functions needed
 data_gen() %>% saveRDS("Data/test_sim_results_A_20190301")
 
 #---- Running the simulation in parallel----
+start_time <- Sys.time()
 runs = 100
 plan(multiprocess, workers = (detectCores() - 2))
 sim_IRRs <- future_replicate(runs, sex_dem_sim())
@@ -27,6 +28,8 @@ results_mat <- matrix(unlist(sim_IRRs),
 results_mat %>% as.data.frame() %>% 
   set_colnames(dimnames(sim_IRRs)[[2]]) %>%
   saveRDS(here("Data", "logIRRs_A_20190301"))
+
+Sys.time() - start_time
 
 
 
