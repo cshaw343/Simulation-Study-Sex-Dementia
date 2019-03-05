@@ -36,4 +36,6 @@ DAGs/*
 Results/*
 #Plots
 Plots/*
+#Search results
+Data/best_slopes_cuts_*
 
