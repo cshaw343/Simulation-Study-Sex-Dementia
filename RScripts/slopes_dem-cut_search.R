@@ -27,16 +27,16 @@ source("RScripts/misc_custom_functions.R")
 
 #---- Small batch data generation ----
 #Can generate data all the way up to generating cognitive function
-small_batch_base_data <- function(small_batch_n){
+small_batch_base_data <- function(){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = small_batch_n, ncol = length(column_names)) %>% 
+  obs <- matrix(NA, nrow = 1000, ncol = length(column_names)) %>% 
     as.data.frame() %>% set_colnames(column_names) %>%
     dplyr::select(-one_of(variable_names$contributed_varnames))
   
   #---- Generating IDs, sex, U ----
-  obs$id <- seq(from = 1, to = small_batch_n, by = 1)
-  obs$sex <- rbinom(small_batch_n, size = 1, prob = psex)
-  obs$U <- rnorm(small_batch_n, mean = 0, sd = 1)
+  obs$id <- seq(from = 1, to = 1000, by = 1)
+  obs$sex <- rbinom(1000, size = 1, prob = psex)
+  obs$U <- rnorm(1000, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
@@ -68,7 +68,7 @@ small_batch_base_data <- function(small_batch_n){
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = small_batch_n, mu = rep(0, 2), 
+    noise <- mvrnorm(n = 1000, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -83,22 +83,21 @@ small_batch_base_data <- function(small_batch_n){
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = small_batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = 1000, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   return(obs)
 }
 
 #---- Base data generation ----
 base_data_gen <- function(n){
-  small_batch_n <- 1000
-  num_reps <- n/small_batch_n
+  num_reps <- n/1000
   
-  if(num_obs %% small_batch_n != 0){
+  if(num_obs %% 1000 != 0){
     stop(paste0("Number of observations must be a multiple of ", 
-                small_batch_n, "."))
+                1000, "."))
   }
   
-  data <- replicate(num_reps, small_batch_base_data(small_batch_n))
+  data <- replicate(num_reps, small_batch_base_data())
   data <- apply(data, 1, function(x) t(x))
   num_cols <- length(column_names) - 
     length(na.omit(variable_names$contributed_varnames))
@@ -141,7 +140,7 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   
   #---- Generating uniform random variables per interval for Sij ----
   obs[, na.omit(variable_names$rij_varnames)]<- 
-    replicate(num_tests, runif(small_batch_n, min = 0, max = 1))
+    replicate(num_tests, runif(1000, min = 0, max = 1))
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -268,7 +267,7 @@ dem_inc_table <- EURODEM_inc_rates
 
 best_slopes_cuts <- matrix(nrow = num_tests, ncol = 4) %>% as.data.frame()
 colnames(best_slopes_cuts) <- c("age", "slope", "dem_cut", "diff")
-best_slopes_cuts[, "age"] <- seq(55, 100, by = 5)
+best_slopes_cuts[, "age"] <- seq(55, 95, by = 5)
 
 #Setting up cluster for parallel optimization
 #If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
