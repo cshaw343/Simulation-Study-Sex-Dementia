@@ -18,8 +18,8 @@ data <- data_gen()
 
 #---- Compute incidence rates ----
 sim_rates <- matrix(ncol = 9, nrow = 1)
-colnames(sim_rates_by_sex) <- na.omit(variable_names$interval_ages)
-rownames(sim_rates_by_sex) <- c("")
+colnames(sim_rates) <- na.omit(variable_names$interval_ages)
+rownames(sim_rates) <- c("")
 
 for(slot in 1:num_tests){
   if(slot == 1){
