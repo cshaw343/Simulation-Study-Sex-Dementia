@@ -25,17 +25,18 @@ source("RScripts/survival_times.R")
 source("RScripts/dementia_onset.R")
 source("RScripts/misc_custom_functions.R")
 
-#---- Data generation ----
+#---- Small batch data generation ----
 #Can generate data all the way up to generating cognitive function
-generate_base_data <- function(n){
+small_batch_base_data <- function(small_batch_n){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = n, ncol = length(column_names)) %>% 
-    as.data.frame() %>% set_colnames(column_names)
+  obs <- matrix(NA, nrow = small_batch_n, ncol = length(column_names)) %>% 
+    as.data.frame() %>% set_colnames(column_names) %>%
+    dplyr::select(-one_of(variable_names$contributed_varnames))
   
   #---- Generating IDs, sex, U ----
-  obs$id <- seq(from = 1, to = n, by = 1)
-  obs$sex <- rbinom(n, size = 1, prob = psex)
-  obs$U <- rnorm(n, mean = 0, sd = 1)
+  obs$id <- seq(from = 1, to = small_batch_n, by = 1)
+  obs$sex <- rbinom(small_batch_n, size = 1, prob = psex)
+  obs$U <- rnorm(small_batch_n, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
@@ -67,7 +68,7 @@ generate_base_data <- function(n){
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = n, mu = rep(0, 2), 
+    noise <- mvrnorm(n = small_batch_n, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -82,9 +83,29 @@ generate_base_data <- function(n){
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = small_batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   return(obs)
+}
+
+#---- Base data generation ----
+base_data_gen <- function(n){
+  small_batch_n <- 1000
+  num_reps <- n/small_batch_n
+  
+  if(num_obs %% small_batch_n != 0){
+    stop(paste0("Number of observations must be a multiple of ", 
+                small_batch_n, "."))
+  }
+  
+  data <- replicate(num_reps, small_batch_base_data(small_batch_n))
+  data <- apply(data, 1, function(x) t(x))
+  data_mat <- matrix(unlist(data), ncol = 54, byrow = FALSE)
+  
+  data_mat %<>% as.data.frame() %>% set_colnames(names(data))
+  data_mat[, 1] <- seq(from = 1, to = nrow(data_mat), by = 1)
+  
+  return(data_mat)
 }
 
 #---- The function we want to optimize ----
