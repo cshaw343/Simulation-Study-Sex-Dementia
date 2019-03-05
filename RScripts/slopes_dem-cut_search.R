@@ -302,7 +302,7 @@ first_search <-
                           age = dem_inc_table[[1, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[1, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 10000),
+                          obs = base_data_gen(n = 10000),
                           upper = c(rep(0, 4), rep(-2.5, 4)), 
                           lower = c(rep(-0.05, 4), rep(-5.5, 4)), 
                           parallel = list(cl = cluster)))
@@ -334,7 +334,7 @@ search_75 <-
                           age = dem_inc_table[[index, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 20000), 
+                          obs = base_data_gen(n = 20000), 
                           old_slopes = best_slopes_cuts[1:max(which(!is.na(
                                        best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
@@ -363,7 +363,7 @@ search_80 <-
                           age = dem_inc_table[[index, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 20000), 
+                          obs = base_data_gen(n = 20000), 
                           old_slopes = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
@@ -392,7 +392,7 @@ search_85 <-
                           age = dem_inc_table[[index, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 20000), 
+                          obs = base_data_gen(n = 20000), 
                           old_slopes = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
@@ -421,7 +421,7 @@ search_90 <-
                           age = dem_inc_table[[index, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 100000), 
+                          obs = base_data_gen(n = 100000), 
                           old_slopes = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
@@ -450,7 +450,7 @@ search_95 <-
                           age = dem_inc_table[[index, "Visit_Age"]], 
                           pub_inc = 
                             dem_inc_table[[index, "Total_All_Dementia_1000PY"]], 
-                          obs = generate_base_data(n = 100000), 
+                          obs = base_data_gen(n = 100000), 
                           old_slopes = best_slopes_cuts[1:max(which(!is.na(
                             best_slopes_cuts[, "slope"]))), "slope"], 
                           old_demcuts = best_slopes_cuts[1:max(which(!is.na(
@@ -470,7 +470,7 @@ write_csv(best_slopes_cuts[this_slot, ],
 
 
 #---- testing code ----
-obs <- generate_base_data(n = 1000)
+obs <- base_data_gen(n = 1000)
 NEWSLOPE <- rep(0, 4)
 NEWDEMCUT <- rep(-4.5, 4)
 NEWSLOPE_NEWDEMCUT <- c(NEWSLOPE, NEWDEMCUT)
