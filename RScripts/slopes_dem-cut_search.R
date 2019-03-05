@@ -476,23 +476,3 @@ write_csv(best_slopes_cuts[this_slot, ],
           append = TRUE)
 
 
-#---- testing code ----
-obs <- base_data_gen(n = 1000)
-NEWSLOPE <- rep(0, 4)
-NEWDEMCUT <- rep(-4.5, 4)
-NEWSLOPE_NEWDEMCUT <- c(NEWSLOPE, NEWDEMCUT)
-old_slopes <- NA
-old_demcuts <- NA
-age <- 70
-pub_inc <- 3.15
-
-test <- dem_irate_1000py (NEWSLOPE_NEWDEMCUT = NEWSLOPE_NEWDEMCUT, 
-                          age = age, pub_inc = pub_inc, obs = young_cohort)
-
-slopes_cuts = c(rep(0, 4), rep(-5, 4))
-
-test_optim <- optim(par = slopes_cuts, fn = dem_irate_1000py, 
-                    age = 70, pub_inc = 3.45, obs = cohort,
-                    upper = slopes_cuts, 
-                    lower = c(rep(-0.15, 4), rep(-6, 4)))
-
