@@ -100,7 +100,9 @@ base_data_gen <- function(n){
   
   data <- replicate(num_reps, small_batch_base_data(small_batch_n))
   data <- apply(data, 1, function(x) t(x))
-  data_mat <- matrix(unlist(data), ncol = 54, byrow = FALSE)
+  num_cols <- length(column_names) - 
+    length(na.omit(variable_names$contributed_varnames))
+  data_mat <- matrix(unlist(data), ncol = num_cols, byrow = FALSE)
   
   data_mat %<>% as.data.frame() %>% set_colnames(names(data))
   data_mat[, 1] <- seq(from = 1, to = nrow(data_mat), by = 1)
