@@ -241,10 +241,18 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   #---- Compute person years ----
   contributed <- (obs$timetodem_death)%%5
   slot <- (age - 50)/5
-  dem_last_wave <- paste("dem", (slot - 1), sep = "")
-  dem_this_wave <- paste("dem", slot, sep = "")
-  death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
-  death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+  if(age == 55){
+    dem_last_wave <- paste("dem", (slot - 1), sep = "")
+    dem_this_wave <- paste("dem", (slot - 1), "-", slot, sep = "")
+    death_last_wave <- paste("death", (slot - 1), sep = "")
+    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+  } else {
+    dem_last_wave <- paste("dem", (slot - 2), "-", (slot - 1), sep = "")
+    dem_this_wave <- paste("dem", (slot - 1), "-", slot, sep = "")
+    death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
+    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+  }
+  
   
   PY_data <- obs %>% dplyr::select(death_last_wave, death_this_wave, 
                                    dem_last_wave, dem_this_wave) %>% 
