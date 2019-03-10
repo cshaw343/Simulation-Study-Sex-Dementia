@@ -238,34 +238,43 @@ dem_irate_1000py <- function(NEWSLOPE_NEWDEMCUT,
   obs[obs[, "dem_death"] == 1, "dem_alive"] <- 1
   obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
   
+  #---- Contributed time ----
+  for(i in 1:nrow(obs)){
+    last_full_slot <- floor(obs[i, "timetodem_death"]/5)
+    full_slots <- na.omit(variable_names$contributed_varnames)[1:last_full_slot]
+    obs[i, full_slots] <- 5
+    if(last_full_slot != 9){
+      partial_slot <- last_full_slot + 1
+      obs[i, na.omit(variable_names$contributed_varnames)[partial_slot]] <- 
+        obs[i, "timetodem_death"]%%5
+    }
+  }
+  
   #---- Compute person years ----
-  contributed <- (obs$timetodem_death)%%5
-  slot <- (age - 50)/5
-  if(age == 55){
-    dem_last_wave <- paste("dem", (slot - 1), sep = "")
-    dem_this_wave <- paste("dem", (slot - 1), "-", slot, sep = "")
-    death_last_wave <- paste("death", (slot - 1), sep = "")
-    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+  visit <- (age - 50)/5
+  if(visit == 1){
+    dem_last_wave <- paste("dem", (visit - 1), sep = "")
+    dem_this_wave <- paste("dem", (visit - 1), "-", visit, sep = "")
+    death_last_wave <- paste("death", (visit - 1), sep = "")
+    death_this_wave <- paste("death", (visit - 1), "-", visit, sep = "")
+    contributed <- paste("contributed", (visit - 1), "-", visit, sep = "")
   } else {
-    dem_last_wave <- paste("dem", (slot - 2), "-", (slot - 1), sep = "")
-    dem_this_wave <- paste("dem", (slot - 1), "-", slot, sep = "")
-    death_last_wave <- paste("death", (slot - 2), "-", (slot - 1), sep = "")
-    death_this_wave <- paste("death", (slot - 1), "-", (slot), sep = "")
+    dem_last_wave <- paste("dem", (visit - 2), "-", (visit - 1), sep = "")
+    dem_this_wave <- paste("dem", (visit - 1), "-", visit, sep = "")
+    death_last_wave <- paste("death", (visit - 2), "-", (visit - 1), sep = "")
+    death_this_wave <- paste("death", (visit - 1), "-", visit, sep = "")
+    contributed <- paste("contributed", (visit - 1), "-", visit, sep = "")
   }
   
   
   PY_data <- obs %>% dplyr::select(death_last_wave, death_this_wave, 
-                                   dem_last_wave, dem_this_wave) %>% 
-    cbind(., contributed) %>% 
+                                   dem_last_wave, dem_this_wave, 
+                                   contributed) %>% 
     filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) %>% 
-    mutate("person_years" = 
-             case_when(!! as.name(death_this_wave) == 1 | 
-                         !! as.name(dem_this_wave) == 1 ~ contributed, 
-           TRUE ~ 5))
+             !! as.name(dem_last_wave) == 0)
   
   cases_py1000 = 
-    1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/sum(PY_data$person_years)
+    1000*sum(PY_data[, dem_this_wave])/sum(PY_data[, contributed])
 
   return(abs(cases_py1000 - pub_inc))
 }
