@@ -13,7 +13,7 @@ source("RScripts/sex-dementia_sim_data_analysis.R") #The data analysis script
 source("RScripts/misc_custom_functions.R")          #Other functions needed
 
 #---- Generating one cohort ----
-data_gen() %>% saveRDS("Data/test_sim_results_A_20190304")
+data_gen() %>% saveRDS("Data/test_sim_results_A_20190310")
 
 #---- Running the simulation in parallel----
 start_time <- Sys.time()
