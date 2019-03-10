@@ -125,12 +125,14 @@ small_batch_gen <- function(small_batch_n){
   censor[censor == 0] <- NA
   censor %<>% cbind(1, .)
   
+  shifted_censor <- cbind(1, censor[, 1:(ncol(censor) - 1)])
+  
   #---- Censor Cij and dem data ----
   obs[, variable_names$Cij_varnames] <- 
     obs[, variable_names$Cij_varnames]*censor
   
-  obs[, variable_names$dem_varnames[-1]] <- 
-    obs[, variable_names$dem_varnames]*censor[, 1:(ncol(censor) - 1)]
+  obs[, variable_names$dem_varnames] <- 
+    obs[, variable_names$dem_varnames]*shifted_censor
   
   #---- Dementia indicators ----
   for(i in 1:nrow(obs)){
