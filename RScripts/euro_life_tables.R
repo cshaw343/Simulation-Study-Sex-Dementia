@@ -6,11 +6,11 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "magrittr")
+p_load("tidyverse", "magrittr", "here")
 
 #---- Source Files ----
-source("RScripts/misc_custom_functions.R")
-source("RScripts/life_table2014.R") #For the purposes of comparing Euro with US data
+source(here("RScripts", "misc_custom_functions.R"))
+source(here("RScripts", "life_table2014.R")) #For the purposes of comparing Euro with US data
 
 #---- Hazard Function ----
 haz <- function(age, logprobs){
@@ -228,11 +228,11 @@ male_life_netherlands <- Netherlands_M %>%
 #Netherlands
 male_haz_netherlands <- Netherlands_M %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 female_haz_netherlands <- Netherlands_F %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 Hratio_Netherlands <- male_haz_netherlands$Haz/female_haz_netherlands$Haz %>%
   as.data.frame() %>% set_colnames("Netherlands_HR") 
@@ -240,11 +240,11 @@ Hratio_Netherlands <- male_haz_netherlands$Haz/female_haz_netherlands$Haz %>%
 #Denmark
 male_haz_denmark <- Denmark_M %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 female_haz_denmark <- Denmark_F %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 Hratio_Denmark <- male_haz_denmark$Haz/female_haz_denmark$Haz %>% 
   as.data.frame() %>% set_colnames("Denmark_HR")
@@ -252,11 +252,11 @@ Hratio_Denmark <- male_haz_denmark$Haz/female_haz_denmark$Haz %>%
 #France
 male_haz_france <- France_M %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 female_haz_france <- France_F %>% 
   filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
-  dplyr::select("Haz")
+  dplyr::select("Year", "Haz")
 
 Hratio_France <- male_haz_france$Haz/female_haz_france$Haz %>%
   as.data.frame() %>% set_colnames("France_HR") 
