@@ -12,18 +12,18 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "magrittr", "MASS", "optimParallel")
+p_load("tidyverse", "magrittr", "MASS", "optimParallel", "here")
 
 options(scipen = 999)
 
 #---- Source Files ----
-source("RScripts/dementia_incidence_EURODEM_pooled.R")
-source("RScripts/sex-dementia_sim_parA.R")
-source("RScripts/variable_names.R")
-source("RScripts/cognitive_function_model.R")
-source("RScripts/survival_times.R")
-source("RScripts/dementia_onset.R")
-source("RScripts/misc_custom_functions.R")
+source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+source(here("RScripts", "sex-dementia_sim_parA.R"))
+source(here("RScripts", "variable_names.R"))
+source(here("RScripts", "cognitive_function_model.R"))
+source(here("RScripts", "survival_times.R"))
+source(here("RScripts", "dementia_onset.R"))
+source(here("RScripts", "misc_custom_functions.R"))
 
 #---- Small batch data generation ----
 #Can generate data all the way up to generating cognitive function
