@@ -7,16 +7,16 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "magrittr")
+p_load("tidyverse", "magrittr", "here")
 
 #Suppress warnings
 options(warn = -1)
 
 #---- Specify source files ----
-source("RScripts/sex-dementia_sim_parA.R")
-source("RScripts/sex-dementia_sim_script.R")
-source("RScripts/life_table2014.R")
-source("RScripts/variable_names.R")
+source(here("RScripts", "sex-dementia_sim_parA.R"))
+source(here("RScripts", "sex-dementia_sim_script.R"))
+source(here("RScripts", "life_table2014.R"))
+source(here("RScripts", "variable_names.R"))
 
 #---- Create datsets for the search ----
 data_gen <- function(){
