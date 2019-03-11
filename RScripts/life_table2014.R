@@ -10,10 +10,10 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "ggplot2")
+p_load("tidyverse", "ggplot2", "here")
 
 #---- Source Files ----
-source("RScripts/misc_custom_functions.R")
+source(here("RScripts", "misc_custom_functions.R"))
 
 #---- Hazard Function ----
 haz <- function(age, logprobs){
