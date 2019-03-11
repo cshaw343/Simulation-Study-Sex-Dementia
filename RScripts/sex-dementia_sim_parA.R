@@ -32,7 +32,7 @@ psex <- 0.49
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
 cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
-              0.001, 0.002, 0.002, 0.002, 0.004, 0.005, 0.011, 0.011, 0.015) #Time-dependent variance of random cognitive slope
+              0.001, 0.002, 0.002, 0.003, 0.004, 0.005, 0.011, 0.01775, 0.01775) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -52,8 +52,9 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-cij_slopes <- c(-0.006, 
-                -0.006, -0.024, -0.052, -0.09, -0.09, -0.0252339, 0, 0, 0)
+cij_slopes <- c(0, 
+                -0.00475552, -0.01820177, -0.02680375, -0.03914714, 
+                -0.03312803, -0.06, -0.03056074, -0.15, 0)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -78,10 +79,9 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-#These seems to be off by one slot when tweaking parameters 
-#(ie the 65 cutoff affects the 70 inc rate??) Is this b/c of no interval censoring
-dem_cuts <- c(-3.51, 
-              -3.51, -3.56, -3.7, -4, -4.95, -5.975, -7.7,
-              rep(-8.4, 2))
+
+dem_cuts <- c(-2.98629, 
+              -2.98629, -3.28948, -3.77503, -4.45, -4.975, 
+              -5.25, -6.225, -6.8225, -7)
               
 
