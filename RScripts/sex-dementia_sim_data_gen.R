@@ -2,18 +2,18 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "MASS", "reshape", "magrittr")
+p_load("tidyverse", "MASS", "reshape", "magrittr", "here")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source("RScripts/variable_names.R")
-source("RScripts/cognitive_function_model.R")
-source("RScripts/survival_times.R")
-source("RScripts/dementia_onset.R")
-source("RScripts/compare_survtime_timetodem.R")
+source(here("RScripts", "variable_names.R"))
+source(here("RScripts", "cognitive_function_model.R"))
+source(here("RScripts", "survival_times.R"))
+source(here("RScripts", "dementia_onset.R"))
+source(here("RScripts", "compare_survtime_timetodem.R"))
 
 #---- The small batch data generation function ----
 small_batch_gen <- function(small_batch_n){
