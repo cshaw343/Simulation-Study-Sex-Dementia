@@ -10,10 +10,10 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse")
+p_load("tidyverse", "here")
 
 #---- Source Files ----
-source("RScripts/misc_custom_functions.R")
+source(here("RScripts", "misc_custom_functions.R"))
 
 #---- Tables ----
 #The original source has incidence rates by race, age, and sex.
