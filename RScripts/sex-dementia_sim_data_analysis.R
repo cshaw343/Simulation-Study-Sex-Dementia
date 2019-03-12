@@ -41,10 +41,28 @@ sex_dem_sim <- function(){
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
-  #---- Number at risk by sex ----
-  at_risk_by_sex <- matrix(ncol = 9, nrow = 2)
-  colnames(at_risk_by_sex) <- seq(50, 90, by = 5)
-  rownames(at_risk_by_sex) <- c("Female", "Male")
+  #---- Mortality logHR (F:M) ----
+  survival_data <- data %>% 
+    dplyr::select(head(variable_names$Sij_varnames, -1))
+  survival_data[(survival_data >= 5)] <- 4.99999
+  
+  death_indicators_sex <- data %>% 
+    dplyr::select(head(variable_names$deathij_varnames, -1), female)
+  
+  simulated_mortality_logHRs <- vector(length = num_tests)
+  
+  for(i in 1:length(simulated_mortality_logHRs)){
+    cox_model <- coxph(Surv(survival_data[, i], death_indicators_sex[, i]) ~ 
+                         death_indicators_sex$female)
+    simulated_mortality_logHRs[i] <- cox_model$coefficients
+  }
+  
+  #---- Number at risk for dementia by sex + distribution of U ----
+  at_risk_females <- vector(length = num_tests) 
+  at_risk_males <- vector(length = num_tests) 
+  
+  mean_U_at_risk_females <- vector(length = num_tests) 
+  mean_U_at_risk_males <- vector(length = num_tests) 
   
   #Computing female at_risk
   for(slot in 1:num_tests){
@@ -56,11 +74,11 @@ sex_dem_sim <- function(){
       death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
     }
     at_risk <- female_data %>% 
-      dplyr::select(death_last_wave, dem_last_wave) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-               !! as.name(dem_last_wave) == 0) 
+      dplyr::select(death_last_wave, dem_last_wave, U) %>% 
+      filter(!! as.name(death_last_wave) == 0 & !! as.name(dem_last_wave) == 0) 
     
-    at_risk_by_sex[1, slot] = nrow(at_risk)
+    at_risk_females[slot] = nrow(at_risk)
+    mean_U_at_risk_females[slot] <- mean(at_risk$U)
   }
   
   #Computing male at_risk
@@ -73,16 +91,16 @@ sex_dem_sim <- function(){
       death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
     }
     at_risk <- male_data %>% 
-      dplyr::select(death_last_wave, dem_last_wave) %>% 
+      dplyr::select(death_last_wave, dem_last_wave, U) %>% 
       filter(!! as.name(death_last_wave) == 0 & 
                !! as.name(dem_last_wave) == 0) 
     
-    at_risk_by_sex[2, slot] = nrow(at_risk)
+    at_risk_males[slot] = nrow(at_risk)
+    mean_U_at_risk_males[slot] <- mean(at_risk$U)
   }
   
   #---- Dementia incidence rates ----
-  sim_rates <- matrix(ncol = 9, nrow = 1)
-  colnames(sim_rates) <- na.omit(variable_names$interval_ages)
+  sim_rates <- vector(length = num_tests) 
   
   #Computing incidence rates
   for(slot in 1:num_tests){
@@ -105,23 +123,19 @@ sex_dem_sim <- function(){
       filter(!! as.name(death_last_wave) == 0 & 
                !! as.name(dem_last_wave) == 0) 
     
-    sim_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                                na.rm = TRUE)/
-                                              sum(PY_data[, contributed])), 3)
+    sim_rates[slot] = round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                                    sum(PY_data[, contributed])), 3)
   }
   
   #---- Dementia incidence cases, rates, and PY by sex ----
-  sim_rates_by_sex <- matrix(ncol = 9, nrow = 2)
-  colnames(sim_rates_by_sex) <- na.omit(variable_names$interval_ages)
-  rownames(sim_rates_by_sex) <- c("Female", "Male")
+  sim_rates_females <- vector(length = num_tests) 
+  sim_rates_males <- vector(length = num_tests) 
   
-  inc_cases_by_sex <- matrix(ncol = 9, nrow = 2)
-  colnames(inc_cases_by_sex) <- na.omit(variable_names$interval_ages)
-  rownames(inc_cases_by_sex) <- c("Female", "Male")
+  inc_cases_females <- vector(length = num_tests) 
+  inc_cases_males <- vector(length = num_tests) 
   
-  PY_by_sex <- matrix(ncol = 9, nrow = 2)
-  colnames(PY_by_sex) <- na.omit(variable_names$interval_ages)
-  rownames(PY_by_sex) <- c("Female", "Male")
+  PY_females <- vector(length = num_tests) 
+  PY_males <- vector(length = num_tests) 
   
   #Computing female incidence cases, rates, PY
   for(slot in 1:num_tests){
@@ -144,14 +158,13 @@ sex_dem_sim <- function(){
       filter(!! as.name(death_last_wave) == 0 & 
                !! as.name(dem_last_wave) == 0) 
     
-    inc_cases_by_sex[1, slot] = sum(PY_data[, dem_this_wave], 
-                                    na.rm = TRUE)
+    inc_cases_females[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
-    PY_by_sex[1, slot] = sum(PY_data[, contributed])
+    PY_females[slot] = sum(PY_data[, contributed])
     
-    sim_rates_by_sex[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                                na.rm = TRUE)/
-                                              sum(PY_data[, contributed])), 3)
+    sim_rates_females[slot] = round(1000*(sum(PY_data[, dem_this_wave], 
+                                              na.rm = TRUE)/
+                                            sum(PY_data[, contributed])), 3)
   }
   
   #Computing male incidence cases and rates
@@ -175,18 +188,33 @@ sex_dem_sim <- function(){
       filter(!! as.name(death_last_wave) == 0 & 
                !! as.name(dem_last_wave) == 0)
     
-    inc_cases_by_sex[2, slot] = sum(PY_data[, dem_this_wave], 
-                                    na.rm = TRUE)
+    inc_cases_males[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
-    PY_by_sex[2, slot] = sum(PY_data[, contributed])
+    PY_males[slot] = sum(PY_data[, contributed])
     
-    sim_rates_by_sex[2, slot] = round(1000*sum(PY_data[, dem_this_wave], 
-                                               na.rm = TRUE)/
-                                        sum(PY_data[, contributed]), 3)
+    sim_rates_males[slot] = round(1000*sum(PY_data[, dem_this_wave], 
+                                           na.rm = TRUE)/
+                                    sum(PY_data[, contributed]), 3)
   }
   
-  IRRs <- unlist(sim_rates_by_sex[1, ]/sim_rates_by_sex[2, ]) %>% t()
-  logIRRs <- log(IRRs) %>% as.data.frame()
+  IRRs <- sim_rates_females/sim_rates_males
+  logIRRs <- log(IRRs) 
+  
+  #---- Dementia logHR (F:M) ----
+  contributed_data <- data %>% 
+    dplyr::select(head(variable_names$contributed_varnames, -1))
+  contributed_data[(contributed_data == 5)] <- 4.99999
+  
+  dem_indicators_sex <- data %>% 
+    dplyr::select(variable_names$dem_varnames[-1], female)
+  
+  simulated_dementia_logHRs <- vector(length = num_tests) 
+  
+  for(i in 1:length(simulated_dementia_logHRs)){
+    cox_model <- coxph(Surv(contributed_data[, i], dem_indicators_sex[, i]) ~ 
+                         dem_indicators_sex$female)
+    simulated_dementia_logHRs[i] <- cox_model$coefficients
+  }
   
   #---- Total dementia cases (incident + prevalent) ----
   dem_cases_female <- female_data %>% 
@@ -197,36 +225,34 @@ sex_dem_sim <- function(){
     dplyr::select(variable_names$dem_varnames[-1]) %>% 
     colSums(na.rm = TRUE)
   
-  dem_cases_by_sex <- rbind(dem_cases_female, dem_cases_male) %>% 
-    as.data.frame() %>%
-    set_colnames(na.omit(variable_names$interval_ages)) %>% 
-    set_rownames(c("Female", "Male"))
-  
   #---- Probability of dementia ----
   #Prevalence of dementia by sex
-  dem_prev_females <- female_data %>% 
+  dem_prob_females <- female_data %>% 
     dplyr::select(variable_names$dem_varnames[-1]) %>% 
     colMeans(na.rm = TRUE) 
   
-  dem_prev_males <- male_data %>% 
+  dem_prob_males <- male_data %>% 
     dplyr::select(variable_names$dem_varnames[-1]) %>% 
     colMeans(na.rm = TRUE) 
-  
-  dem_prob_by_sex <- rbind(dem_prev_females, dem_prev_males) %>% 
-    as.data.frame() %>%
-    set_colnames(na.omit(variable_names$interval_ages)) %>% 
-    set_rownames(c("Female", "Male"))
   
   #---- Return ----
   return(list("num_obs" = num_obs, "num_females" = num_females, 
               "num_males" = num_males, "p_alive" = p_alive, 
               "p_alive_females" = p_alive_females, 
-              "p_alive_males" = p_alive_males,
-              "at_risk_by_sex" = at_risk_by_sex, 
-              "inc_cases_by_sex" = inc_cases_by_sex, 
-              "dem_cases_by_sex" = dem_cases_by_sex, "PY_by_sex" = PY_by_sex,
-              "dem_prob_by_sex" = dem_prob_by_sex, "sim_rates" = sim_rates, 
-              "logIRRs" = logIRRs))
+              "p_alive_males" = p_alive_males, 
+              "simulated_mortality_logHRs" = simulated_mortality_logHRs,
+              "at_risk_females" = at_risk_females, 
+              "at_risk_males" = at_risk_males, "sim_rates" = sim_rates, 
+              "sim_rates_females" = sim_rates_females, 
+              "sim_rates_males" = sim_rates_males, 
+              "inc_cases_females" = inc_cases_females, 
+              "inc_cases_males" = inc_cases_males, "PY_females" = PY_females, 
+              "PY_males" = PY_males, "logIRRs" = logIRRs, 
+              "simulated_dementia_logHRs" = simulated_dementia_logHRs,
+              "dem_cases_female" = dem_cases_female, 
+              "dem_cases_male" = dem_cases_male, 
+              "dem_prob_females" = dem_prob_females, 
+              "dem_prob_males" = dem_prob_males))
 }
 
 
