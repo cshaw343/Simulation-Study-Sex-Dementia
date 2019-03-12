@@ -219,7 +219,10 @@ sex_dem_sim <- function(){
   
   #---- Return ----
   return(list("num_obs" = num_obs, "num_females" = num_females, 
-              "num_males" = num_males, "at_risk_by_sex" = at_risk_by_sex, 
+              "num_males" = num_males, "p_alive" = p_alive, 
+              "p_alive_females" = p_alive_females, 
+              "p_alive_males" = p_alive_males,
+              "at_risk_by_sex" = at_risk_by_sex, 
               "inc_cases_by_sex" = inc_cases_by_sex, 
               "dem_cases_by_sex" = dem_cases_by_sex, "PY_by_sex" = PY_by_sex,
               "dem_prob_by_sex" = dem_prob_by_sex, "sim_rates" = sim_rates, 
