@@ -5,8 +5,8 @@ install.packages("pacman", repos='http://cran.us.r-project.org')
 p_load("tidyverse")
 
 #---- Generating variable names for dataset ----
-variable_names <- tibble("exo_var" = c("id", "sex", "U", 
-                                       rep(NA, (num_tests + 1) - 3)),
+variable_names <- tibble("exo_var" = c("id", "sex", "female", "U", 
+                                       rep(NA, (num_tests + 1) - 4)),
                          "timepoints" = seq(from = 0, to = num_tests, by = 1),
                          #have to go to timepoint 1 + num_tests just to make enough rows (because of baseline)
                          "timepoints_nobase" = seq(from = 1, 

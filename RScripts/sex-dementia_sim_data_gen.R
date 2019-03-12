@@ -24,6 +24,7 @@ small_batch_gen <- function(small_batch_n){
   #---- Generating IDs, sex, U ----
   obs$id <- seq(from = 1, to = small_batch_n, by = 1)
   obs$sex <- rbinom(small_batch_n, size = 1, prob = psex)
+  obs$female <- 1 - obs$sex
   obs$U <- rnorm(small_batch_n, mean = 0, sd = 1)
   
   #---- Generating age data ----
