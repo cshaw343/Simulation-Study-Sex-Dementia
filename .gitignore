@@ -32,8 +32,6 @@ Data/test_sim_results*
 RScripts/debugging*
 #DAGs
 DAGs/*
-#Results files
-Results/*
 #Plots
 Plots/*
 #Search results
