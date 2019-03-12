@@ -252,7 +252,9 @@ sex_dem_sim <- function(){
               "dem_cases_female" = dem_cases_female, 
               "dem_cases_male" = dem_cases_male, 
               "dem_prob_females" = dem_prob_females, 
-              "dem_prob_males" = dem_prob_males))
+              "dem_prob_males" = dem_prob_males, 
+              "mean_U_at_risk_females" = mean_U_at_risk_females, 
+              "mean_U_at_risk_males" = mean_U_at_risk_males))
 }
 
 

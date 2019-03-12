@@ -25,9 +25,10 @@ mean_results_mat <- data.frame(matrix(NA, nrow = num_tests,
                                       ncol = nrow(sim_results))) %>%
   set_colnames(c("num_obs", "num_females", "num_males", "p_alive", 
                  "p_alive_females", "p_alive_males", "mortality_HRs(F:M)",
-                 "at_risk_females", "at_risk_males", "inc_cases_females", 
-                 "inc_cases_males", "dem_cases_females", "dem_cases_males", 
-                 "PY_females", "PY_males", "dem_prob_females", "dem_prob_males", 
+                 "at_risk_females", "at_risk_males", "mean_U_at_risk_females", 
+                 "mean_U_at_risk_males", "inc_cases_females", "inc_cases_males", 
+                 "dem_cases_females", "dem_cases_males", "PY_females", 
+                 "PY_males", "dem_prob_females", "dem_prob_males", 
                  "sim_rates","sim_rates_females", "sim_rates_males", 
                  "IRRs(F:M)", "dem_HRs(F:M)"))
 
@@ -48,6 +49,12 @@ mean_results_mat[, "at_risk_females"] <-
   sim_results["at_risk_females", ] %>% Reduce(`+`, .)/runs
 mean_results_mat[, "at_risk_males"] <- 
   sim_results["at_risk_males", ] %>% 
+  Reduce(`+`, .)/runs
+
+mean_results_mat[, "mean_U_at_risk_females"] <- 
+  sim_results["mean_U_at_risk_females", ] %>% Reduce(`+`, .)/runs
+mean_results_mat[, "mean_U_at_risk_males"] <- 
+  sim_results["mean_U_at_risk_males", ] %>% 
   Reduce(`+`, .)/runs
 
 mean_results_mat[, "inc_cases_females"] <- 
