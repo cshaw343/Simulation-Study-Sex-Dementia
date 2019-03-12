@@ -17,7 +17,7 @@ data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190311"))
 
 #---- Running the simulation in parallel----
 start_time <- Sys.time()
-runs = 1000
+runs = 100
 plan(multiprocess, workers = (detectCores() - 2))
 sim_results <- future_replicate(runs, sex_dem_sim())
 Sys.time() - start_time
