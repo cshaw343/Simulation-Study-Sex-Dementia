@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "here")
+p_load("tidyverse", "here", "survival")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
