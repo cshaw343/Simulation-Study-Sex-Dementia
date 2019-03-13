@@ -16,8 +16,7 @@ knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "knitr", "kableExtra", "magrittr", "reshape2", "here", 
-       "survival")
+p_load("here", "tidyverse", "knitr", "kableExtra", "magrittr", "reshape2")
 
 options(digits = 3)
 options(scipen = 999)
@@ -27,14 +26,14 @@ options(scipen = 999)
 set.seed(03122019)
 ```
 
-```{r Sourcing the scripts that I need}
+```{r Sourcing scripts}
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "sex-dementia_sim_parA.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "misc_custom_functions.R"))
 ```
 
-```{r Pulling data}
+```{r Loading data}
 #Life table data
 netherlands_MF <- read_csv(here("Data", "Netherlands_cohort_MF_calcs"), 
                            col_names = TRUE) %>% 
@@ -68,7 +67,8 @@ france_F <- read_csv(here("Data", "france_cohort_F_calcs"),
 test_data <- readRDS(here("Data", "test_sim_results_A_20190312"))
 
 #Data Analyses
-#sim_results <- readRDS(here("Data", "logIRRs_A_20190304"))
+sim_results <- read_csv(here("Results", "Scenario_A_no_bias", 
+                             "test_sim_results_20190312.csv"))
 ```
 
 <br>
@@ -81,9 +81,12 @@ knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG.png"))
 <br>
 
 #Cohort Description 
-The results in this summary are based on 100 simulated cohorts of n = `r formatC(nrow(test_data), format = "d", big.mark = ",")` 50 year old individuals who were followed for up to 45 years with assessments for dementia status every five years. Dementia incidence rate = _____. 
+The results in this summary are based on `r runs` simulated cohorts of on average n = `r formatC(na.omit(sim_results$num_obs[1]), format = "d", big.mark = ",")` 50 year old individuals who were followed for up to 45 years with assessments for dementia status every five years. Dementia incidence rate = _____. 
 
-**You have a single incidence rate in your draft, but we have different incidence rates because we have a much longer study period (50 years instead of 10). Do we want this to be a table of incidence rates?** 
+```{r Dementia incidence table}
+
+
+```
 
 ```{r Cumulative mortality}
 last_interval <- variable_names$deathij_varnames[nrow(variable_names) - 1]
@@ -136,7 +139,7 @@ We were able to solve for the $\lambda$ values in our survival model so that con
 
 ```{r Lambda values}
 lambda_values <- lambda %>% t() %>% as.data.frame() %>%
-  set_colnames(column_names$interval_names) %>% set_rownames("Lambda")
+  set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("Lambda")
 
 kable(lambda_values) 
 ```
