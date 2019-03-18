@@ -73,6 +73,20 @@ sim_results <- read_csv(here("Results", "Scenario_A_no_bias",
                              "sim_results_20190312.csv"))
 ```
 
+```{r Column names}
+#Interval labels i.e. [50, 55)
+age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
+                     "left_brack" = "[", 
+                     "interval_ages" = na.omit(variable_names$interval_ages), 
+                     "right_pren" = ")") %>%
+  unite("formatted_age_intervals", sep = "")
+
+#Age and #, i.e. Age 50
+age_names <- tibble("Age" = c("Age ", rep("", 9)), 
+                    "number" = seq(50, 95, by = 5)) %>%
+  unite("age_names", sep = "")
+```
+
 <br>
 <br>
 
@@ -86,13 +100,13 @@ In this scenario, sex influences survival while U influences the rate of cogniti
 <br>
 
 #  Description of Hypothetical Cohort Study 
-This is a hypothetical cohort study of sex/gender differences in dementia incidence.  The hypothetical cohort included 100,000 men and women recruited at age 50 years and followed for dementia incidence until age 95 (45 years).  To quantify the extent to which selective survival could plausibly explain higher dementia incidence in men than women at older ages, we generated the data assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence. Thus, associations between sex/gender and dementia incidence reflect survival bias in our simulations.  
+This is a hypothetical cohort study of sex/gender differences in dementia incidence.  The hypothetical cohort included 100,000 men and women recruited at age 50 years and followed for dementia incidence until age 95 (45 years).  To quantify the extent to which selective survival could plausibly explain higher dementia incidence in men compared to women at older ages, we generated the data assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence. Thus, associations between sex/gender and dementia incidence reflect survival bias in our simulations.  
 
 ## Survival 
 
-Sex-specific survival distributions from ages 50-95 years were generated to match survival distributions from European Life Tables. We found European cohort life tables on UC Berkeley's repository:  [https://www.mortality.org/](https://www.mortality.org/).  For those countries included in the EURODEM study, Figure 1.1 shows mortality hazard ratios plotted for the 1920-1925 birth cohort.  
+Sex-specific survival distributions from ages 50-95 years were generated to match survival distributions from European life tables. We found European cohort life tables on UC Berkeley's repository:  [https://www.mortality.org/](https://www.mortality.org/).  For those countries included in the EURODEM study, Figure 1.1 shows mortality hazard ratios plotted for the 1920-1925 birth cohort.  
 
-**Figure 2.1:  Published Survival Hazard Ratios for Countries in the EURODEM Study**
+**Figure 1.1:  Published mortality hazard ratios for countries in the EURODEM ttudy**
 
 ```{r HR Plots, fig.align="center"}
 Hratio_Netherlands <- netherlands_F$Haz/netherlands_M$Haz %>%
@@ -122,22 +136,22 @@ ggplot(HR_plot_data, aes(Age, HR)) +
 
 Since the Netherlands cohort was the largest sample included in the EURODEM study and because their mortality hazard ratios provided a nice middle ground in the 50+ age group, we decided to use Netherlands life tables as our benchmark.  
 
-Using R's optim function, we were able to solve for the $\lambda$ values (baseline hazard for women) in our survival model so that conditional probabilities of survival in our simulated data closely matched those calculated from the Netherlands life tables.  Table 2.1 shows the computed values of $\lambda$ and Figure 1.2 
+Using R's optim function, we were able to solve for the $\lambda$ values (baseline hazard for women in each 5-year age band) in our survival model so that conditional probabilities of survival, i.e. survival to age X + 5, conditional on survival to age X, in our simulated data closely matched those calculated from the Netherlands life tables.  Table 1.1 shows the computed values of $\lambda$ and Figure 1.2 compares the published and simulated cumulative survival probabilities from age 50 years, i.e., conditional on survival to age 50, the probability of surviving to each age.  Figure 1.3 compares the published and simulated mortality hazard ratios from ages 50+.  Both the simulated survival probabilities and the modeled mortality hazard ratios were averaged over 100 iterations of sample generation.  The average of the mortality hazard ratios was computed by first taking the mean(ln(mortality HR)), then exponentiating.  Average cumulative incidence of mortality  = `r round((1 - sim_results$p_alive[length(sim_results$p_alive)])*100, 1)`% across the 100 runs.  
 
 <br>
 
-**Table 1.1:  Lambda Values**
+**Table 1.1:  Baseline hazard for females in each 5-year age band**
 
 ```{r Lambda values}
 lambda_values <- lambda %>% t() %>% as.data.frame() %>%
-  set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("Lambda")
+  set_colnames(age_labels$formatted_age_intervals) %>% set_rownames("Lambda")
 
 kable(lambda_values) 
 ```
 
 <br>
 
-**Figure 1.2: Average Simulated Cumulative Survival Probabilites from Age 50 Years across 100 Simulation Runs**
+**Figure 1.2: Average simulated cumulative survival probabilites from age 50 years across 100 simulation runs**
 
 ```{r Survival plot data}
 all_cp_survival <- c(1, sim_results$p_alive)
@@ -178,8 +192,9 @@ plot_data_all <- plot_data %>% dplyr::select(age, contains("all")) %>%
 ggplot(plot_data_all, 
        aes(age, value, group = `Data Type`, color = `Data Type`)) + 
   geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Whole Population", 
-       y = "Conditional Probability of Survival", 
+       y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal()
 ```
@@ -196,8 +211,9 @@ plot_data_female <- plot_data %>% dplyr::select(age, contains("female")) %>%
 ggplot(plot_data_female, 
        aes(age, value, group = `Data Type`, color = `Data Type`)) + 
   geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Females", 
-       y = "Conditional Probability of Survival", 
+       y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal()
 
@@ -212,87 +228,78 @@ plot_data_Male <- plot_data %>% dplyr::select(age, contains("Male")) %>%
 ggplot(plot_data_Male, 
        aes(age, value, group = `Data Type`, color = `Data Type`)) + 
   geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Males", 
-       y = "Conditional Probability of Survival", 
+       y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal()
 ```
 
 <br>
 
-**Figure 2.3: Survival Hazard Ratios**  
-Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the HR for the interval [50, 55).
+**Figure 1.3: Average simulated mortality hazard ratios for age 50+ across 100 simulation runs**  
+Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the mortality HR for the interval [50, 55).
 
-```{r Cox PH}
-survival_data <- test_data %>% 
-  dplyr::select(head(variable_names$Sij_varnames, -1))
-survival_data[(survival_data >= 5)] <- 4.99999
+```{r pub vs. sim HR, fig.align="center"}
+published_HR <- head(netherlands_F$Haz/netherlands_M$Haz, -1) %>%
+  as.data.frame() %>% set_colnames("Published Mortality HR")
 
-death_indicators_sex <- test_data %>% 
-  dplyr::select(head(variable_names$deathij_varnames, -1), female)
-
-simulated_HRs <- vector(length = ncol(survival_data)) %>%
-  as.data.frame() %>% set_colnames("Modeled HR")
-
-for(i in 1:nrow(simulated_HRs)){
-  cox_model <- coxph(Surv(survival_data[, i], death_indicators_sex[, i]) ~ 
-                      death_indicators_sex$female)
-  simulated_HRs[i, 1] <- exp(cox_model$coefficients)
-}
-
-```
-
-```{r pub vs. sim HR, fig.pos="hold"}
-published_HR <- netherlands_F$Haz/netherlands_M$Haz
-published_HR <- published_HR[11:(length(published_HR) - 1)] %>%
-  as.data.frame() %>% set_colnames("Published HR")
+simulated_HRs <- sim_results$`mortality_HRs(F:M)` %>%
+  as.data.frame() %>% set_colnames("Modeled Mortality HR")
 
 pub_sim_HR_data_cox <- 
   cbind(published_HR, simulated_HRs) %>% 
   mutate("Age" = seq(50, 90, by = 5)) %>%
-  gather(c("Published HR", "Modeled HR"), 
+  gather(c("Published Mortality HR", "Modeled Mortality HR"), 
          key = "Data Type", value = "HR") %>% 
   mutate_at("Data Type", as.factor)
 pub_sim_HR_data_cox$`Data Type` <- fct_relevel(pub_sim_HR_data_cox$`Data Type`, 
-                                               "Published HR", after = 1)
+                                               "Published Mortality HR", 
+                                               after = 1)
 
 ggplot(pub_sim_HR_data_cox, aes(Age, HR)) + 
   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
             alpha = 0.6) +
-  labs(y = "Hazard Ratio (Female:Memale)", x = "Age", 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(y = "Mortality Hazard Ratio (Female:Memale)", x = "Age", 
        color = "") + theme_minimal() + 
-  ggtitle("Simulated vs. Published HRs")
+  ggtitle("Mortality Hazard Ratios")
 ```
  
-
-The results in this summary are based on `r runs` simulated cohorts of on average n = `r formatC(na.omit(sim_results$num_obs[1]), format = "d", big.mark = ",")` 50 year old individuals who were followed for up to 45 years with assessments for dementia status every five years. Average cumulative incidence of mortality  = `r round((1 - sim_results$p_alive[length(sim_results$p_alive)])*100, 1)`%. 
-
-In this summary, we consider the scenario in which sex had no effect on development of dementia, but female sex decreased mortality risk. Results in this simulation that reject the null hypothesis that sex has no effect on dementia incidence (HR = 1.00) are wrong.
-
-# Simulation Results
-
-##  Survival
-
-
 ## Dementia
 
-Average dementia incidence rates per 1000 person years across the simulated cohorts are displayed in Table 2.2.  There is no interval censoring for dementia in the simulated scenarios.  The dementia incidence rates from the EURODEM study, used as reference, are displayed in the first line of the table.  
+Dementia incidence was generated based on cognitive function using age-specific cut points for cognitive function below a "dementia" threshold.  Age-specific cut points for dementia were updated every five years such that lower cognitive function that would be considered consistent with dementia at younger ages could be considered "normal" at older ages.  The chosen dementia cut points and their associated percentiles are displayed in Table 1.2. There was no interval censoring included in our simulations; age at dementia diagnosis was based on the age at which a participant's cognitive function fell below the diagnostic threshold for the 5-year age band.  Age-specific dementia incidence rates for ages 65-95 were generated to match sex-pooled dementia incidence rates from the EURODEM study.  
 
-The average hazard ratios for dementia across our simulated scenarios are displayed in Table 2.3, and the average incidence rate ratios are displayed in Table 2.4.  In both cases, ratios are presented as female:male.
+**Table 1.2:  Dementia cut points and associated percentiles**  
+The percentile is the proportion of susceptible that will be diagnosed with dementia
+
+```{r cutoffs and percentiles}
+Cij_data <- test_data %>% dplyr::select(variable_names$Cij_varnames)
+means <- Cij_data %>% map_dbl(~ mean(., na.rm = TRUE))
+SDs <- Cij_data %>% map_dbl(~ sd(., na.rm = TRUE))
+
+percentile <- vector(length = length(dem_cuts))
+for(i in 1:length(dem_cuts)){
+  percentile[i] <- pnorm(dem_cuts[i], mean = means[i], sd = SDs[i])
+}
+
+percentile_table <- rbind(dem_cuts, percentile)
+colnames(percentile_table) <- age_names$age_names
+rownames(percentile_table) <- c("Dementia Cutoff", "Percentile")
+kable(percentile_table)
+```
 
 <br>
 
-**Table 2.2: Dementia Incidence Rates**  
+Average dementia incidence rates per 1000 person years across 100 simulated cohorts are displayed in Table 1.3. The dementia incidence rates from the EURODEM study, used as reference, are displayed in the first line of the table. The average dementia hazard ratios across 100 simulated scenarios are displayed in Table 1.4, and the average incidence rate ratios are displayed in Table 1.5.  In both cases, ratios are presented as female:male.
+
+<br>
+
+**Table 1.3: Dementia incidence rates**  
 Source: Gender differences in the incidence of AD and vascular dementia: 
 The EURODEM Studies (Andersen 1999); Table 2
 
 ```{r dem_table}
-age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
-                     "left_brack" = "[", 
-                     "interval_ages" = na.omit(variable_names$interval_ages), 
-                     "right_pren" = ")") %>%
-  unite("formatted_age_intervals", sep = "")
-
 dem_table <- 
   tibble("EURODEM" = c(" ", " ", " ", 
                        round(head(EURODEM_inc_rates$Total_All_Dementia_1000PY, 
@@ -308,7 +315,7 @@ kable(dem_table)
 
 <br>
 
-**Table 2.3: Hazard Ratios for Dementia**  
+**Table 1.4: Average hazard ratios for dementia (exponentiated mean(ln(dementia HR)) across 100 simulation runs)**  
 
 ```{r hr_table}
 age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
@@ -327,7 +334,7 @@ kable(hr_table)
 
 <br>
 
-**Table 2.4: Incidence Rate Ratios for Dementia**  
+**Table 1.5: Average incidence rate ratios for dementia (exponentiated mean(ln(IRR)) across 100 simulation runs)**  
 
 ```{r IRR_table}
 age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
@@ -344,12 +351,13 @@ IRR_table <-
 kable(IRR_table)
 ```
 
+<br>
 
 # Some results from one simulated cohort
 
 ##  Cognitive Trajectories
 
-**Figure 3.1:  Mean cognitive trajectories overlayed on a random sample of 10 individual's trajectories.**
+**Figure 2.1:  Mean cognitive trajectories overlayed on a random sample of 10 individual's trajectories.**
 
 ```{r Cognitive trajectories, fig.align="center"}
 Cij_check <- test_data %>% dplyr::select(sex, variable_names$Cij_varnames)
@@ -390,13 +398,14 @@ ggplot(samp_Cij, aes(Age, value)) +
   labs(y = "Cognitive Function", 
        x = "Age", 
        color = "Mean Cognitive \n Function") + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("Mean Cognitive Trajectories") +
   theme_minimal()
 ```
 
 <br>
 
-**Table 3.1: Mean slopes at each interval** 
+**Table 2.1: Mean slopes at each interval** 
 
 ```{r Slopes table}
 slopes <- cumsum(cij_slopes)[-1] %>% as.data.frame() %>% t() %>%
@@ -407,7 +416,7 @@ kable(slopes)
 
 <br>
 
-**Table 3.2:  Variance of random slope for each interval**  
+**Table 2.2:  Variance of random slope for each interval**  
 
 ```{r slope variance table}
 slope_var <- cij_var1[-1] %>% as.data.frame() %>% t() %>%
@@ -418,7 +427,7 @@ kable(slope_var)
 
 ## Dementia Cases
 
-**Figure 3.2:  Dementia cases by age**  
+**Figure 2.2:  Dementia cases by age**  
 Incident cases at each age are plotted in blue
 
 ```{r Dementia incidence rate plot, fig.align="center"}
@@ -460,27 +469,7 @@ hists %>% ggplot(aes(value)) +
 
 <br>
 
-**Table 3.3:  Dementia cut points and associated percentiles**  
-The percentile is the proportion of susceptible that will be diagnosed with dementia
-
-```{r cutoffs and percentiles}
-means <- Cij_data %>% map_dbl(~ mean(., na.rm = TRUE))
-SDs <- Cij_data %>% map_dbl(~ sd(., na.rm = TRUE))
-
-percentile <- vector(length = length(dem_cuts))
-for(i in 1:length(dem_cuts)){
-  percentile[i] <- pnorm(dem_cuts[i], mean = means[i], sd = SDs[i])
-}
-
-percentile_table <- rbind(dem_cuts, percentile)
-colnames(percentile_table) <- age_names$age_names
-rownames(percentile_table) <- c("Dementia Cutoff", "Percentile")
-kable(percentile_table)
-```
-
-<br>
-
-**Table 3.4:  Prevalence of dementia**  
+**Table 2.3:  Prevalence of dementia**  
 Estimating this is not our primary goal, but we thought this might be another good sanity check.  We expect that these numbers are higher than what they should be because in this scenario, dementia does not kill anyone. 
 
 ```{r Dementia prevalance}
@@ -493,7 +482,7 @@ kable(dem_prev)
 
 ## Distributions of U
 
-**Figure 3.3:  Distribution of U**
+**Figure 2.3:  Distribution of U**
 
 ```{r U dists, fig.align="center"}
 dem_data <- test_data %>% 
@@ -522,9 +511,9 @@ dem_data %>% ggplot(aes(x = U)) +
   theme(legend.title = element_text("Sex"))
 ```
 
-# Extra Sanity Check Calculations
+## Extra Sanity Check Calculations
 
-**Table 4.1:  Contributed years by sex**
+**Table 2.4:  Dementia-free person-years contributed to each 5-year age interval by sex**
 
 ```{r PY by sex}
 py_by_sex <- test_data %>% group_by(sex) %>% 
@@ -533,14 +522,15 @@ py_by_sex <- test_data %>% group_by(sex) %>%
   mutate(Sex = case_when(sex == 0 ~ "Female", 
                          TRUE ~ "Male")) %>% 
   dplyr::select(-one_of("sex")) %>% 
-  dplyr::select(Sex, everything())
+  dplyr::select(Sex, everything()) %>% 
+  set_colnames(c("Sex", age_labels$formatted_age_intervals))
 
 kable(py_by_sex)
 ```
 
 <br>
 
-**Table 4.2:  Incident Dementia Cases by Sex**
+**Table 2.5:  Number of incident dementia cases by age and sex in each 5-year age interval**
 
 ```{r Dem inc}
 dem_inc_by_sex <- test_data %>%
@@ -553,11 +543,10 @@ dem_inc_by_sex <- test_data %>%
   count(dem_wave) %>% 
   filter(dem_wave != "NA") %>% spread(key = Sex, value = n) %>% t() %>%
   set_rownames(c("Sex", "Female", "Male")) %>% 
-  set_colnames(variable_names$dem_varnames[-c(1)])
+  set_colnames(age_labels$formatted_age_intervals)
   
 kable(dem_inc_by_sex[-1, ])
 ```
-
 
 
 
