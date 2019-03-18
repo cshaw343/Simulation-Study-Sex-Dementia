@@ -37,3 +37,6 @@ Plots/*
 #Search results
 Data/best_slopes_cuts_*
 
+#Markdown .html files
+Results/Scenario_A_no_bias/*.html
+
