@@ -1,10 +1,11 @@
 ---
 title: "Simulation Scenario A:  No bias anticipated"
 output: 
-  html_document:
+  bookdown::html_document2:
     theme: flatly
     toc: TRUE
-    toc_float: TRUE
+    toc_float: 
+      collapsed: FALSE
     toc_depth: 2
 ---
 
@@ -16,7 +17,8 @@ knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse", "knitr", "kableExtra", "magrittr", "reshape2")
+p_load("bookdown", "here", "tidyverse", "knitr", "kableExtra", "magrittr", 
+       "reshape2", "survival")
 
 options(digits = 3)
 options(scipen = 999)
@@ -33,42 +35,42 @@ source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "misc_custom_functions.R"))
 ```
 
-```{r Loading data}
+```{r Loading data, eval = TRUE}
 #Life table data
 netherlands_MF <- read_csv(here("Data", "Netherlands_cohort_MF_calcs"), 
                            col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 netherlands_M <- read_csv(here("Data", "Netherlands_cohort_M_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 netherlands_F <- read_csv(here("Data", "Netherlands_cohort_F_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 denmark_MF <- read_csv(here("Data", "denmark_cohort_MF_calcs"), 
                            col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 denmark_M <- read_csv(here("Data", "denmark_cohort_M_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 denmark_F <- read_csv(here("Data", "denmark_cohort_F_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 france_MF <- read_csv(here("Data", "france_cohort_MF_calcs"), 
                            col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 france_M <- read_csv(here("Data", "france_cohort_M_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 france_F <- read_csv(here("Data", "france_cohort_F_calcs"), 
                           col_names = TRUE) %>% 
-  filter(Year == "1920-1925" & Age < 100)
+  filter(Year == "1920-1925" & Age < 100 & Age >= 50)
 
 #One simulation run
 test_data <- readRDS(here("Data", "test_sim_results_A_20190312"))
 
 #Data Analyses
 sim_results <- read_csv(here("Results", "Scenario_A_no_bias", 
-                             "test_sim_results_20190312.csv"))
+                             "sim_results_20190312.csv"))
 ```
 
 <br>
@@ -78,36 +80,19 @@ sim_results <- read_csv(here("Results", "Scenario_A_no_bias",
 knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG.png"))
 ```
 <br>
+
+In this scenario, sex influences survival while U influences the rate of cognitive change and dementia incidence.  The dotted line from U to survival represents the fact that in this causal structure, U does not influence survival; but the effects of U on survival will be added in future scenarios to induce potential collider bias.
+
 <br>
 
-#Cohort Description 
-The results in this summary are based on `r runs` simulated cohorts of on average n = `r formatC(na.omit(sim_results$num_obs[1]), format = "d", big.mark = ",")` 50 year old individuals who were followed for up to 45 years with assessments for dementia status every five years. Dementia incidence rate = _____. 
+#  Description of Hypothetical Cohort Study 
+This is a hypothetical cohort study of sex/gender differences in dementia incidence.  The hypothetical cohort included 100,000 men and women recruited at age 50 years and followed for dementia incidence until age 95 (45 years).  To quantify the extent to which selective survival could plausibly explain higher dementia incidence in men than women at older ages, we generated the data assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence. Thus, associations between sex/gender and dementia incidence reflect survival bias in our simulations.  
 
-```{r Dementia incidence table}
+## Survival 
 
+Sex-specific survival distributions from ages 50-95 years were generated to match survival distributions from European Life Tables. We found European cohort life tables on UC Berkeley's repository:  [https://www.mortality.org/](https://www.mortality.org/).  For those countries included in the EURODEM study, Figure 1.1 shows mortality hazard ratios plotted for the 1920-1925 birth cohort.  
 
-```
-
-```{r Cumulative mortality}
-last_interval <- variable_names$deathij_varnames[nrow(variable_names) - 1]
-cum_mort <- sum(test_data[, last_interval])/nrow(test_data)
-```
-
-Cumulative incidence of mortality during the study = `r round(cum_mort*100, 1)`%.
-
-**I calculated this as the proportion of dead people over the study period... is this right?**
-
-In this summary, we consider the scenario in which sex had no effect on development of dementia, but female sex decreased mortality risk 
-
-**Do we want a table for this as well since the HRs change so much over the 50 year period?**. 
-
-In our simulations, results that reject the null hypothesis that sex has no effect on dementia incidence (HR=1.00) are wrong. 
-
-#Matching European Survival Data 
-
-We used dementia incidence rate data from the EURODEM studies so we needed to switch from US to European survival data.  We found cohort life tables on UC Berkeley's repository: [https://www.mortality.org/](https://www.mortality.org/).  Pulling data for the countries included in the EURODEM study, we plotted hazard ratios and decided that the Netherlands data provided a nice middle ground in the 50+ age group. 
-
-##Comparing Hazard Ratios
+**Figure 2.1:  Published Survival Hazard Ratios for Countries in the EURODEM Study**
 
 ```{r HR Plots, fig.align="center"}
 Hratio_Netherlands <- netherlands_F$Haz/netherlands_M$Haz %>%
@@ -119,23 +104,29 @@ Hratio_France <- france_F$Haz/france_M$Haz %>%
 
 HR_plot_data <- 
   cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France) %>% 
-  mutate("Age" = seq(0, 95, by = 5)) %>%
+  mutate("Age" = seq(50, 95, by = 5)) %>%
   gather(c("Netherlands", "Denmark", "France"), 
          key = "Country", value = "HR") %>% 
   mutate_at("Country", as.factor)
 HR_plot_data$Country <- fct_relevel(HR_plot_data$Country, 
-                                    "Denmark", after = 2)
+                                    "France", after = 2)
 
 ggplot(HR_plot_data, aes(Age, HR)) + 
   geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
-  labs(y = "Hazard Ratio (Female:Male)", x = "Age", 
-       color = "") + theme_minimal() + 
+  labs(y = "Mortality Hazard Ratio (Female:Male)", x = "Age", 
+       color = "") + ylim(0, 1) + theme_minimal() + 
+  scale_y_continuous(breaks = seq(0, 1, 0.2)) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("1920-1925 Birth Cohort")
 ```
 
-##Lambda values
+Since the Netherlands cohort was the largest sample included in the EURODEM study and because their mortality hazard ratios provided a nice middle ground in the 50+ age group, we decided to use Netherlands life tables as our benchmark.  
 
-We were able to solve for the $\lambda$ values in our survival model so that conditional probabilities of survival in our simulated data closely matched those calculated from the Netherlands life tables: 
+Using R's optim function, we were able to solve for the $\lambda$ values (baseline hazard for women) in our survival model so that conditional probabilities of survival in our simulated data closely matched those calculated from the Netherlands life tables.  Table 2.1 shows the computed values of $\lambda$ and Figure 1.2 
+
+<br>
+
+**Table 1.1:  Lambda Values**
 
 ```{r Lambda values}
 lambda_values <- lambda %>% t() %>% as.data.frame() %>%
@@ -144,41 +135,27 @@ lambda_values <- lambda %>% t() %>% as.data.frame() %>%
 kable(lambda_values) 
 ```
 
-##Conditional Survival Probabilites from Age 50 Years
+<br>
+
+**Figure 1.2: Average Simulated Cumulative Survival Probabilites from Age 50 Years across 100 Simulation Runs**
 
 ```{r Survival plot data}
-sim_data <- test_data[, c("sex", "death0", 
-                          na.omit(variable_names$deathij_varnames))]
-
-#Want to look at unconditional and conditional probabilities of survival
-#Unconditional Survival
-all_death_counts <- sim_data %>% dplyr::select(-one_of("sex")) %>% 
-  colSums(., na.rm = TRUE) %>% cumsum()
-all_survival_counts <- nrow(sim_data) - all_death_counts
-all_cp_survival <- cond_prob(all_survival_counts)
-
-#Female survival
-num_females <- sim_data %>% filter(sex == 0) %>% nrow()
-female_death_counts <- sim_data %>% filter(sex == 0) %>% 
-  dplyr::select(-one_of("sex")) %>% colSums(., na.rm = TRUE) %>% cumsum()
-female_survival_counts <- num_females - female_death_counts
-female_cp_survival <- cond_prob(female_survival_counts)
-
-#Male survival
-num_males <- sim_data %>% filter(sex == 1) %>% nrow()
-male_death_counts <- sim_data %>% filter(sex == 1) %>% 
-  dplyr::select(-one_of("sex")) %>% colSums(., na.rm = TRUE) %>% cumsum()
-male_survival_counts <- num_males - male_death_counts
-male_cp_survival <- cond_prob(male_survival_counts)
+all_cp_survival <- c(1, sim_results$p_alive)
+female_cp_survival <- c(1, sim_results$p_alive_females)
+male_cp_survival <- c(1, sim_results$p_alive_males)
 
 #Netherlands data that we need
 netherlands_MF_survival <- netherlands_MF %>% filter(Age >= 50)
 netherlands_M_survival <- netherlands_M %>% filter(Age >= 50)
 netherlands_F_survival <- netherlands_F %>% filter(Age >= 50)
 
-netherlands_MF_survival$CP[1] <- 1
-netherlands_M_survival$CP[1] <- 1
-netherlands_F_survival$CP[1] <- 1
+#Calculating cumulative survival from age 50
+netherlands_MF_survival$CP <- 
+  netherlands_MF_survival$lx/netherlands_MF_survival$lx[1]
+netherlands_M_survival$CP <- 
+  netherlands_M_survival$lx/netherlands_M_survival$lx[1]
+netherlands_F_survival$CP <- 
+  netherlands_F_survival$lx/netherlands_F_survival$lx[1]
 
 plot_data <- tibble("age" = seq(50, 95, by = 5), 
                       "pub_all_survival" = netherlands_MF_survival$CP, 
@@ -241,7 +218,9 @@ ggplot(plot_data_Male,
   theme_minimal()
 ```
 
-##Hazard Ratios 
+<br>
+
+**Figure 2.3: Survival Hazard Ratios**  
 Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the HR for the interval [50, 55).
 
 ```{r Cox PH}
@@ -264,49 +243,9 @@ for(i in 1:nrow(simulated_HRs)){
 ```
 
 ```{r pub vs. sim HR, fig.pos="hold"}
-# #---- Hazard Function ----
-# haz <- function(age, logprobs){
-#   HZ <- vector(length = length(age))
-#   for(i in 2:length(HZ)){
-#     HZ[i] = -(logprobs[i] - logprobs[i - 1])/(age[i] - age[i - 1])
-#   }
-#   return(HZ)
-# }
-# 
-# #Computing Female hazards
-# female_haz <- tibble("Age" = seq(50, 95, by = 5),
-#                      "Prob" = female_survival_counts/num_females,
-#                      "logProb" = log(Prob),
-#                      "Haz" = haz(age = Age, logprobs = logProb))
-# 
-# #Computing Male hazards
-# male_haz <- tibble("Age" = seq(50, 95, by = 5),
-#                    "Prob" = male_survival_counts/num_males,
-#                    "logProb" = log(Prob),
-#                    "Haz" = haz(age = Age, logprobs = logProb))
-# 
 published_HR <- netherlands_F$Haz/netherlands_M$Haz
 published_HR <- published_HR[11:(length(published_HR) - 1)] %>%
   as.data.frame() %>% set_colnames("Published HR")
-# 
-# sim_HR <- (male_haz$Haz/female_haz$Haz)[-1] %>%
-#   as.data.frame() %>% set_colnames("Simulated HR")
-# 
-# pub_sim_HR_data <- 
-#   cbind(published_HR, sim_HR) %>% 
-#   mutate("Age" = seq(50, 90, by = 5)) %>%
-#   gather(c("Published HR", "Simulated HR"), 
-#          key = "Data Type", value = "HR") %>% 
-#   mutate_at("Data Type", as.factor)
-# pub_sim_HR_data$`Data Type` <- fct_relevel(pub_sim_HR_data$`Data Type`, 
-#                                            "Published HR", after = 1)
-# 
-# ggplot(pub_sim_HR_data, aes(Age, HR)) + 
-#   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
-#             alpha = 0.6) +
-#   labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
-#        color = "") + theme_minimal() + 
-#   ggtitle("Simulated vs. Published HRs")
 
 pub_sim_HR_data_cox <- 
   cbind(published_HR, simulated_HRs) %>% 
@@ -320,12 +259,97 @@ pub_sim_HR_data_cox$`Data Type` <- fct_relevel(pub_sim_HR_data_cox$`Data Type`,
 ggplot(pub_sim_HR_data_cox, aes(Age, HR)) + 
   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
             alpha = 0.6) +
-  labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
+  labs(y = "Hazard Ratio (Female:Memale)", x = "Age", 
        color = "") + theme_minimal() + 
-  ggtitle("Modeled vs. Published HRs")
+  ggtitle("Simulated vs. Published HRs")
+```
+ 
+
+The results in this summary are based on `r runs` simulated cohorts of on average n = `r formatC(na.omit(sim_results$num_obs[1]), format = "d", big.mark = ",")` 50 year old individuals who were followed for up to 45 years with assessments for dementia status every five years. Average cumulative incidence of mortality  = `r round((1 - sim_results$p_alive[length(sim_results$p_alive)])*100, 1)`%. 
+
+In this summary, we consider the scenario in which sex had no effect on development of dementia, but female sex decreased mortality risk. Results in this simulation that reject the null hypothesis that sex has no effect on dementia incidence (HR = 1.00) are wrong.
+
+# Simulation Results
+
+##  Survival
+
+
+## Dementia
+
+Average dementia incidence rates per 1000 person years across the simulated cohorts are displayed in Table 2.2.  There is no interval censoring for dementia in the simulated scenarios.  The dementia incidence rates from the EURODEM study, used as reference, are displayed in the first line of the table.  
+
+The average hazard ratios for dementia across our simulated scenarios are displayed in Table 2.3, and the average incidence rate ratios are displayed in Table 2.4.  In both cases, ratios are presented as female:male.
+
+<br>
+
+**Table 2.2: Dementia Incidence Rates**  
+Source: Gender differences in the incidence of AD and vascular dementia: 
+The EURODEM Studies (Andersen 1999); Table 2
+
+```{r dem_table}
+age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
+                     "left_brack" = "[", 
+                     "interval_ages" = na.omit(variable_names$interval_ages), 
+                     "right_pren" = ")") %>%
+  unite("formatted_age_intervals", sep = "")
+
+dem_table <- 
+  tibble("EURODEM" = c(" ", " ", " ", 
+                       round(head(EURODEM_inc_rates$Total_All_Dementia_1000PY, 
+                                  -1), 3)), 
+         "Scenario A" = " ", 
+         "F" = sim_results$sim_rates_females, 
+         "M" = sim_results$sim_rates_males, 
+         "Combined" = sim_results$sim_rates) %>% t() %>% 
+  set_colnames(age_labels$formatted_age_intervals)
+
+kable(dem_table)
 ```
 
-#Cognitive Trajectories
+<br>
+
+**Table 2.3: Hazard Ratios for Dementia**  
+
+```{r hr_table}
+age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
+                     "left_brack" = "[", 
+                     "interval_ages" = na.omit(variable_names$interval_ages), 
+                     "right_pren" = ")") %>%
+  unite("formatted_age_intervals", sep = "")
+
+hr_table <- 
+  tibble("Scenario A" = " ", 
+         "HR" = sim_results$`dem_HRs(F:M)`) %>% t() %>% 
+  set_colnames(age_labels$formatted_age_intervals)
+
+kable(hr_table)
+```
+
+<br>
+
+**Table 2.4: Incidence Rate Ratios for Dementia**  
+
+```{r IRR_table}
+age_labels <- tibble("age" = c("age ", rep("", (num_tests - 1))), 
+                     "left_brack" = "[", 
+                     "interval_ages" = na.omit(variable_names$interval_ages), 
+                     "right_pren" = ")") %>%
+  unite("formatted_age_intervals", sep = "")
+
+IRR_table <- 
+  tibble("Scenario A" = " ", 
+         "IRR" = sim_results$`IRRs(F:M)`) %>% t() %>% 
+  set_colnames(age_labels$formatted_age_intervals)
+
+kable(IRR_table)
+```
+
+
+# Some results from one simulated cohort
+
+##  Cognitive Trajectories
+
+**Figure 3.1:  Mean cognitive trajectories overlayed on a random sample of 10 individual's trajectories.**
 
 ```{r Cognitive trajectories, fig.align="center"}
 Cij_check <- test_data %>% dplyr::select(sex, variable_names$Cij_varnames)
@@ -370,197 +394,32 @@ ggplot(samp_Cij, aes(Age, value)) +
   theme_minimal()
 ```
 
-Mean slopes at each interval: 
+<br>
+
+**Table 3.1: Mean slopes at each interval** 
 
 ```{r Slopes table}
 slopes <- cumsum(cij_slopes)[-1] %>% as.data.frame() %>% t() %>%
-  set_colnames(column_names$interval_names) %>% set_rownames("")
+  set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("")
 
 kable(slopes)
 ```
 
-Variance of random slope for each interval:  
+<br>
+
+**Table 3.2:  Variance of random slope for each interval**  
 
 ```{r slope variance table}
 slope_var <- cij_var1[-1] %>% as.data.frame() %>% t() %>%
-  set_colnames(column_names$interval_names) %>% set_rownames("")
+  set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("")
 
 kable(slope_var)
 ```
 
-#Matching Dementia Incidence Rates
-Source: Gender differences in the incidence of AD and vascular dementia: 
-The EURODEM Studies (Andersen 1999); Table 2
+## Dementia Cases
 
-```{r Dementia rates table}
-pub_rates <- round(EURODEM_inc_rates$Total_All_Dementia_1000PY, 3) %>% 
-  c(rep("NA", 3), .) %>% head(9)
-
-test_data %<>% mutate("death0" = 0)
-
-sim_rates <- vector(length = 9)
-names(sim_rates) <- column_names$interval_names
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- test_data %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  sim_rates[slot] = round(1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/
-                            sum(PY_data[, contributed]), 3)
-}
-
-rbind(sim_rates, pub_rates) %>% 
-  as.data.frame() %>% set_rownames(c("Simulated", "Published")) %>%
-  kable()
-```
-
-
-## Sex-specific dementia incidence rates
-
-```{r Sex-specific dem rates}
-sim_rates_by_sex <- matrix(ncol = 9, nrow = 2)
-colnames(sim_rates_by_sex) <- column_names$interval_names
-rownames(sim_rates_by_sex) <- c("Female", "Male")
-
-female_data <- test_data %>% filter(sex == 0)
-male_data <- test_data %>% filter(sex == 1)
-
-#Computing female incidence rates
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- female_data %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  sim_rates_by_sex[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                             na.rm = TRUE)/
-                                      sum(PY_data[, contributed])), 3)
-}
-
-#Computing male incidence rates
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- male_data %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  sim_rates_by_sex[2, slot] = round(1000*sum(PY_data[, dem_this_wave], 
-                                             na.rm = TRUE)/
-                                      sum(PY_data[, contributed]), 3)
-}
-kable(sim_rates_by_sex)
-```
-
-
-
-##Mean IRRs (100 runs of 100,000 people)
-These are male:female IRRs
-
-```{r dem IRRs}
-IRRs <- sim_rates_by_sex[2, ]/sim_rates_by_sex[1, ] %>% t() %>%
-  set_rownames("")
-
-kable(IRRs)
-```
-
-##Person year and incidence data by sex
-
-```{r PY by sex}
-py_by_sex <- test_data %>% group_by(sex) %>% 
-  dplyr::select(head(variable_names$contributed_varnames, -1)) %>% 
-  summarise_all(~sum(., na.rm = TRUE)) %>% 
-  mutate(Sex = case_when(sex == 0 ~ "Female", 
-                         TRUE ~ "Male")) %>% 
-  dplyr::select(-one_of("sex")) %>% 
-  dplyr::select(Sex, everything())
-
-kable(py_by_sex)
-```
-
-```{r Dem inc}
-dem_inc_by_sex <- test_data %>%
-  dplyr::select(sex, dem_wave) %>% 
-  mutate_at("dem_wave", as.factor) %>% 
-  mutate(Sex = case_when(sex == 0 ~ "Female", 
-                         TRUE ~ "Male")) %>% 
-  dplyr::select(Sex, dem_wave) %>% 
-  group_by(Sex) %>%
-  count(dem_wave) %>% 
-  filter(dem_wave != "NA") %>% spread(key = Sex, value = n) %>% t() %>%
-  set_rownames(c("Sex", "Female", "Male")) %>% 
-  set_colnames(variable_names$dem_varnames[-c(1)])
-  
-kable(dem_inc_by_sex[-1, ])
-```
-
-##Dementia HRs
-
-```{r Dementia HRs}
-contributed_data <- test_data %>% 
-  dplyr::select(head(variable_names$contributed_varnames, -1))
-contributed_data[(contributed_data == 5)] <- 4.99999
-
-dem_indicators_sex <- test_data %>% 
-  dplyr::select(variable_names$dem_varnames[-1], sex)
-
-simulated_HRs <- vector(length = ncol(contributed_data)) %>%
-  as.data.frame() %>% set_colnames("Modeled Dementia HR")
-
-for(i in 1:nrow(simulated_HRs)){
-  cox_model <- coxph(Surv(contributed_data[, i], dem_indicators_sex[, i]) ~ 
-                      dem_indicators_sex$sex)
-  simulated_HRs[i, 1] <- exp(cox_model$coefficients)
-}
-
-kable(t(simulated_HRs) %>% set_colnames(column_names$interval_names))
-
-```
-
-<br>
-<br>
+**Figure 3.2:  Dementia cases by age**  
+Incident cases at each age are plotted in blue
 
 ```{r Dementia incidence rate plot, fig.align="center"}
 cutoffs <- dem_cuts
@@ -592,14 +451,16 @@ hists %>% ggplot(aes(value)) +
   geom_histogram(fill = "gray", alpha = 0.6) + 
   geom_histogram(data = hists %>% filter(indicators == 1), fill = "dodgerblue2", 
                  alpha = 0.6) + 
-  labs(title = "Incident Dementia Cases by Age", 
+  labs(title = "Dementia Cases by Age", 
        x = "Cognitive Level", 
        y = "Live People") + 
   facet_wrap(~ key, scales = "free") + 
   xlim(-30, 3.5) + theme_minimal()
 ```
 
-##Percentiles associated with each dementia cut point 
+<br>
+
+**Table 3.3:  Dementia cut points and associated percentiles**  
 The percentile is the proportion of susceptible that will be diagnosed with dementia
 
 ```{r cutoffs and percentiles}
@@ -617,18 +478,22 @@ rownames(percentile_table) <- c("Dementia Cutoff", "Percentile")
 kable(percentile_table)
 ```
 
-##Prevalence of dementia
-Estimating this is not our primary goal, but we thought this might be another good sanity check.  We expect that these numbers are higher than what they should be because in our model, dementia does not kill anyone. 
+<br>
+
+**Table 3.4:  Prevalence of dementia**  
+Estimating this is not our primary goal, but we thought this might be another good sanity check.  We expect that these numbers are higher than what they should be because in this scenario, dementia does not kill anyone. 
 
 ```{r Dementia prevalance}
 dem_prev <- test_data %>% dplyr::select(variable_names$dem_varnames) %>% 
   colMeans(na.rm = TRUE) %>% as.data.frame() %>% t() %>%
-  set_colnames(age_names$age_names) %>% set_rownames("")
+  set_colnames(age_names$age_names) %>% set_rownames("Prevalence")
 
 kable(dem_prev)
 ```
 
-#Distribution of U
+## Distributions of U
+
+**Figure 3.3:  Distribution of U**
 
 ```{r U dists, fig.align="center"}
 dem_data <- test_data %>% 
@@ -657,65 +522,41 @@ dem_data %>% ggplot(aes(x = U)) +
   theme(legend.title = element_text("Sex"))
 ```
 
-```{r debugging calculations, eval = FALSE}
-#At risk calculations
-at_risk_by_sex <- matrix(ncol = 9, nrow = 2)
-colnames(at_risk_by_sex) <- seq(50, 90, by = 5)
-rownames(at_risk_by_sex) <- c("Female", "Male")
+# Extra Sanity Check Calculations
 
-#Computing female at_risk
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    death_last_wave <- paste0("death", (slot - 1))
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-  }
-  at_risk <- female_data %>% 
-    dplyr::select(death_last_wave, dem_last_wave) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  at_risk_by_sex[1, slot] = nrow(at_risk)
-}
+**Table 4.1:  Contributed years by sex**
 
-#Computing male at_risk
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    death_last_wave <- paste0("death", (slot - 1))
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-  }
-  at_risk <- male_data %>% 
-    dplyr::select(death_last_wave, dem_last_wave) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  at_risk_by_sex[2, slot] = nrow(at_risk)
-}
+```{r PY by sex}
+py_by_sex <- test_data %>% group_by(sex) %>% 
+  dplyr::select(head(variable_names$contributed_varnames, -1)) %>% 
+  summarise_all(~sum(., na.rm = TRUE)) %>% 
+  mutate(Sex = case_when(sex == 0 ~ "Female", 
+                         TRUE ~ "Male")) %>% 
+  dplyr::select(-one_of("sex")) %>% 
+  dplyr::select(Sex, everything())
 
-#Dementia cases (incident + prevalent)
-dem_cases_female <- female_data %>% 
-  dplyr::select(variable_names$dem_varnames) %>% 
-  colSums(na.rm = TRUE) 
-
-dem_cases_male <- male_data %>% 
-  dplyr::select(variable_names$dem_varnames) %>% 
-  colSums(na.rm = TRUE) 
-
-#Prevalence of dementia by sex
-dem_prev_females <- female_data %>% 
-  dplyr::select(variable_names$dem_varnames) %>% 
-  colMeans(na.rm = TRUE) 
-
-dem_prev_males <- male_data %>% 
-  dplyr::select(variable_names$dem_varnames) %>% 
-  colMeans(na.rm = TRUE) 
+kable(py_by_sex)
 ```
 
+<br>
+
+**Table 4.2:  Incident Dementia Cases by Sex**
+
+```{r Dem inc}
+dem_inc_by_sex <- test_data %>%
+  dplyr::select(sex, dem_wave) %>% 
+  mutate_at("dem_wave", as.factor) %>% 
+  mutate(Sex = case_when(sex == 0 ~ "Female", 
+                         TRUE ~ "Male")) %>% 
+  dplyr::select(Sex, dem_wave) %>% 
+  group_by(Sex) %>%
+  count(dem_wave) %>% 
+  filter(dem_wave != "NA") %>% spread(key = Sex, value = n) %>% t() %>%
+  set_rownames(c("Sex", "Female", "Male")) %>% 
+  set_colnames(variable_names$dem_varnames[-c(1)])
+  
+kable(dem_inc_by_sex[-1, ])
+```
 
 
 
