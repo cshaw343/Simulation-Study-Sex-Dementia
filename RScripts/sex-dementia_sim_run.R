@@ -18,8 +18,8 @@ data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
 #---- Running the simulation in parallel----
 start_time <- Sys.time()
 
-batch_100_runs <- function(){
-  plan(multiprocess, workers = (detectCores() - 2))
+
+  plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
   sim_results <- future_replicate(runs, sex_dem_sim())
   
   #Mean results
@@ -97,10 +97,11 @@ batch_100_runs <- function(){
   
   write_csv(mean_results_mat,
             here("Results", "Scenario_A_no_bias", 
-                 paste0("sim_results_", gsub("-", "", Sys.Date()), ".csv")), 
-            append = TRUE)
+                 paste0("sim_results_250_", gsub("-", "", Sys.Date()), ".csv")))
   
-}
+  Sys.time() - start_time 
+  
+  #---- Old Code ----
 
 data.frame(matrix(NA, nrow = 1, ncol = 24)) %>%
   set_colnames(c("num_obs", "num_females", "num_males", "p_alive", 
@@ -116,7 +117,7 @@ data.frame(matrix(NA, nrow = 1, ncol = 24)) %>%
 
 replicate(10, batch_100_runs())
 
-Sys.time() - start_time 
+
 
 
 
