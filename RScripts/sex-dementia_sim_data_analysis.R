@@ -200,14 +200,38 @@ sex_dem_sim <- function(){
   IRRs <- sim_rates_females/sim_rates_males
   logIRRs <- log(IRRs) 
   
+  #---- Dementia log(IRRs) Poisson Regression ----
+  modeled_dementia_logIRRs <- vector(length = num_tests)
+  poisson_reg_data <- rbind(cbind(rep("1", length(inc_cases_females)),
+                                  na.omit(variable_names$interval_ages),
+                                  inc_cases_females, PY_females), 
+                            cbind(rep("0", length(inc_cases_females)), 
+                                  na.omit(variable_names$interval_ages),
+                                  inc_cases_males, PY_males)) %>% 
+    as.tibble() %>% 
+    set_colnames(c("female", "age_interval", "inc_cases", "PY")) %>%
+    mutate_at(c("female", "inc_cases", "PY"), as.numeric) %>%
+    mutate("logPY" = log(PY))
+  
+  for(i in 1:length(modeled_dementia_logIRRs)){
+    model_data <- tibble("female" = c(1, 0), 
+                         "py_years" = c(PY_females[i], PY_males[i]), 
+                         "cases" = c(inc_cases_females[i], inc_cases_males[i]), 
+                         "logPY" = log(c(PY_females[i], PY_males[i])))
+    
+    poisson_model_rate <- glm(cases ~ female + offset(logPY), 
+                              family = poisson(link = "log"), data = model_data)
+    modeled_dementia_logIRRs[i] <- poisson_model_rate$coefficients["female"]
+  }
+  
+  #With ages
+  poisson_model_rate <- 
+    glm(inc_cases ~ female + age_interval + offset(logPY), 
+        family = poisson(link = "log"), data = poisson_reg_data)
+  
+  
+  
   #---- Dementia logHR (F:M) ----
-  contributed_data <- data %>% 
-    dplyr::select(head(variable_names$contributed_varnames, -1))
-  contributed_data[(contributed_data == 5)] <- 4.99999
-  
-  dem_indicators_sex <- data %>% 
-    dplyr::select(variable_names$dem_varnames[-1], female)
-  
   simulated_dementia_logHRs <- vector(length = num_tests) 
   
   for(i in 1:length(simulated_dementia_logHRs)){
