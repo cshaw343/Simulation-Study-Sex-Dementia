@@ -42,6 +42,9 @@ sex_dem_sim <- function(){
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
   #---- Mortality logHR (F:M) ----
+  survival_data <- data[, na.omit(variable_names$Sij_varnames)]
+  survival_data[survival_data == 5] <- 4.99999
+  data[, na.omit(variable_names$Sij_varnames)] <- survival_data
   simulated_mortality_logHRs <- vector(length = num_tests)
   
   for(i in 1:length(simulated_mortality_logHRs)){
@@ -228,8 +231,6 @@ sex_dem_sim <- function(){
   
   #---- Dementia logHR (F:M) ----
   simulated_dementia_logHRs <- vector(length = num_tests) 
-  
-  #Need to feed data to this model but without creating new datasets
   
   for(i in 1:length(simulated_dementia_logHRs)){
     PY_contributed_name <- paste0("contributed", i - 1, "-", i)
