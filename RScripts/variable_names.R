@@ -42,6 +42,11 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
                          "logIRR" = rep("logIRR", num_tests + 1), 
                          "dementia_logHR" = 
                            rep("dementia_logHR", num_tests + 1), 
+                         "SE" = rep("SE", num_tests + 1),
+                         "CI_95_Upper" = rep("CI_95_Upper", num_tests + 1),
+                         "CI_95_Lower" = rep("CI_95_Lower", num_tests + 1),
+                         "CI_95_Coverage" = 
+                           rep("CI_95_Coverage", num_tests + 1),
                          "dem_cases" = rep("dem_cases", num_tests + 1), 
                          "prop_dem" = rep("prop_dem", num_tests + 1), 
                          "mean_U" = rep("mean_U", num_tests + 1)) %>% 
@@ -113,8 +118,27 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
         c(PY, males, interval_ages), sep = "_", remove = FALSE) %>% 
   unite("logIRR_varnames", 
         c(logIRR, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_SE_varnames", 
+        c(logIRR, SE, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Upper_varnames", 
+        c(logIRR, CI_95_Upper, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Lower_varnames", 
+        c(logIRR, CI_95_Lower, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Coverage_varnames", 
+        c(logIRR, CI_95_Coverage, interval_ages), sep = "_", remove = FALSE) %>% 
   unite("dementia_logHR_varnames", c(dementia_logHR, interval_ages), sep = "_", 
         remove = FALSE) %>% 
+  unite("dementia_logHR_SE_varnames", c(dementia_logHR, SE, interval_ages), 
+        sep = "_", remove = FALSE) %>%
+  unite("dementia_logHR_95CI_Upper_varnames", 
+        c(dementia_logHR, CI_95_Upper, interval_ages), 
+        sep = "_", remove = FALSE) %>%
+  unite("dementia_logHR_95CI_Lower_varnames", 
+        c(dementia_logHR, CI_95_Lower, interval_ages), 
+        sep = "_", remove = FALSE) %>%
+  unite("dementia_logHR_95CI_Coverage_varnames", 
+        c(dementia_logHR, CI_95_Coverage, interval_ages), 
+        sep = "_", remove = FALSE) %>%
   unite("dem_cases_females_varnames", 
         c(dem_cases, females, interval_ages), sep = "_", remove = FALSE) %>%
   unite("dem_cases_males_varnames", 
@@ -138,7 +162,13 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
                 "dem_inc_rate_females_varnames", "dem_inc_rate_males_varnames", 
                 "inc_cases_females_varnames", "inc_cases_males_varnames", 
                 "PY_females_varnames", "PY_males_varnames", "logIRR_varnames", 
-                "dementia_logHR_varnames", "dem_cases_females_varnames", 
+                "logIRR_SE_varnames", "logIRR_95CI_Upper_varnames", 
+                "logIRR_95CI_Lower_varnames", "logIRR_95CI_Coverage_varnames",
+                "dementia_logHR_varnames", "dementia_logHR_SE_varnames",
+                "dementia_logHR_95CI_Upper_varnames", 
+                "dementia_logHR_95CI_Lower_varnames", 
+                "dementia_logHR_95CI_Coverage_varnames",
+                "dem_cases_females_varnames", 
                 "dem_cases_males_varnames", "prop_dem_females_varnames", 
                 "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
                 "mean_U_at_risk_males_varnames")
@@ -153,8 +183,14 @@ variable_names[nrow(variable_names),
                  "dem_inc_rate_varnames", "dem_inc_rate_females_varnames", 
                  "dem_inc_rate_males_varnames", "inc_cases_females_varnames", 
                  "inc_cases_males_varnames", "PY_females_varnames", 
-                 "PY_males_varnames", "logIRR_varnames", 
-                 "dementia_logHR_varnames", "dem_cases_females_varnames", 
+                 "PY_males_varnames", "logIRR_varnames", "logIRR_SE_varnames", 
+                 "logIRR_95CI_Upper_varnames", 
+                 "logIRR_95CI_Lower_varnames", "logIRR_95CI_Coverage_varnames",
+                 "dementia_logHR_varnames", "dementia_logHR_SE_varnames", 
+                 "dementia_logHR_95CI_Upper_varnames", 
+                 "dementia_logHR_95CI_Lower_varnames", 
+                 "dementia_logHR_95CI_Coverage_varnames",
+                 "dem_cases_females_varnames", 
                  "dem_cases_males_varnames", "prop_dem_females_varnames", 
                  "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
                  "mean_U_at_risk_males_varnames")] <- NA
