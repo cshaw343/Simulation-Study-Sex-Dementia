@@ -23,7 +23,7 @@ survival <- function(obs_matrix){
     }
     Sij[i, ] <- survtimes
   }
-  Sij[Sij > 5] <- 5
+  Sij[Sij > 5] <- 4.999999
   return(list("Sij" = Sij, "survtimes" = rowSums(Sij, na.rm = TRUE)))
 }
 
