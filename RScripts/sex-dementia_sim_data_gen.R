@@ -122,7 +122,7 @@ small_batch_gen <- function(small_batch_n){
   obs %<>% filter(dem0 == 0)
   
   #---- Survival censoring matrix ----
-  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 4.999999)*1
+  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
   censor[censor == 0] <- NA
   censor %<>% cbind(1, .)
   
