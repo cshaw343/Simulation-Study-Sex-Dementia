@@ -28,7 +28,23 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
                          "rij" = rep("rij", num_tests + 1), 
                          "death" = rep("death", num_tests + 1), 
                          "survtime" = rep("survtime", num_tests + 1), 
-                         "contributed" = rep("contributed", num_tests + 1)) %>% 
+                         "contributed" = rep("contributed", num_tests + 1), 
+                         "p_alive" = rep("p_alive", num_tests + 1), 
+                         "females" = rep("females", num_tests + 1), 
+                         "males" = rep("males", num_tests + 1), 
+                         "mortality_logHR" = 
+                           rep("mortality_logHR", num_tests + 1), 
+                         "at_risk" = rep("at_risk", num_tests + 1), 
+                         "dem_inc_rate" = 
+                           rep("dem_inc_rate", num_tests + 1), 
+                         "inc_cases" = rep("inc_cases", num_tests + 1), 
+                         "PY" = rep("PY", num_tests + 1), 
+                         "logIRR" = rep("logIRR", num_tests + 1), 
+                         "dementia_logHR" = 
+                           rep("dementia_logHR", num_tests + 1), 
+                         "dem_cases" = rep("dem_cases", num_tests + 1), 
+                         "prop_dem" = rep("prop_dem", num_tests + 1), 
+                         "mean_U" = rep("mean_U", num_tests + 1)) %>% 
   #Interval timepoints
   unite("interval_times", c(timepoints, timepoints_nobase), sep = "-", 
         remove = FALSE) %>%
@@ -69,16 +85,79 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
   #Contributed time labels
   unite("contributed_varnames", c(contributed, interval_times), sep = "", 
         remove = FALSE) %>% 
+  #For return values
+  unite("p_alive_varnames", c(p_alive, end_ages), sep = "_", remove = FALSE) %>%
+  unite("p_alive_females_varnames", c(p_alive, females, end_ages), sep = "_", 
+        remove = FALSE) %>%
+  unite("p_alive_males_varnames", c(p_alive, males, end_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("mortality_logHR_varnames", c(mortality_logHR, interval_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("at_risk_females_varnames", c(at_risk, females, start_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("at_risk_males_varnames", c(at_risk, males, start_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("dem_inc_rate_varnames", c(dem_inc_rate, interval_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("dem_inc_rate_females_varnames", 
+        c(dem_inc_rate, females, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("dem_inc_rate_males_varnames", 
+        c(dem_inc_rate, males, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("inc_cases_females_varnames", 
+        c(inc_cases, females, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("inc_cases_males_varnames", 
+        c(inc_cases, males, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("PY_females_varnames", 
+        c(PY, females, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("PY_males_varnames", 
+        c(PY, males, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_varnames", 
+        c(logIRR, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("dementia_logHR_varnames", c(dementia_logHR, interval_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("dem_cases_females_varnames", 
+        c(dem_cases, females, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("dem_cases_males_varnames", 
+        c(dem_cases, males, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_females_varnames", 
+        c(prop_dem, females, end_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_males_varnames", 
+        c(prop_dem, males, end_ages), sep = "_", remove = FALSE) %>%
+  unite("mean_U_at_risk_females_varnames", 
+        c(mean_U, at_risk, females, start_ages), sep = "_", remove = FALSE) %>%
+  unite("mean_U_at_risk_males_varnames", 
+        c(mean_U, at_risk, males, start_ages), sep = "_", remove = FALSE) %>%
   dplyr::select("exo_var", "int_noise_names", "slope_noise_names", 
                 "cij_slopeij_varnames", "rij_varnames", 
                 "deathij_varnames", "Sij_varnames", "contributed_varnames", 
                 "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames", 
-                "dem_varnames", "interval_ages")
+                "dem_varnames", "interval_ages", "p_alive_varnames", 
+                "p_alive_females_varnames", "p_alive_males_varnames", 
+                "mortality_logHR_varnames", "at_risk_females_varnames", 
+                "at_risk_males_varnames", "dem_inc_rate_varnames", 
+                "dem_inc_rate_females_varnames", "dem_inc_rate_males_varnames", 
+                "inc_cases_females_varnames", "inc_cases_males_varnames", 
+                "PY_females_varnames", "PY_males_varnames", "logIRR_varnames", 
+                "dementia_logHR_varnames", "dem_cases_females_varnames", 
+                "dem_cases_males_varnames", "prop_dem_females_varnames", 
+                "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
+                "mean_U_at_risk_males_varnames")
 
 #NAs for those intervals that don't exist in the data set
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
-                 "Sij_varnames", "contributed_varnames", "interval_ages")] <- NA
+                 "Sij_varnames", "contributed_varnames", "interval_ages", 
+                 "p_alive_varnames", "p_alive_females_varnames", 
+                 "p_alive_males_varnames", "mortality_logHR_varnames", 
+                 "at_risk_females_varnames", "at_risk_males_varnames", 
+                 "dem_inc_rate_varnames", "dem_inc_rate_females_varnames", 
+                 "dem_inc_rate_males_varnames", "inc_cases_females_varnames", 
+                 "inc_cases_males_varnames", "PY_females_varnames", 
+                 "PY_males_varnames", "logIRR_varnames", 
+                 "dementia_logHR_varnames", "dem_cases_females_varnames", 
+                 "dem_cases_males_varnames", "prop_dem_females_varnames", 
+                 "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
+                 "mean_U_at_risk_males_varnames")] <- NA
 
 column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
                   variable_names$agec_varnames, variable_names$int_noise_names, 
