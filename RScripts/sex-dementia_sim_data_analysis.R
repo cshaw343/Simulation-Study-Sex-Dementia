@@ -200,43 +200,47 @@ sex_dem_sim <- function(){
   IRRs <- sim_rates_females/sim_rates_males
   logIRRs <- log(IRRs) 
   
-  #---- Dementia log(IRRs) Poisson Regression ----
-  modeled_dementia_logIRRs <- vector(length = num_tests)
-  poisson_reg_data <- rbind(cbind(rep("1", length(inc_cases_females)),
-                                  na.omit(variable_names$interval_ages),
-                                  inc_cases_females, PY_females), 
-                            cbind(rep("0", length(inc_cases_females)), 
-                                  na.omit(variable_names$interval_ages),
-                                  inc_cases_males, PY_males)) %>% 
-    as.tibble() %>% 
-    set_colnames(c("female", "age_interval", "inc_cases", "PY")) %>%
-    mutate_at(c("female", "inc_cases", "PY"), as.numeric) %>%
-    mutate("logPY" = log(PY))
-  
-  for(i in 1:length(modeled_dementia_logIRRs)){
-    model_data <- tibble("female" = c(1, 0), 
-                         "py_years" = c(PY_females[i], PY_males[i]), 
-                         "cases" = c(inc_cases_females[i], inc_cases_males[i]), 
-                         "logPY" = log(c(PY_females[i], PY_males[i])))
-    
-    poisson_model_rate <- glm(cases ~ female + offset(logPY), 
-                              family = poisson(link = "log"), data = model_data)
-    modeled_dementia_logIRRs[i] <- poisson_model_rate$coefficients["female"]
-  }
-  
-  #With ages
-  poisson_model_rate <- 
-    glm(inc_cases ~ female + age_interval + offset(logPY), 
-        family = poisson(link = "log"), data = poisson_reg_data)
-  
-  
+  # #---- Dementia log(IRRs) Poisson Regression ----
+  # modeled_dementia_logIRRs <- vector(length = num_tests)
+  # poisson_reg_data <- rbind(cbind(rep("1", length(inc_cases_females)),
+  #                                 na.omit(variable_names$interval_ages),
+  #                                 inc_cases_females, PY_females), 
+  #                           cbind(rep("0", length(inc_cases_females)), 
+  #                                 na.omit(variable_names$interval_ages),
+  #                                 inc_cases_males, PY_males)) %>% 
+  #   as.tibble() %>% 
+  #   set_colnames(c("female", "age_interval", "inc_cases", "PY")) %>%
+  #   mutate_at(c("female", "inc_cases", "PY"), as.numeric) %>%
+  #   mutate("logPY" = log(PY))
+  # 
+  # for(i in 1:length(modeled_dementia_logIRRs)){
+  #   model_data <- tibble("female" = c(1, 0), 
+  #                        "py_years" = c(PY_females[i], PY_males[i]), 
+  #                        "cases" = c(inc_cases_females[i], inc_cases_males[i]), 
+  #                        "logPY" = log(c(PY_females[i], PY_males[i])))
+  #   
+  #   poisson_model_rate <- glm(cases ~ female + offset(logPY), 
+  #                             family = poisson(link = "log"), data = model_data)
+  #   modeled_dementia_logIRRs[i] <- poisson_model_rate$coefficients["female"]
+  # }
+  # 
+  # #With ages
+  # poisson_model_rate <- 
+  #   glm(inc_cases ~ female + age_interval + offset(logPY), 
+  #       family = poisson(link = "log"), data = poisson_reg_data)
+  # 
+  # 
   
   #---- Dementia logHR (F:M) ----
   simulated_dementia_logHRs <- vector(length = num_tests) 
   
+  #Need to feed data to this model but without creating new datasets
+  
   for(i in 1:length(simulated_dementia_logHRs)){
-    cox_model <- coxph(Surv(contributed_data[, i], dem_indicators_sex[, i]) ~ 
-                         dem_indicators_sex$female)
+    PY_contributed_name <- paste0("contributed", i - 1, "-", i)
+    dem_indicator_name <- paste0("dem", i - 1, "-", i)
+    cox_model <- coxph(Surv(data[, PY_contributed_name], 
+                            data[, dem_indicator_name]) ~ data$female)
     simulated_dementia_logHRs[i] <- cox_model$coefficients
   }
   
@@ -251,34 +255,50 @@ sex_dem_sim <- function(){
   
   #---- Probability of dementia ----
   #Prevalence of dementia by sex
-  dem_prob_females <- female_data %>% 
+  prop_dem_females <- female_data %>% 
     dplyr::select(variable_names$dem_varnames[-1]) %>% 
     colMeans(na.rm = TRUE) 
   
-  dem_prob_males <- male_data %>% 
+  prop_dem_males <- male_data %>% 
     dplyr::select(variable_names$dem_varnames[-1]) %>% 
     colMeans(na.rm = TRUE) 
+  
+  #---- Vector to return ----
+  results_vec <- c(num_obs, num_females, num_males, p_alive, p_alive_females, 
+                   p_alive_males, simulated_mortality_logHRs, at_risk_females, 
+                   at_risk_males, sim_rates, sim_rates_females, sim_rates_males, 
+                   inc_cases_females, inc_cases_males, PY_females, PY_males, 
+                   logIRRs, simulated_dementia_logHRs, dem_cases_female, 
+                   dem_cases_male, prop_dem_females, prop_dem_males, 
+                   mean_U_at_risk_females, mean_U_at_risk_males)
+  
+  names(results_vec) <- c("num_obs_baseline", "num_females_baseline", 
+                          "num_males_baseline", 
+                          na.omit(variable_names$p_alive_varnames), 
+                          na.omit(variable_names$p_alive_females_varnames), 
+                          na.omit(variable_names$p_alive_males_varnames), 
+                          na.omit(variable_names$mortality_logHR_varnames),
+                          na.omit(variable_names$at_risk_females_varnames), 
+                          na.omit(variable_names$at_risk_males_varnames), 
+                          na.omit(variable_names$dem_inc_rate_varnames), 
+                          na.omit(variable_names$dem_inc_rate_females_varnames), 
+                          na.omit(variable_names$dem_inc_rate_males_varnames), 
+                          na.omit(variable_names$inc_cases_females_varnames), 
+                          na.omit(variable_names$inc_cases_males_varnames), 
+                          na.omit(variable_names$PY_females_varnames), 
+                          na.omit(variable_names$PY_males_varnames), 
+                          na.omit(variable_names$logIRR_varnames), 
+                          na.omit(variable_names$dementia_logHR_varnames), 
+                          na.omit(variable_names$dem_cases_females_varnames), 
+                          na.omit(variable_names$dem_cases_males_varnames), 
+                          na.omit(variable_names$prop_dem_females_varnames), 
+                          na.omit(variable_names$prop_dem_males_varnames), 
+                          na.omit(
+                            variable_names$mean_U_at_risk_females_varnames), 
+                          na.omit(variable_names$mean_U_at_risk_males_varnames))
   
   #---- Return ----
-  return(list("num_obs" = num_obs, "num_females" = num_females, 
-              "num_males" = num_males, "p_alive" = p_alive, 
-              "p_alive_females" = p_alive_females, 
-              "p_alive_males" = p_alive_males, 
-              "simulated_mortality_logHRs" = simulated_mortality_logHRs,
-              "at_risk_females" = at_risk_females, 
-              "at_risk_males" = at_risk_males, "sim_rates" = sim_rates, 
-              "sim_rates_females" = sim_rates_females, 
-              "sim_rates_males" = sim_rates_males, 
-              "inc_cases_females" = inc_cases_females, 
-              "inc_cases_males" = inc_cases_males, "PY_females" = PY_females, 
-              "PY_males" = PY_males, "logIRRs" = logIRRs, 
-              "simulated_dementia_logHRs" = simulated_dementia_logHRs,
-              "dem_cases_female" = dem_cases_female, 
-              "dem_cases_male" = dem_cases_male, 
-              "dem_prob_females" = dem_prob_females, 
-              "dem_prob_males" = dem_prob_males, 
-              "mean_U_at_risk_females" = mean_U_at_risk_females, 
-              "mean_U_at_risk_males" = mean_U_at_risk_males))
+  return(results_vec)
 }
 
 
