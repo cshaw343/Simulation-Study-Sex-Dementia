@@ -42,18 +42,13 @@ sex_dem_sim <- function(){
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
   #---- Mortality logHR (F:M) ----
-  survival_data <- data %>% 
-    dplyr::select(head(variable_names$Sij_varnames, -1))
-  survival_data[(survival_data >= 5)] <- 4.99999
-  
-  death_indicators_sex <- data %>% 
-    dplyr::select(head(variable_names$deathij_varnames, -1), female)
-  
   simulated_mortality_logHRs <- vector(length = num_tests)
   
   for(i in 1:length(simulated_mortality_logHRs)){
-    cox_model <- coxph(Surv(survival_data[, i], death_indicators_sex[, i]) ~ 
-                         death_indicators_sex$female)
+    survtime_name <- paste0("survtime", i - 1, "-", i)
+    death_indicator_name <- paste0("death", i - 1, "-", i)
+    cox_model <- coxph(Surv(data[, survtime_name], 
+                            data[, death_indicator_name]) ~ data$female)
     simulated_mortality_logHRs[i] <- cox_model$coefficients
   }
   
