@@ -33,11 +33,11 @@ sex_dem_sim <- function(){
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_obs
   
   #---- Survival probabilities by sex ----
-  p_alive_females <- female_data %>% 
+  p_alive_females <- data %>% filter(female == 1) %>%
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
   
-  p_alive_males <- male_data %>% 
+  p_alive_males <- data %>% filter(female == 0) %>%
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
