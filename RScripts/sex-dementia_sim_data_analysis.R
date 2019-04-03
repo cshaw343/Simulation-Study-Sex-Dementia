@@ -24,8 +24,8 @@ sex_dem_sim <- function(){
   
   #---- Cohort size ----
   num_obs <- nrow(data)
-  num_females <- nrow(female_data)
-  num_males <- nrow(male_data)
+  num_females <- data %>% filter(female == 1) %>% nrow()
+  num_males <- data %>% filter(female == 0) %>% nrow()
   
   #---- Survival probabilities ----
   p_alive <- data %>% 
