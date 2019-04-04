@@ -16,37 +16,70 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
 
 #---- Running the simulation in parallel----
-start_time <- Sys.time()
 #Start with a garbage collection
 gc()
+
+#Function to run simulation in batches
 batch_100runs <- function(x){
   plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-  sim_results <- future_replicate(runs, sex_dem_sim())
+  sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% 
+    as.data.frame() 
   
-  
-  
-  write_csv(mean_results_mat,
+  write_csv(sim_results, 
             here("Results", "Scenario_A_no_bias", 
-                 paste0("sim_results_250_", gsub("-", "", Sys.Date()), ".csv")))
+                 "sim_results_1000_20190403.csv"), append = TRUE)
 }
-  Sys.time() - start_time 
-  
-  #---- Old Code ----
 
-data.frame(matrix(NA, nrow = 1, ncol = 24)) %>%
-  set_colnames(c("num_obs", "num_females", "num_males", "p_alive", 
-                 "p_alive_females", "p_alive_males", "mortality_HRs(F:M)",
-                 "at_risk_females", "at_risk_males", "mean_U_at_risk_females", 
-                 "mean_U_at_risk_males", "inc_cases_females", "inc_cases_males", 
-                 "dem_cases_females", "dem_cases_males", "PY_females", 
-                 "PY_males", "dem_prob_females", "dem_prob_males", 
-                 "sim_rates","sim_rates_females", "sim_rates_males", 
-                 "IRRs(F:M)", "dem_HRs(F:M)")) %>%
+#---- Old Code ----
+output_column_names <- 
+  c("num_obs_baseline", "num_females_baseline", 
+    "num_males_baseline", 
+    na.omit(variable_names$p_alive_varnames), 
+    na.omit(variable_names$p_alive_females_varnames), 
+    na.omit(variable_names$p_alive_males_varnames), 
+    na.omit(variable_names$mortality_logHR_varnames),
+    na.omit(variable_names$at_risk_females_varnames), 
+    na.omit(variable_names$at_risk_males_varnames), 
+    na.omit(variable_names$dem_inc_rate_varnames), 
+    na.omit(variable_names$dem_inc_rate_females_varnames), 
+    na.omit(variable_names$dem_inc_rate_males_varnames), 
+    na.omit(variable_names$inc_cases_females_varnames), 
+    na.omit(variable_names$inc_cases_males_varnames), 
+    na.omit(variable_names$PY_females_varnames), 
+    na.omit(variable_names$PY_males_varnames), 
+    t(
+      cbind(
+        na.omit(variable_names$logIRR_varnames), 
+        na.omit(variable_names$logIRR_SE_varnames), 
+        na.omit(variable_names$logIRR_95CI_Lower_varnames), 
+        na.omit(variable_names$logIRR_95CI_Upper_varnames), 
+        na.omit(variable_names$logIRR_95CI_Coverage_varnames))) %>% 
+      as.vector(), 
+    t(
+      cbind(
+        na.omit(variable_names$dementia_logHR_varnames), 
+        na.omit(variable_names$dementia_logHR_SE_varnames), 
+        na.omit(variable_names$dementia_logHR_95CI_Lower_varnames), 
+        na.omit(variable_names$dementia_logHR_95CI_Upper_varnames), 
+        na.omit(variable_names$dementia_logHR_95CI_Coverage_varnames))) %>% 
+      as.vector(), 
+    na.omit(variable_names$dem_cases_females_varnames), 
+    na.omit(variable_names$dem_cases_males_varnames), 
+    na.omit(variable_names$prop_dem_females_varnames), 
+    na.omit(variable_names$prop_dem_males_varnames), 
+    na.omit(variable_names$mean_U_at_risk_females_varnames), 
+    na.omit(variable_names$mean_U_at_risk_males_varnames))
+
+#Create an empty .csv file to write to
+data.frame(matrix(NA, nrow = 1, ncol = length(output_column_names))) %>%
+  set_colnames(output_column_names) %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 paste0("sim_results_", gsub("-", "", Sys.Date()), ".csv")))
+                 "sim_results_1000_20190403.csv"))
 
-replicate(10, batch_100_runs())
-
+start_time <- Sys.time()
+replicate(10, batch_100runs())
+Sys.time() - start_time 
+  
 #---- Data Analysis Code ----
 #Mean results
 mean_results_mat <- data.frame(matrix(NA, nrow = num_tests, 
