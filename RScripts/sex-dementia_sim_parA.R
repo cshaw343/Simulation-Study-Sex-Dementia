@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 250
+runs = 100
 
 #---- Number of observations ----
 #Multiples of 1000
