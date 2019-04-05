@@ -254,7 +254,7 @@ sex_dem_sim <- function(){
   simulated_dementia_logHRs_model_data <- 
     matrix(nrow = num_tests, ncol = 5)
   
-  for(i in 1:length(simulated_dementia_logHRs)){
+  for(i in 1:nrow(simulated_dementia_logHRs_model_data)){
     PY_contributed_name <- paste0("contributed", i - 1, "-", i)
     dem_indicator_name <- paste0("dem", i - 1, "-", i)
     cox_model <- coxph(Surv(data[, PY_contributed_name], 
