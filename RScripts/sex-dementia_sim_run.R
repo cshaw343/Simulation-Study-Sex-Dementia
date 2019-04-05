@@ -27,10 +27,9 @@ batch_100runs <- function(x){
   
   write_csv(sim_results, 
             here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190403.csv"), append = TRUE)
+                 "sim_results_1000_20190404.csv"), append = TRUE)
 }
 
-#---- Old Code ----
 output_column_names <- 
   c("num_obs_baseline", "num_females_baseline", 
     "num_males_baseline", 
@@ -74,7 +73,7 @@ output_column_names <-
 data.frame(matrix(NA, nrow = 1, ncol = length(output_column_names))) %>%
   set_colnames(output_column_names) %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190403.csv"))
+                 "sim_results_1000_20190404.csv"))
 
 start_time <- Sys.time()
 replicate(10, batch_100runs())
