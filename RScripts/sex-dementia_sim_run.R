@@ -1,16 +1,3 @@
-#---- Package Loading, Options, and Seed ----
-if (!require("pacman")) 
-  install.packages("pacman", repos='http://cran.us.r-project.org')
-
-p_load("future.apply", "parallel", "here", "magrittr")
-
-set.seed(20190311)
-
-#---- Source Files ----
-source(here("RScripts", "sex-dementia_sim_parA.R"))          #The parameter file
-source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
-source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
-source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
 data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
@@ -19,7 +6,7 @@ data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
 #Start with a garbage collection
 gc()
 
-#Function to run simulation in batches
+#---- Function to run simulation in batches ----
 batch_50runs <- function(x){
   plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
   sim_results <- future_replicate(50, sex_dem_sim()) %>% t() %>% 
@@ -79,7 +66,17 @@ if(!is.integer(runs/50)) stop("Number of runs must be a multiple of 50.")
 
 start_time <- Sys.time()
 replicate(runs/50, batch_50runs())
-Sys.time() - start_time 
+Sys.time() - start_time
+
+#---- Non-batch replicate ----
+#Start with a garbage collect
+gc()
+start_time <- Sys.time()
+plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
+sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% as.data.frame() %>%
+  write_csv(here("Results", "Scenario_A_no_bias", 
+                 "sim_results_1000_20190406.csv"))
+Sys.time() - start_time
   
 #---- Data Analysis Code ----
 #Mean results
