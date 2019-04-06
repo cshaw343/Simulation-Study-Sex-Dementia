@@ -20,14 +20,14 @@ data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
 gc()
 
 #Function to run simulation in batches
-batch_100runs <- function(x){
+batch_50runs <- function(x){
   plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-  sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(50, sex_dem_sim()) %>% t() %>% 
     as.data.frame() 
   
   write_csv(sim_results, 
             here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190404.csv"), append = TRUE)
+                 "sim_results_1000_20190405.csv"), append = TRUE)
 }
 
 output_column_names <- 
@@ -73,10 +73,12 @@ output_column_names <-
 data.frame(matrix(NA, nrow = 1, ncol = length(output_column_names))) %>%
   set_colnames(output_column_names) %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190404.csv"))
+                 "sim_results_1000_20190405.csv"))
+
+if(!is.integer(runs/50)) stop("Number of runs must be a multiple of 50.")
 
 start_time <- Sys.time()
-replicate(10, batch_100runs())
+replicate(runs/50, batch_50runs())
 Sys.time() - start_time 
   
 #---- Data Analysis Code ----
