@@ -1,3 +1,16 @@
+#---- Package Loading, Options, and Seed ----
+if (!require("pacman")) 
+  install.packages("pacman", repos='http://cran.us.r-project.org')
+
+p_load("future.apply", "parallel", "here", "magrittr")
+
+set.seed(20190311)
+
+#---- Source Files ----
+source(here("RScripts", "sex-dementia_sim_parA.R"))          #The parameter file
+source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
+source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
+source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
 data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
