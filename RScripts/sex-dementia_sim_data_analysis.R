@@ -338,6 +338,9 @@ sex_dem_sim <- function(){
       na.omit(variable_names$mean_U_at_risk_females_varnames), 
       na.omit(variable_names$mean_U_at_risk_males_varnames))
   
+  #---- Take out the trash ----
+  gc()
+  
   #---- Return ----
   return(results_vec)
 }
