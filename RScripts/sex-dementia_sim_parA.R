@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 100
+runs = 1000
 
 #---- Number of observations ----
 #Multiples of 1000
@@ -35,7 +35,7 @@ psex <- 0.49
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
 cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
-              0.001, 0.002, 0.002, 0.003, 0.004, 0.005, 0.011, 0.01775, 0.01775) #Time-dependent variance of random cognitive slope
+              0.001, 0.002, 0.002, 0.003, 0.004, 0.005, 0.011, 0.01775, 0.0195) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -57,7 +57,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 cij_slopes <- c(0, 
                 -0.00475552, -0.01820177, -0.02680375, -0.03914714, 
-                -0.03312803, -0.06, -0.03056074, -0.15, 0)
+                -0.03312803, -0.06, -0.03056074, -0.15, -0.40)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
