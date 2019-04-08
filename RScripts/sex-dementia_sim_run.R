@@ -19,24 +19,18 @@ data_gen() %>% saveRDS(here("Data", "test_sim_results_A_20190312"))
 #Start with a garbage collection
 gc()
 
-#---- Function to run simulation in batches ----
-batch_50runs <- function(x){
-  plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-  sim_results <- future_replicate(20, sex_dem_sim()) %>% t() %>% 
-    as.data.frame() 
+#Function to run simulation in batches
+batch_100runs <- function(x){
+  plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
+  sim_results <- future_replicate(100, sex_dem_sim()) %>% t() %>% 
+    as.data.frame()
   
-  # write_csv(sim_results, 
-  #           here("Results", "Scenario_A_no_bias", 
-  #                "sim_results_1000_20190405.csv"), append = TRUE)
   return(sim_results)
+
   future:::ClusterRegistry("stop")
 }
 
-#---- Code Testing ----
-Start <- Sys.time()
-test <- batch_50runs()
-Sys.time() - Start
-
+#---- Output column names ----
 output_column_names <- 
   c("num_obs_baseline", "num_females_baseline", 
     "num_males_baseline", 
@@ -76,6 +70,14 @@ output_column_names <-
     na.omit(variable_names$mean_U_at_risk_females_varnames), 
     na.omit(variable_names$mean_U_at_risk_males_varnames))
 
+#---- Test Code ----
+gc()
+Start <- Sys.time()
+test <- batch_100runs()
+Sys.time() - Start
+
+#---- Old Code ----
+
 #Create an empty .csv file to write to
 data.frame(matrix(NA, nrow = 1, ncol = length(output_column_names))) %>%
   set_colnames(output_column_names) %>%
@@ -98,6 +100,9 @@ sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
                  "sim_results_1000_20190406.csv"))
 Sys.time() - start_time
+=======
+                 "sim_results_1000_20190407.csv"))
+>>>>>>> 5ea5c8c85de88c038a4c4a72e2494cf7aa977c05
   
 #---- Data Analysis Code ----
 #Mean results
@@ -175,7 +180,11 @@ mean_results_mat[, "dem_HRs(F:M)"] <-
 
 
 
-
+#---- Testing code ----
+plan(multisession, workers = (detectCores() - 1), gc = TRUE)
+start <- Sys.time()
+test_gc <- future_replicate(10, sex_dem_sim())
+Sys.time() - start
 
 
 
