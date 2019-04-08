@@ -22,13 +22,20 @@ gc()
 #---- Function to run simulation in batches ----
 batch_50runs <- function(x){
   plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-  sim_results <- future_replicate(50, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(20, sex_dem_sim()) %>% t() %>% 
     as.data.frame() 
   
-  write_csv(sim_results, 
-            here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190405.csv"), append = TRUE)
+  # write_csv(sim_results, 
+  #           here("Results", "Scenario_A_no_bias", 
+  #                "sim_results_1000_20190405.csv"), append = TRUE)
+  return(sim_results)
+  future:::ClusterRegistry("stop")
 }
+
+#---- Code Testing ----
+Start <- Sys.time()
+test <- batch_50runs()
+Sys.time() - Start
 
 output_column_names <- 
   c("num_obs_baseline", "num_females_baseline", 
@@ -86,7 +93,8 @@ Sys.time() - start_time
 gc()
 start_time <- Sys.time()
 plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% as.data.frame() %>%
+sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% 
+  as.data.frame() %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
                  "sim_results_1000_20190406.csv"))
 Sys.time() - start_time
