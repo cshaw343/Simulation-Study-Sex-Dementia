@@ -22,24 +22,15 @@ gc()
 #Function to run simulation in batches
 batch_100runs <- function(x){
   plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
-  sim_results <- future_replicate(20, sex_dem_sim()) %>% t() %>% 
-    as.data.frame() 
-  
-  # write_csv(sim_results, 
-  #           here("Results", "Scenario_A_no_bias", 
-  #                "sim_results_1000_20190403.csv"), append = TRUE)
+  sim_results <- future_replicate(100, sex_dem_sim()) %>% t() %>% 
+    as.data.frame()
   
   return(sim_results)
+
   future:::ClusterRegistry("stop")
 }
 
-#---- Test Code ----
-gc()
-Start <- Sys.time()
-test <- batch_100runs()
-Sys.time() - Start
-
-#---- Old Code ----
+#---- Output column names ----
 output_column_names <- 
   c("num_obs_baseline", "num_females_baseline", 
     "num_males_baseline", 
@@ -79,15 +70,19 @@ output_column_names <-
     na.omit(variable_names$mean_U_at_risk_females_varnames), 
     na.omit(variable_names$mean_U_at_risk_males_varnames))
 
+#---- Test Code ----
+gc()
+Start <- Sys.time()
+test <- batch_100runs()
+Sys.time() - Start
+
+#---- Old Code ----
+
 #Create an empty .csv file to write to
 data.frame(matrix(NA, nrow = 1, ncol = length(output_column_names))) %>%
   set_colnames(output_column_names) %>%
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190403.csv"))
-
-start_time <- Sys.time()
-replicate(10, batch_100runs())
-Sys.time() - start_time 
+                 "sim_results_1000_20190407.csv"))
   
 #---- Data Analysis Code ----
 #Mean results
