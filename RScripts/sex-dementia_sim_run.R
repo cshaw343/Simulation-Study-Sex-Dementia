@@ -21,14 +21,23 @@ gc()
 
 #Function to run simulation in batches
 batch_100runs <- function(x){
-  plan(multiprocess, workers = (detectCores() - 2), gc = TRUE)
-  sim_results <- future_replicate(runs, sex_dem_sim()) %>% t() %>% 
+  plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
+  sim_results <- future_replicate(20, sex_dem_sim()) %>% t() %>% 
     as.data.frame() 
   
-  write_csv(sim_results, 
-            here("Results", "Scenario_A_no_bias", 
-                 "sim_results_1000_20190403.csv"), append = TRUE)
+  # write_csv(sim_results, 
+  #           here("Results", "Scenario_A_no_bias", 
+  #                "sim_results_1000_20190403.csv"), append = TRUE)
+  
+  return(sim_results)
+  future:::ClusterRegistry("stop")
 }
+
+#---- Test Code ----
+gc()
+Start <- Sys.time()
+test <- batch_100runs()
+Sys.time() - Start
 
 #---- Old Code ----
 output_column_names <- 
@@ -156,7 +165,11 @@ mean_results_mat[, "dem_HRs(F:M)"] <-
 
 
 
-
+#---- Testing code ----
+plan(multisession, workers = (detectCores() - 1), gc = TRUE)
+start <- Sys.time()
+test_gc <- future_replicate(10, sex_dem_sim())
+Sys.time() - start
 
 
 
