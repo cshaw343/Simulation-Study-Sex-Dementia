@@ -40,6 +40,18 @@ Sys.time() - Start
 #---- Output column names ----
 output_column_names <- rownames(test)
 
+#---- Create results matrix ----
+results_matrix <- 
+  as.data.frame(matrix(NA, ncol = length(output_column_names), nrow = 60)) %>% 
+  set_colnames(output_column_names)
+
+for(i in output_column_names){
+  results_matrix[, i] <- unlist(test[i, ])
+}
+
+write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
+                               "sim_results_1000_20190408.csv"))
+
 #---- Old Code ----
 
 #Create an empty .csv file to write to
