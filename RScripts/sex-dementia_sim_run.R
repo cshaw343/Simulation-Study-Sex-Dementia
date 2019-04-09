@@ -34,48 +34,11 @@ batch_100runs <- function(x){
 gc()
 Start <- Sys.time()
 test <- replicate(2, batch_100runs())
+
 Sys.time() - Start
 
 #---- Output column names ----
-output_column_names <- 
-  c("num_obs_baseline", "num_females_baseline", 
-    "num_males_baseline", 
-    na.omit(variable_names$p_alive_varnames), 
-    na.omit(variable_names$p_alive_females_varnames), 
-    na.omit(variable_names$p_alive_males_varnames), 
-    na.omit(variable_names$mortality_logHR_varnames),
-    na.omit(variable_names$at_risk_females_varnames), 
-    na.omit(variable_names$at_risk_males_varnames), 
-    na.omit(variable_names$dem_inc_rate_varnames), 
-    na.omit(variable_names$dem_inc_rate_females_varnames), 
-    na.omit(variable_names$dem_inc_rate_males_varnames), 
-    na.omit(variable_names$inc_cases_females_varnames), 
-    na.omit(variable_names$inc_cases_males_varnames), 
-    na.omit(variable_names$PY_females_varnames), 
-    na.omit(variable_names$PY_males_varnames), 
-    t(
-      cbind(
-        na.omit(variable_names$logIRR_varnames), 
-        na.omit(variable_names$logIRR_SE_varnames), 
-        na.omit(variable_names$logIRR_95CI_Lower_varnames), 
-        na.omit(variable_names$logIRR_95CI_Upper_varnames), 
-        na.omit(variable_names$logIRR_95CI_Coverage_varnames))) %>% 
-      as.vector(), 
-    t(
-      cbind(
-        na.omit(variable_names$dementia_logHR_varnames), 
-        na.omit(variable_names$dementia_logHR_SE_varnames), 
-        na.omit(variable_names$dementia_logHR_95CI_Lower_varnames), 
-        na.omit(variable_names$dementia_logHR_95CI_Upper_varnames), 
-        na.omit(variable_names$dementia_logHR_95CI_Coverage_varnames))) %>% 
-      as.vector(), 
-    na.omit(variable_names$dem_cases_females_varnames), 
-    na.omit(variable_names$dem_cases_males_varnames), 
-    na.omit(variable_names$prop_dem_females_varnames), 
-    na.omit(variable_names$prop_dem_males_varnames), 
-    na.omit(variable_names$mean_U_at_risk_females_varnames), 
-    na.omit(variable_names$mean_U_at_risk_males_varnames))
-
+output_column_names <- rownames(test)
 
 #---- Old Code ----
 
