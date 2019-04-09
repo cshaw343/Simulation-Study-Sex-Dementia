@@ -22,13 +22,19 @@ gc()
 #Function to run simulation in batches
 batch_100runs <- function(x){
   plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
-  sim_results <- future_replicate(100, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(30, sex_dem_sim()) %>% t() %>% 
     as.data.frame()
   
   return(sim_results)
 
   future:::ClusterRegistry("stop")
 }
+
+#---- Test Code ----
+gc()
+Start <- Sys.time()
+test <- replicate(2, batch_100runs())
+Sys.time() - Start
 
 #---- Output column names ----
 output_column_names <- 
@@ -70,11 +76,6 @@ output_column_names <-
     na.omit(variable_names$mean_U_at_risk_females_varnames), 
     na.omit(variable_names$mean_U_at_risk_males_varnames))
 
-#---- Test Code ----
-gc()
-Start <- Sys.time()
-test <- batch_100runs()
-Sys.time() - Start
 
 #---- Old Code ----
 
