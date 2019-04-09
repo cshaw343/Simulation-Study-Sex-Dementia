@@ -22,7 +22,7 @@ gc()
 #Function to run simulation in batches
 batch_100runs <- function(x){
   plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
-  sim_results <- future_replicate(30, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(60, sex_dem_sim()) %>% t() %>% 
     as.data.frame()
   
   return(sim_results)
@@ -33,7 +33,7 @@ batch_100runs <- function(x){
 #---- Test Code ----
 gc()
 Start <- Sys.time()
-test <- replicate(2, batch_100runs())
+test <- batch_100runs()
 
 Sys.time() - Start
 
