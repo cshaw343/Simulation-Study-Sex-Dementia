@@ -24,16 +24,24 @@ vignettes/*.pdf
 *.utf8.md
 *.knit.md
 .Rproj.user
+
 # Meeting files
 Meetings/*
-#Test simulation results
+
+#Simulation results
 Data/test_sim_results*
+Data/dataset*
+Results/Scenario_A_no_bias/sim_results*
+
 #Debugging files
 RScripts/debugging*
+
 #DAGs
 DAGs/*
+
 #Plots
 Plots/*
+
 #Search results
 Data/best_slopes_cuts_*
 
