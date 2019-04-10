@@ -37,15 +37,15 @@ sim_results <- replicate(runs/50, batch_100runs())
 Sys.time() - Start
 
 #---- Output column names ----
-output_column_names <- rownames(test)
+output_column_names <- rownames(sim_results)
 
 #---- Create results matrix ----
 results_matrix <- 
-  as.data.frame(matrix(NA, ncol = length(output_column_names), nrow = 60)) %>% 
+  as.data.frame(matrix(NA, ncol = length(output_column_names), nrow = runs)) %>% 
   set_colnames(output_column_names)
 
 for(i in output_column_names){
-  results_matrix[, i] <- unlist(test[i, ])
+  results_matrix[, i] <- unlist(sim_results[i, ])
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
