@@ -17,7 +17,7 @@ data_gen() %>% saveRDS(here("Data", "dataset_A_20190409"))
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
-batch_100runs <- function(x){
+batch_runs <- function(x){
   plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
   sim_results <- future_replicate(50, sex_dem_sim()) %>% t() %>% 
     as.data.frame()
@@ -32,7 +32,7 @@ if(!is.integer(runs/50)) stop("Number of runs must be a multiple of 50.")
 gc()
 Start <- Sys.time()
 
-sim_results <- replicate(runs/50, batch_100runs())
+sim_results <- replicate(runs/50, batch_runs())
 
 Sys.time() - Start
 
