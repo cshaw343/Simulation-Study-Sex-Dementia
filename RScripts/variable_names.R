@@ -4,7 +4,7 @@ install.packages("pacman", repos='http://cran.us.r-project.org')
 
 p_load("tidyverse")
 
-#---- Generating variable names for dataset ----
+#---- Generating variable names for dataset (5 year) ----
 variable_names <- tibble("exo_var" = c("id", "sex", "female", "U", 
                                        rep(NA, (num_tests + 1) - 4)),
                          "timepoints" = seq(from = 0, to = num_tests, by = 1),
@@ -173,7 +173,9 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
                 "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
                 "mean_U_at_risk_males_varnames")
 
-#NAs for those intervals that don't exist in the data set
+#---- Generating variable names for dataset (1 year) ----
+
+#---- NAs for those intervals that don't exist in the data sets ----
 variable_names[nrow(variable_names), 
                c("cij_slopeij_varnames", "rij_varnames", "deathij_varnames", 
                  "Sij_varnames", "contributed_varnames", "interval_ages", 
@@ -195,6 +197,7 @@ variable_names[nrow(variable_names),
                  "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
                  "mean_U_at_risk_males_varnames")] <- NA
 
+#---- Define column names for simulation dataset ----
 column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
                   variable_names$agec_varnames, variable_names$int_noise_names, 
                   variable_names$slope_noise_names, variable_names$eps_varnames, 
