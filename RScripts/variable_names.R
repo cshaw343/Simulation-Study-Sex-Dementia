@@ -174,6 +174,40 @@ variable_names <- tibble("exo_var" = c("id", "sex", "female", "U",
                 "mean_U_at_risk_males_varnames")
 
 #---- Generating variable names for dataset (1 year) ----
+variable_names_1year <- tibble("dem" = rep("dem", num_tests*5),
+                               "females" = rep("females", num_tests*5), 
+                               "males" = rep("males", num_tests*5),
+                               "inc_cases" = rep("inc_cases", num_tests*5), 
+                               "PY" = rep("PY", num_tests*5), 
+                               "contributed" = rep("contributed", num_tests*5), 
+                               "logIRR" = rep("logIRR", num_tests*5),
+                               "SE" = rep("SE", num_tests*5),
+                               "CI_95_Upper" = rep("CI_95_Upper", num_tests*5),
+                               "CI_95_Lower" = rep("CI_95_Lower", num_tests*5),
+                               "CI_95_Coverage" = 
+                                 rep("CI_95_Coverage", num_tests*5),
+                               "start_ages" = seq(50, 94, by = 1), 
+                               "end_ages" = seq(51, 95, by = 1)) %>%
+  unite("interval_ages", c(start_ages, end_ages), sep = "-", 
+        remove = FALSE) %>%
+  unite("inc_cases_females_varnames", 
+        c(inc_cases, females, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("inc_cases_males_varnames", 
+        c(inc_cases, males, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("PY_females_varnames", 
+        c(PY, females, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("PY_males_varnames", 
+        c(PY, males, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_varnames", 
+        c(logIRR, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_SE_varnames", 
+        c(logIRR, SE, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Upper_varnames", 
+        c(logIRR, CI_95_Upper, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Lower_varnames", 
+        c(logIRR, CI_95_Lower, interval_ages), sep = "_", remove = FALSE) %>% 
+  unite("logIRR_95CI_Coverage_varnames", 
+        c(logIRR, CI_95_Coverage, interval_ages), sep = "_", remove = FALSE)
 
 #---- NAs for those intervals that don't exist in the data sets ----
 variable_names[nrow(variable_names), 
