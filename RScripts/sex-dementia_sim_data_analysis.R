@@ -195,6 +195,7 @@ sex_dem_sim <- function(){
                                     sum(PY_data[, contributed]), 3)
   }
   
+  #---- Dementia logIRRs ----
   IRRs <- sim_rates_females/sim_rates_males
   
   simulated_dementia_logIRRs_data <- matrix(nrow = num_tests, ncol = 5)
@@ -219,7 +220,7 @@ sex_dem_sim <- function(){
   simulated_dementia_logIRRs_data <- 
     as.vector(t(simulated_dementia_logIRRs_data))
   
-  # #---- Dementia log(IRRs) Poisson Regression ----
+  # #---- Dementia logIRRs Poisson Regression ----
   # modeled_dementia_logIRRs <- vector(length = num_tests)
   # poisson_reg_data <- rbind(cbind(rep("1", length(inc_cases_females)),
   #                                 na.omit(variable_names$interval_ages),
