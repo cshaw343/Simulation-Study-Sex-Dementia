@@ -136,29 +136,23 @@ sex_dem_sim <- function(){
     if(slot == 1){
       dem_last_wave <- paste0("dem", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     } else {
       dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     }
     PY_data <- female_data %>% 
-      dplyr::select(death_last_wave, death_this_wave, 
-                    dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-               !! as.name(dem_last_wave) == 0) 
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(dem_last_wave) == 0) 
     
     inc_cases_females[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
-    PY_females[slot] = sum(PY_data[, contributed])
+    PY_females[slot] = sum(PY_data[, contributed], na.rm = TRUE)
     
-    sim_rates_females[slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                              na.rm = TRUE)/
-                                            sum(PY_data[, contributed])), 3)
+    sim_rates_females[slot] = 
+      round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                    sum(PY_data[, contributed], na.rm = TRUE)), 3)
   }
   
   #Computing male incidence cases and rates
@@ -166,29 +160,23 @@ sex_dem_sim <- function(){
     if(slot == 1){
       dem_last_wave <- paste0("dem", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     } else {
       dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     }
     PY_data <- male_data %>% 
-      dplyr::select(death_last_wave, death_this_wave, 
-                    dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-               !! as.name(dem_last_wave) == 0)
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(dem_last_wave) == 0)
     
     inc_cases_males[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
-    PY_males[slot] = sum(PY_data[, contributed])
+    PY_males[slot] = sum(PY_data[, contributed], na.rm = TRUE)
     
-    sim_rates_males[slot] = round(1000*sum(PY_data[, dem_this_wave], 
-                                           na.rm = TRUE)/
-                                    sum(PY_data[, contributed]), 3)
+    sim_rates_males[slot] = 
+      round(1000*sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+              sum(PY_data[, contributed], na.rm = TRUE), 3)
   }
   
   #---- Dementia logIRRs (5-year bands) ----
