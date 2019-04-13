@@ -210,7 +210,12 @@ variable_names_1year <- tibble("dem" = rep("dem", num_tests*5),
   unite("logIRR_95CI_Lower_varnames", 
         c(logIRR, CI_95_Lower, interval_ages), sep = "_", remove = FALSE) %>% 
   unite("logIRR_95CI_Coverage_varnames", 
-        c(logIRR, CI_95_Coverage, interval_ages), sep = "_", remove = FALSE)
+        c(logIRR, CI_95_Coverage, interval_ages), sep = "_", remove = FALSE) %>%
+  dplyr::select("contributed_varnames", "dem_varnames", 
+                "inc_cases_females_varnames", "inc_cases_males_varnames", 
+                "PY_females_varnames", "PY_males_varnames", "logIRR_varnames", 
+                "logIRR_SE_varnames", "logIRR_95CI_Upper_varnames", 
+                "logIRR_95CI_Lower_varnames", "logIRR_95CI_Coverage_varnames")
 
 #---- NAs for those intervals that don't exist in the data sets ----
 variable_names[nrow(variable_names), 
