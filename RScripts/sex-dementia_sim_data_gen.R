@@ -187,6 +187,7 @@ small_batch_gen <- function(small_batch_n){
   
   #---- Contributed time ----
   for(i in 1:nrow(obs)){
+    #5-year bands
     last_full_slot <- floor(obs[i, "timetodem_death"]/5)
     full_slots <- na.omit(variable_names$contributed_varnames)[1:last_full_slot]
     obs[i, full_slots] <- 5
@@ -196,6 +197,36 @@ small_batch_gen <- function(small_batch_n){
         obs[i, "timetodem_death"]%%5
     }
   }
+  
+  #---- Contributed time (1-year bands) ----
+  for(i in 1:nrow(obs)){
+    for(j in 1:num_tests){
+      contributed_var <- na.omit(variable_names$contributed_varnames)[j]
+      contributed_vars_1year_block <- 
+        variable_names_1year$contributed_varnames[(5*(j-1) + 1):(5*j)]
+      
+      if(is.na(obs[i, contributed_var])){
+        break
+      } else if(obs[i, contributed_var] == int_time){
+        obs[i, contributed_vars_1year_block] <- 1
+      } else {
+        last_full_slot <- floor(obs[i, contributed_var])
+        if(last_full_slot == 0){
+          obs[i, contributed_vars_1year_block[1]] <- obs[i, contributed_var]
+        } else {
+          full_slots <- 
+            contributed_vars_1year_block[1:last_full_slot]
+          obs[i, full_slots] <- 1
+          partial_slot <- last_full_slot + 1
+          obs[i, contributed_vars_1year_block[partial_slot]] <- 
+            (obs[i, contributed_var] - last_full_slot)
+        }
+      }
+    }
+  }
+  
+  #---- Dementia indicators (1-year bands) ----
+  
   
   #---- Values to return ----
   return(obs)
