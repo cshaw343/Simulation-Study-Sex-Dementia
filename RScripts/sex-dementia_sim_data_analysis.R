@@ -45,6 +45,7 @@ sex_dem_sim <- function(){
   survival_data <- data[, na.omit(variable_names$Sij_varnames)]
   survival_data[survival_data == 5] <- 4.99999
   data[, na.omit(variable_names$Sij_varnames)] <- survival_data
+  
   simulated_mortality_logHRs <- vector(length = num_tests)
   
   for(i in 1:length(simulated_mortality_logHRs)){
@@ -105,24 +106,19 @@ sex_dem_sim <- function(){
     if(slot == 1){
       dem_last_wave <- paste0("dem", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     } else {
       dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-      death_this_wave <- paste0("death", (slot - 1), "-", slot)
       contributed <- paste0("contributed", (slot - 1), "-", slot)
     }
     PY_data <- data %>% 
-      dplyr::select(death_last_wave, death_this_wave, 
-                    dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-               !! as.name(dem_last_wave) == 0) 
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(dem_last_wave) == 0) 
     
-    sim_rates[slot] = round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
-                                    sum(PY_data[, contributed])), 3)
+    sim_rates[slot] = 
+      round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                    sum(PY_data[, contributed], na.rm = TRUE)), 3)
   }
   
   #---- Dementia incidence cases, rates, and PY by sex (5-year bands) ----
@@ -221,17 +217,17 @@ sex_dem_sim <- function(){
     as.vector(t(simulated_dementia_logIRRs_data))
   
   #---- Dementia incidence cases, rates, and PY by sex (1-year bands) ----
-  sim_rates_females <- vector(length = num_tests) 
-  sim_rates_males <- vector(length = num_tests) 
+  sim_rates_females_1year <- vector(length = num_tests*5) 
+  sim_rates_males_1year <- vector(length = num_tests*5) 
   
-  inc_cases_females <- vector(length = num_tests) 
-  inc_cases_males <- vector(length = num_tests) 
+  inc_cases_females_1year <- vector(length = num_tests*5) 
+  inc_cases_males_1year <- vector(length = num_tests*5) 
   
-  PY_females <- vector(length = num_tests) 
-  PY_males <- vector(length = num_tests) 
+  PY_females_1year <- vector(length = num_tests*5) 
+  PY_males_1year <- vector(length = num_tests*5) 
   
   #Computing female incidence cases, rates, PY
-  for(slot in 1:num_tests){
+  for(slot in 1:num_tests*5){
     if(slot == 1){
       dem_last_wave <- paste0("dem", (slot - 1))
       dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
