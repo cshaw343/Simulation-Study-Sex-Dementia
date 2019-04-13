@@ -190,6 +190,9 @@ variable_names_1year <- tibble("dem" = rep("dem", num_tests*5),
                                "end_ages" = seq(51, 95, by = 1)) %>%
   unite("interval_ages", c(start_ages, end_ages), sep = "-", 
         remove = FALSE) %>%
+  unite("contributed_varnames", c(contributed, interval_ages), sep = "", 
+        remove = FALSE) %>%
+  unite("dem_varnames", c(dem, interval_ages), sep = "", remove = FALSE) %>%
   unite("inc_cases_females_varnames", 
         c(inc_cases, females, interval_ages), sep = "_", remove = FALSE) %>% 
   unite("inc_cases_males_varnames", 
@@ -243,6 +246,8 @@ column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames,
                   "study_death", "survtime", "age_death", 
                   variable_names$dem_varnames, "dem_wave", "dem", "timetodem", 
                   "ageatdem", "dem_death", "timetodem_death", "ageatdem_death", 
-                  "dem_alive", na.omit(variable_names$contributed_varnames))
+                  "dem_alive", na.omit(variable_names$contributed_varnames), 
+                  variable_names_1year$contributed_varnames, 
+                  variable_names_1year$dem_varnames)
 
 
