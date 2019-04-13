@@ -165,7 +165,9 @@ coeff_table <-
                  "$\\gamma_{19}$", "$\\gamma_{2}$", "$\\gamma_{3}$", 
                  "$\\gamma_{4}$"))
 
-kable(coeff_table, escape = FALSE, caption = "Coefficients used to generate mortality hazard") %>% kable_styling()
+kable(coeff_table, escape = FALSE, 
+      caption = "Coefficients used to generate mortality hazard") %>% 
+  kable_styling()
 ```
 
 Using R's optim function [@Roptim], we solved for the $\lambda_j$ values (baseline mortality hazard for women in each 5-year age band) in our hazard function so that conditional probabilities of survival, i.e. survival to age X + 5, conditional on survival to age X, in our simulated data closely matched those calculated from the Netherlands cohort life tables.  Note that although all of our analyses are presented with males as the reference group, females were used as the reference group throughout the data-generation process.
@@ -332,7 +334,10 @@ percentile_table <- rbind(dem_cuts, percentile)
 colnames(percentile_table) <- c("Age <50", "[50, 55)",  age_labels$formatted_age_intervals[-1])
 rownames(percentile_table) <- c("Dementia Cutoff", "Percentile")
 kable(percentile_table, 
-      caption = "Dementia cut points and associated percentiles. The percentile is the proportion of susceptible that will be diagnosed with dementia.") %>% kable_styling()
+      caption = "Dementia cut points and associated percentiles. 
+      The percentile is the proportion of susceptible that will be diagnosed 
+      with dementia.") %>% 
+  kable_styling()
 ```
 
 <br>
@@ -359,8 +364,9 @@ dem_table <-
                na.omit(variable_names$dem_inc_rate_varnames)])) %>% 
            t() %>% set_colnames(age_labels$formatted_age_intervals)
 
-kable(dem_table, caption = "Dementia incidence rates. Source: Gender differences in the incidence of AD and vascular dementia: 
-The EURODEM Studies (Andersen 1999); Table 2.") %>% kable_styling()
+kable(dem_table, caption = 
+"Dementia incidence rates. Source: Gender differences in the incidence of AD 
+and vascular dementia: The EURODEM Studies (Andersen 1999); Table 2.") %>% kable_styling()
 ```
 
 <br>
@@ -373,7 +379,10 @@ hr_table <-
              na.omit(variable_names$dementia_logHR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
-kable(hr_table, caption = paste("Average hazard ratios for dementia (exponentiated mean of the observed ln(dementia HR) across", runs, "simulated samples).")) %>% 
+kable(hr_table, caption = 
+        paste("Average hazard ratios for dementia 
+              (exponentiated mean of the observed ln(dementia HR) across", runs, 
+              "simulated samples).")) %>% 
   kable_styling()
 ```
 
@@ -452,7 +461,9 @@ ggplot(samp_Cij, aes(Age, value)) +
 slopes <- cumsum(cij_slopes)[-1] %>% as.data.frame() %>% t() %>%
   set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("")
 
-kable(slopes, caption = "Mean slopes at each interval (input parameters).  Note that the mean slope (rate of cognitive change) becomes more negative with age.") %>% kable_styling()
+kable(slopes, caption = "Mean slopes at each interval (input parameters).  
+      Note that the mean slope (rate of cognitive change) 
+      becomes more negative with age.") %>% kable_styling()
 ```
 
 <br>
@@ -462,7 +473,8 @@ slope_var <- cij_var1[-1] %>% as.data.frame() %>% t() %>%
   set_colnames(na.omit(variable_names$interval_ages)) %>% set_rownames("")
 
 kable(slope_var, 
-      caption = "Variance of random slope for each interval (input parameters). Note that the variance of the random slope increases with age.") %>% kable_styling()
+      caption = "Variance of random slope for each interval (input parameters). 
+      Note that the variance of the random slope increases with age.") %>% kable_styling()
 ```
 
 ## Dementia Cases
@@ -512,7 +524,11 @@ dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>%
   set_rownames("Prevalence")
 
 kable(dem_prev, 
-      caption = "Prevalence of dementia by age for one simulated sample. Estimating this is not our primary goal, but we thought this might be another good sanity check.  We expect that these numbers are higher than what they should be because in this scenario, dementia does not kill anyone. ") %>% kable_styling()
+      caption = "Prevalence of dementia by age for one simulated sample. 
+      Estimating this is not our primary goal, but we thought this might be 
+      another good sanity check.  We expect that these numbers are higher than 
+      what they should be because in this scenario, 
+      dementia does not kill anyone. ") %>% kable_styling()
 ```
 
 ## Distributions of U
@@ -558,7 +574,9 @@ py_by_sex <- dataset %>% group_by(sex) %>%
   dplyr::select(Sex, everything()) %>% 
   set_colnames(c("Sex", age_labels$formatted_age_intervals))
 
-kable(py_by_sex, caption = "Dementia-free person-years contributed to each 5-year age interval by sex from one simulated sample.") %>% kable_styling()
+kable(py_by_sex, caption = "Dementia-free person-years contributed to each 
+      5-year age interval by sex from one simulated sample.") %>% 
+  kable_styling()
 ```
 
 <br>
@@ -576,7 +594,9 @@ dem_inc_by_sex <- dataset %>%
   set_rownames(c("Sex", "Female", "Male")) %>% 
   set_colnames(age_labels$formatted_age_intervals)
   
-kable(dem_inc_by_sex[-1, ], caption =  "Number of incident dementia cases in each 5-year age interval by sex in one simulated sample.") %>% kable_styling()
+kable(dem_inc_by_sex[-1, ], caption =  "Number of incident dementia cases in 
+      each 5-year age interval by sex in one simulated sample.") %>% 
+  kable_styling()
 ```
 
 # References
