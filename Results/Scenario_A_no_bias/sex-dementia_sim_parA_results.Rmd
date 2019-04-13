@@ -112,7 +112,7 @@ In this scenario, sex influences survival while U influences the rate of cogniti
 <br>
 
 #  Description of Hypothetical Cohort Study 
-This is a hypothetical cohort study of sex/gender differences in dementia incidence.  The hypothetical cohort included 100,000 men and women recruited at age 50 years and followed for dementia incidence until age 95 (45 years).  To quantify the extent to which selective survival could plausibly explain higher dementia incidence in men compared to women at older ages. We generated the data assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence. Thus, associations between sex/gender and dementia incidence reflect survival bias in our simulations.  
+This is a hypothetical cohort study of sex/gender differences in dementia incidence.  The hypothetical cohort included 100,000 men and women recruited at age 50 years and followed for dementia incidence until age 95 (45 years).  To quantify the extent to which selective survival could plausibly explain higher dementia incidence in men compared to women at older ages, we generated the data assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence. Thus, associations between sex/gender and dementia incidence reflect survival bias in our simulations.  
 
 ## Survival 
 Andersen, et al. (1999) [@Andersen1999] include data from Denmark, France, the Netherlands, and the UK in their pooled EURODEM analysis.  For those countries with cohort life tables available on UC Berkeley's repository (all but the UK), Figure \@ref(fig:HR-Plots) shows mortality hazard ratios plotted for the 1920-1925 birth cohort.  The respository for these life tables can be found here:  [https://www.mortality.org/](https://www.mortality.org/).  
@@ -170,7 +170,7 @@ kable(coeff_table, escape = FALSE, caption = "Coefficients used to generate mort
 
 Using R's optim function [@Roptim], we solved for the $\lambda_j$ values (baseline mortality hazard for women in each 5-year age band) in our hazard function so that conditional probabilities of survival, i.e. survival to age X + 5, conditional on survival to age X, in our simulated data closely matched those calculated from the Netherlands cohort life tables.  Note that although all of our analyses are presented with males as the reference group, females were used as the reference group throughout the data-generation process.
 
-Table \@ref(tab:Lambda-values) shows the computed values of $\lambda_j$ for our hazard function. Figure \@ref(fig:survival-plots) compares the simulated cumulative survival probabilities from age 50 years based on these $\lambda_j$, i.e., the probability of surviving to each age conditional on survival to age 50, with cumulative survival probabilites calculated from the Netherlands life tables.  Figure \@ref(fig:mort-HR-plots) compares the simulated mortality hazard ratios from ages 50+ to those calculated from life tables.  Both the survival probabilities calculated from simulated data and the modeled mortality hazard ratios were averaged over 250 iterations of sample generation.  The average of the mortality hazard ratios was computed by first taking the mean of the observed age-specific ln(mortality HR) across the 250 simulated samples and then exponentiating.  Average cumulative mortality  = `r round((1 - sim_results$p_alive[length(sim_results$p_alive)])*100, 1)`% across the 250 simulated samples.
+Table \@ref(tab:Lambda-values) shows the computed values of $\lambda_j$ for our hazard function. Figure \@ref(fig:survival-plots) compares the simulated cumulative survival probabilities from age 50 years based on these $\lambda_j$, i.e., the probability of surviving to each age conditional on survival to age 50, with cumulative survival probabilites calculated from the Netherlands life tables.  Figure \@ref(fig:mort-HR-plots) compares the simulated mortality hazard ratios from ages 50+ to those calculated from life tables.  Both the survival probabilities calculated from simulated data and the modeled mortality hazard ratios were averaged over `r runs` iterations of sample generation.  The average of the mortality hazard ratios was computed by first taking the mean of the observed age-specific ln(mortality HR) across the `r runs` simulated samples and then exponentiating.  Average cumulative mortality  = `r as.numeric(round((1 - mean_sim_results["p_alive_95"])*100, 1))`% across the `r runs` simulated samples.
 
 <br>
 
@@ -214,7 +214,7 @@ plot_data <- tibble("age" = seq(50, 95, by = 5),
                       "cohort_male_survival" = male_cp_survival) 
 ```
 
-```{r survival-plots, fig.show="hold", out.width="50%", fig.cap="Average simulated cumulative survival probabilites from age 50 years across 250 iterations of sample generation"}
+```{r survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated cumulative survival probabilites from age 50 years across", runs, "iterations of sample generation")}
 #Female survival plot
 plot_data_female <- plot_data %>% dplyr::select(age, contains("female")) %>%
   gather(key = key, value = value, 
@@ -269,7 +269,7 @@ ggplot(plot_data_all,
 
 <br>
 
-```{r mort-HR-plots, fig.align="center", out.width = "75%", fig.cap="Average simulated mortality hazard ratios for age 50+ across 100 simulation runs. Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the mortality HR for the interval [50, 55)."}
+```{r mort-HR-plots, fig.align="center", out.width = "75%", fig.cap=paste("Average simulated mortality hazard ratios for age 50+ across", runs, "simulation runs. Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the mortality HR for the interval [50, 55).")}
 published_HR <- head(netherlands_F$Haz/netherlands_M$Haz, -1) %>%
   as.data.frame() %>% set_colnames("Published Mortality HR")
 
@@ -337,7 +337,7 @@ kable(percentile_table,
 
 <br>
 
-Average dementia incidence rates per 1000 person years across 250 simulated samples are displayed in Table \@ref(tab:dem-inc-rates). The dementia incidence rates from the EURODEM study, used as reference, are displayed in the first line of the table. The average dementia hazard ratios across 250 simulated scenarios are displayed in Table \@ref(tab:hr-table), and the average incidence rate ratios are displayed in Table \@ref(tab:IRR-table).  In both cases, ratios are presented as female:male.
+Average dementia incidence rates per 1000 person years across `r runs` simulated samples are displayed in Table \@ref(tab:dem-inc-rates). The dementia incidence rates from the EURODEM study, used as reference, are displayed in the first line of the table. The average dementia hazard ratios across `r runs` simulated scenarios are displayed in Table \@ref(tab:hr-table), and the average incidence rate ratios are displayed in Table \@ref(tab:IRR-table).  In both cases, ratios are presented as female:male.
 
 <br>
 
@@ -373,7 +373,7 @@ hr_table <-
              na.omit(variable_names$dementia_logHR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
-kable(hr_table, caption = "Average hazard ratios for dementia (exponentiated mean of the observed ln(dementia HR) across 250 simulated samples).") %>% 
+kable(hr_table, caption = paste("Average hazard ratios for dementia (exponentiated mean of the observed ln(dementia HR) across", runs, "simulated samples).")) %>% 
   kable_styling()
 ```
 
@@ -386,7 +386,7 @@ IRR_table <-
            mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
-kable(IRR_table, caption = "Average incidence rate ratios for dementia (exponentiated mean of the observed ln(dementia IRR) across 250 simulated samples).") %>% kable_styling()
+kable(IRR_table, caption = paste("Average incidence rate ratios for dementia (exponentiated mean of the observed ln(dementia IRR) across", runs, "simulated samples).")) %>% kable_styling()
 ```
 
 <br>
