@@ -21,7 +21,7 @@ batch_runs <- function(x){
   plan(multiprocess, 
        workers = (floor(0.5*detectCores())), 
        gc = TRUE)
-  sim_results <- future_replicate(12, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(5, sex_dem_sim()) %>% t() %>% 
     as.data.frame()
   
   return(sim_results)
@@ -30,11 +30,11 @@ batch_runs <- function(x){
 }
 
 #---- Test Code ----
-if(!is.integer(runs/50)) stop("Number of runs must be a multiple of 50.")
+if(!is.integer(runs/5)) stop("Number of runs must be a multiple of 5.")
 gc()
 Start <- Sys.time()
 
-sim_results <- replicate(runs/50, batch_runs())
+sim_results <- replicate(runs/5, batch_runs())
 
 Sys.time() - Start
 
@@ -51,7 +51,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "sim_results_1000_20190408.csv"))
+                               "sim_results_20_20190415.csv"))
   
 
 
