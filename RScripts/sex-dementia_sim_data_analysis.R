@@ -365,7 +365,9 @@ sex_dem_sim <- function(){
                    p_alive_males, simulated_mortality_logHRs, at_risk_females, 
                    at_risk_males, sim_rates, sim_rates_females, sim_rates_males, 
                    inc_cases_females, inc_cases_males, PY_females, PY_males, 
-                   simulated_dementia_logIRRs_data, 
+                   inc_cases_females_1year, inc_cases_males_1year, 
+                   PY_females_1year, PY_males_1year,
+                   #simulated_dementia_logIRRs_data, 
                    simulated_dementia_logIRRs_data_1yr,
                    simulated_dementia_logHRs_model_data, dem_cases_female, 
                    dem_cases_male, prop_dem_females, prop_dem_males, 
@@ -386,7 +388,11 @@ sex_dem_sim <- function(){
       na.omit(variable_names$inc_cases_females_varnames), 
       na.omit(variable_names$inc_cases_males_varnames), 
       na.omit(variable_names$PY_females_varnames), 
-      na.omit(variable_names$PY_males_varnames), 
+      na.omit(variable_names$PY_males_varnames),
+      variable_names_1year$inc_cases_females_varnames, 
+      variable_names_1year$inc_cases_males_varnames,
+      variable_names_1year$PY_females_varnames, 
+      variable_names_1year$PY_males_varnames, 
       # t(
       #   cbind(
       #     na.omit(variable_names$logIRR_varnames), 
