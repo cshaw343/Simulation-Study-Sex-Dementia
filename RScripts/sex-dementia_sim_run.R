@@ -18,8 +18,10 @@ data_gen() %>% saveRDS(here("Data", "dataset_A_20190409"))
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
 batch_runs <- function(x){
-  plan(multiprocess, workers = (floor(0.5*detectCores())), gc = TRUE)
-  sim_results <- future_replicate(50, sex_dem_sim()) %>% t() %>% 
+  plan(multiprocess, 
+       workers = (floor(0.5*detectCores())), 
+       gc = TRUE)
+  sim_results <- future_replicate(12, sex_dem_sim()) %>% t() %>% 
     as.data.frame()
   
   return(sim_results)
