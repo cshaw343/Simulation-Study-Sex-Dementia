@@ -30,7 +30,10 @@ batch_runs <- function(x){
 }
 
 #---- Test Code ----
-if(!is.integer(runs/5)) stop("Number of runs must be a multiple of 5.")
+if(runs%%5 != 0){
+  stop("Number of runs must be a multiple of 5.")
+}
+ 
 gc()
 Start <- Sys.time()
 
