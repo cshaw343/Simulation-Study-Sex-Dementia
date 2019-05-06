@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 20
+runs = 100
 
 #---- Number of observations ----
 #Multiples of 1000
@@ -81,7 +81,11 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 #Need one value for each visit time, including baseline
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 dem_cuts <- c(-2.98629, 
-              -2.98629, -3.28948, -3.77503, -4.45, -4.975, 
-              -5.25, -6.225, -6.8225, -7.05)
-              
+              -2.98629, -3.28948, -3.77503, -4.45, -4.975, -5.25, -6.225, 
+              -6.8225, -7.05)
 
+dem_cut_slopes <- vector(length = length(dem_cuts) - 1)
+
+for(i in 1:length(dem_cut_slopes)){
+  dem_cut_slopes[i] = (dem_cuts[i + 1] - dem_cuts[i])/5
+}
