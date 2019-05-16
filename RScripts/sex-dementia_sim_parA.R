@@ -68,8 +68,12 @@ b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 g1 <- log(c(1.6160, 1.8973, 2.1307, 2.2726, 2.2225, 2.0917, 1.8494, 1.6147, 
             1.3909, 1.2596)) 
 g2 <- 0     #Effect of U on log hazard of death
-g3 <- 0     #Effect of cognitive slope at time j on log hazard of death
-g4 <- 0     #Effect of cognitive function at time j on log hazard of death
+g3 <- 0     #Effect of interaction between sex and U on log hazard of death
+g4 <- 0     #Effect of cognitive slope at time j on log hazard of death
+g5 <- 0     #Effect of cognitive function at time j on log hazard of death
+#Effect of prevalent dementia on log hazard of death
+#From Kaiser dataset for now
+g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))      
 
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search_euro.R script
@@ -83,9 +87,3 @@ lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316,
 dem_cuts <- c(-2.98629, 
               -2.98629, -3.28948, -3.77503, -4.45, -4.975, -5.25, -6.225, 
               -6.8225, -7.05)
-
-dem_cut_slopes <- vector(length = length(dem_cuts) - 1)
-
-for(i in 1:length(dem_cut_slopes)){
-  dem_cut_slopes[i] = (dem_cuts[i + 1] - dem_cuts[i])/5
-}
