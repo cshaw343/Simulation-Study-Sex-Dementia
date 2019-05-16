@@ -29,13 +29,9 @@ small_batch_gen <- function(small_batch_n){
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  for(j in 1:length(variable_names$age_varnames)){
-    if(j == 1){
-      obs[, variable_names$age_varnames[j]] = age0 #Creates column of baseline ages
-    } else 
-      obs[, variable_names$age_varnames[j]] = 
-        obs[, variable_names$age_varnames[j - 1]] + int_time #Creates ages at following timepoints
-  }
+  ages = matrix(seq(50, 95, by = 5), nrow = 1)
+  ones = matrix(1, nrow = small_batch_n, ncol = 1)
+  obs[, variable_names$age_varnames] <- ones %*% ages
   
   #---- Generating centered age data ----
   #Creating baseline-mean-centered ages at each timepoint j
