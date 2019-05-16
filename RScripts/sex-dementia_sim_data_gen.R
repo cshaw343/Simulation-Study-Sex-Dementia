@@ -76,6 +76,16 @@ small_batch_gen <- function(small_batch_n){
   obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
   obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
   
+  #---- Create a competing risk outcome ----
+  dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
+                         ncol = length(variable_names$Cij_varnames), 
+                         byrow = TRUE)
+  
+  obs[, variable_names$dem_varnames] <- 
+    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
+  
+  obs %<>% filter(dem0 == 0)
+  
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
@@ -107,15 +117,6 @@ small_batch_gen <- function(small_batch_n){
   #   set_colnames(variable_names$std_Cij_varnames)
   # 
   # obs %<>% bind_cols(., std_Cij)
-  
-  #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
-                         byrow = TRUE)
-  
-  obs[, variable_names$dem_varnames] <- 
-    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
-  
-  obs %<>% filter(dem0 == 0)
   
   #---- Survival censoring matrix ----
   censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
