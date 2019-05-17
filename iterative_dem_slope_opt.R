@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here")
+p_load("here", "tidyverse")
 
 #---- Source files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))
@@ -19,22 +19,22 @@ opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
 opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
 opt_base_haz <- lambda          #Start with original hazards
 
-
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
 survival_data <- female_life_netherlands$CP
 
 #---- Objective Function ----
-dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j] 
+dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1 
                                batch_n, timepoint, 
                                dem_inc_data, survival_data,
                                opt_cij_slopes, opt_cij_var1, opt_base_haz){
   
   #---- Plug in parameters to optimize for ----
-  opt_cij_slopes[timepoint] <- PARAMETERS[1]
-  opt_cij_var1[timepoint] <- PARAMETERS[2]
-  opt_base_haz[timepoint] <- PARAMETERS[3]
+  cij_slopes <- opt_cij_slopes
+  cij_slopes[timepoint] <- PARAMETERS[1]
+  cij_var1 <- opt_cij_var1
+  cij_var1[timepoint] <- PARAMETERS[2]
   
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = batch_n, ncol = length(column_names)) %>% 
@@ -72,7 +72,7 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j]
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = small_batch_n, mu = rep(0, 2), 
+    noise <- mvrnorm(n = batch_n, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -87,7 +87,7 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j]
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = small_batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
@@ -110,7 +110,45 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j]
   
   #---- Generating uniform random variables per interval for Sij ----
   obs[, na.omit(variable_names$rij_varnames)]<- 
-    replicate(num_tests, runif(small_batch_n, min = 0, max = 1))
+    replicate(num_tests, runif(batch_n, min = 0, max = 1))
+  
+  #---- Survival optimization ----
+  #Objective Function
+  survival_match <- function(LAMBDA, obs, survival_data){
+    lambda <- opt_base_haz
+    lambda[timepoint] <- LAMBDA
+    survival_data <- survival(obs)
+    obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+    obs[, "survtime"] <- survival_data$survtimes
+    
+    #---- Calculating death data for each individual ----
+    #Indicator of 1 means the individual died in that interval
+    #NAs mean the individual died in a prior interval
+    obs[, "death0"] <- 0
+    obs[, na.omit(variable_names$deathij_varnames)] <- 
+      (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+    
+    obs[, "study_death"] <- 
+      rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
+    
+    obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
+    
+    #---- Survival Analysis ----
+    female_data <- obs %>% filter(sex == 0)
+    
+    p_alive_females <- female_data %>%
+      dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+      map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
+    
+    return(abs(p_alive_females[timepoint] - survival_data[timepoint]))
+  }
+  
+  optim(lambda[timepoint], survival_match, 
+        lower = lambda[timepoint], upper = 1.5*lambda[timepoint], 
+        method = "L-BFGS-B")
+  
+  #Use optimized lambda values
+  
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -129,6 +167,13 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j]
     rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
   
   obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
+  
+  #---- Survival Analysis ----
+  female_data <- data %>% filter(sex == 0)
+  
+  p_alive_females <- female_data %>%
+    dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+    map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
   
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
@@ -213,6 +258,9 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1, lambda[j]
         obs[i, "timetodem_death"]%%5
     }
   }
+  
+  #---- Dementia Incidence Analysis ----
+  
   
   return(abs(dem_inc - dem_inc_data[timepoint]))
 }
