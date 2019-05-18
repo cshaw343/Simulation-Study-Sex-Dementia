@@ -21,7 +21,7 @@ opt_base_haz <- lambda          #Start with original hazards
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
-dem_inc <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
+dem_inc_data <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
 cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
 #---- Objective Function ----
@@ -139,11 +139,12 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   }
   
   #Replace lambda with optimized lambda value
-  lambda[timepoint] <- optim(par = lambda[timepoint], fn = survival_match, 
-                             obs = obs, cp_survival = cp_survival, 
-                             lower = lambda[timepoint], 
-                             upper = 2.75*lambda[timepoint], 
-                             method = "L-BFGS-B")
+  opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
+                                   fn = survival_match, 
+                                   obs = obs, cp_survival = cp_survival, 
+                                   lower = lambda[timepoint], 
+                                   upper = 2.75*lambda[timepoint], 
+                                   method = "L-BFGS-B")$par
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -162,20 +163,6 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
     rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
   
   obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
-  
-  #---- Survival Analysis ----
-  female_data <- data %>% filter(sex == 0)
-  
-  p_alive_females <- female_data %>%
-    dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
-    map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
-  
-  # #---- Standardize Cij values ----
-  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
-  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-  #   set_colnames(variable_names$std_Cij_varnames)
-  # 
-  # obs %<>% bind_cols(., std_Cij)
   
   #---- Survival censoring matrix ----
   censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
@@ -221,7 +208,8 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
       obs[i, "dem_death"] <- 1
     } else if(obs[i, "study_death"] == 1 & 
               (obs[i, "dem"] == 0 | (obs[i, "dem"] == 1 & 
-                                     obs[i, "timetodem"] > obs[i, "survtime"]))){
+                                     obs[i, "timetodem"] > 
+                                     obs[i, "survtime"]))){
       obs[i, "dem_death"] <- 2
     } else {
       obs[i, "dem_death"] <- 0
