@@ -238,7 +238,7 @@ opt_base_haz <- rep(0.003, 9)   #Testing replacement of values
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
-dem_inc_data <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
+dem_inc_data <- c(0, 0.25, 0.6, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
 cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
 #---- Setup cluster ----
