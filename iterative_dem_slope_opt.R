@@ -22,12 +22,12 @@ opt_base_haz <- lambda          #Start with original hazards
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
-survival_data <- female_life_netherlands$CP[c(-1, -2)]
+cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
 #---- Objective Function ----
 dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1 
                                batch_n, timepoint, 
-                               dem_inc_data, survival_data,
+                               dem_inc_data, cp_survival,
                                opt_cij_slopes, opt_cij_var1, opt_base_haz){
   
   #---- Plug in parameters to optimize for ----
@@ -114,7 +114,7 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   
   #---- Survival optimization ----
   #Objective Function
-  survival_match <- function(LAMBDA, obs, survival_data){
+  survival_match <- function(LAMBDA, obs, cp_survival){
     lambda <- opt_base_haz
     lambda[timepoint] <- LAMBDA
     survival_data <- survival(obs)
@@ -127,11 +127,6 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
     obs[, "death0"] <- 0
     obs[, na.omit(variable_names$deathij_varnames)] <- 
       (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
-    
-    obs[, "study_death"] <- 
-      rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
-    
-    obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
     
     #---- Survival Analysis ----
     female_data <- obs %>% filter(sex == 0)
