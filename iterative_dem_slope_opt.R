@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse", "MASS")
+p_load("here", "tidyverse", "MASS", "optimParallel")
 
 #---- Source files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))
@@ -238,15 +238,80 @@ opt_base_haz <- rep(0.003, 9)   #Testing replacement of values
 dem_inc_data <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
 cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
-#---- Optimization ----
+#---- Setup cluster ----
+#Setting up cluster for parallel optimization
+#If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
+#option instead and comment out the clusterEvalQ() lines
+
+cluster <- makeCluster(0.5*detectCores(), type = "PSOCK")
+clusterEvalQ(cl = cluster, {
+  if (!require("pacman")) 
+    install.packages("pacman", repos='http://cran.us.r-project.org')
+  
+  p_load("here", "tidyverse", "MASS")
+  
+  #Source files
+  source(here("RScripts", "sex-dementia_sim_parA.R"))
+  source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+  source(here("RScripts", "euro_life_tables.R"))
+  source(here("RScripts", "variable_names.R"))
+  source(here("RScripts", "cognitive_function_model.R"))
+  source(here("RScripts", "survival_times.R"))
+  source(here("RScripts", "dementia_onset.R"))
+  source(here("RScripts", "compare_survtime_timetodem.R"))
+}) 
+
+clusterExport(cl = cluster, 
+              varlist = c("opt_cij_slopes", "opt_cij_var1", "opt_base_haz", 
+                          "dem_inc_data", "cp_survival"), 
+              envir = environment())
+
+#---- Slope Optimization ----
+time = 2
 optim_values <- 
-  optim(par = c(cij_slopes[timepoint + 1], cij_var1[timepoint + 1]), 
-        fn = dem_inc_rate_match, 
-        batch_n = 10000, timepoint = 1, dem_inc_data = dem_inc_data, 
-        cp_survival = cp_survival, opt_cij_slopes = opt_cij_slopes, 
-        opt_cij_var1 = opt_cij_var1, opt_base_haz = opt_base_haz, 
-        lower = c(-1, cij_var1[timepoint]), 
-        upper = c(0, 2*cij_var1[timepoint]), 
-        method = "L-BFGS-B")$par
+  optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
+                fn = dem_inc_rate_match, 
+                batch_n = 10000, timepoint = time, dem_inc_data = dem_inc_data, 
+                cp_survival = cp_survival, opt_cij_slopes = opt_cij_slopes, 
+                opt_cij_var1 = opt_cij_var1, opt_base_haz = opt_base_haz, 
+                lower = c(-1, cij_var1[time]), 
+                upper = c(0, 2*cij_var1[time]), 
+                method = "L-BFGS-B", 
+                parallel = list(cl = cluster))$par
 
+opt_cij_slopes[time + 1] <- optim_values[1]
+opt_cij_var1[time + 1] <- optim_values[2]
 
+#---- Survival Re-optimization ----
+#Objective Function
+survival_match <- function(LAMBDA, obs, cp_survival){
+  lambda <- opt_base_haz
+  lambda[timepoint] <- LAMBDA
+  survival_data <- survival(obs)
+  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+  obs[, "survtime"] <- survival_data$survtimes
+  
+  #---- Calculating death data for each individual ----
+  #Indicator of 1 means the individual died in that interval
+  #NAs mean the individual died in a prior interval
+  obs[, "death0"] <- 0
+  obs[, na.omit(variable_names$deathij_varnames)] <- 
+    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+  
+  #---- Survival Analysis ----
+  female_data <- obs %>% filter(sex == 0)
+  
+  p_alive_females <- female_data %>%
+    dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+    map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
+  
+  return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+}
+
+#Replace lambda with optimized lambda value
+opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
+                                 fn = survival_match, 
+                                 obs = obs, cp_survival = cp_survival, 
+                                 lower = lambda[timepoint], 
+                                 upper = 2.75*lambda[timepoint], 
+                                 method = "L-BFGS-B")$par
