@@ -159,11 +159,6 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   obs[, na.omit(variable_names$deathij_varnames)] <- 
     (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
   
-  obs[, "study_death"] <- 
-    rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
-  
-  obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
-  
   #---- Survival censoring matrix ----
   censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
   censor[censor == 0] <- NA
@@ -237,9 +232,8 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
     dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
     filter(!! as.name(dem_last_wave) == 0) 
   
-  dem_inc = 
-    round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
-                  sum(PY_data[, contributed], na.rm = TRUE)), 3)
+  dem_inc = round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                          sum(PY_data[, contributed], na.rm = TRUE)), 3)
   
   return(abs(dem_inc - dem_inc_data[timepoint]))
 }
