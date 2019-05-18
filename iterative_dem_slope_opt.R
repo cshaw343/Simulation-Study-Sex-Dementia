@@ -14,16 +14,6 @@ source(here("RScripts", "survival_times.R"))
 source(here("RScripts", "dementia_onset.R"))
 source(here("RScripts", "compare_survtime_timetodem.R"))
 
-#---- Pre-allocation ----
-opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
-opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
-opt_base_haz <- lambda          #Start with original hazards
-
-#---- Values to match ----
-#The first values are inputs based on climbing to desired inc rate at age 70
-dem_inc_data <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
-cp_survival <- female_life_netherlands$CP[c(-1, -2)]
-
 #---- Objective Function ----
 dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1 
                                batch_n, timepoint, 
@@ -228,7 +218,7 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
     dem_this_wave <- paste0("dem", (timepoint - 1), "-", timepoint)
     contributed <- paste0("contributed", (timepoint - 1), "-", timepoint)
   }
-  PY_data <- data %>% 
+  PY_data <- obs %>% 
     dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
     filter(!! as.name(dem_last_wave) == 0) 
   
@@ -237,3 +227,24 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   
   return(abs(dem_inc - dem_inc_data[timepoint]))
 }
+
+#---- Pre-allocation ----
+opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
+opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
+opt_base_haz <- lambda          #Start with original hazards
+
+#---- Values to match ----
+#The first values are inputs based on climbing to desired inc rate at age 70
+dem_inc_data <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
+cp_survival <- female_life_netherlands$CP[c(-1, -2)]
+
+#---- Optimization ----
+test <- optim(par = c(cij_slopes[timepoint + 1], cij_var1[timepoint + 1]), 
+      fn = dem_inc_rate_match, 
+      batch_n = 10000, timepoint = 1, dem_inc_data = dem_inc_data, 
+      cp_survival = cp_survival, opt_cij_slopes = opt_cij_slopes, 
+      opt_cij_var1 = opt_cij_var1, opt_base_haz = opt_base_haz, 
+      lower = c(-1, cij_var1[timepoint]), 
+      upper = c(0, 2*cij_var1[timepoint]), 
+      method = "L-BFGS-B")
+
