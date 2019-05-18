@@ -32,6 +32,9 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 psex <- 0.49
 
 #---- Variances and correlations ----
+#Both slope and slope variance has placeholder values because of the covariance
+#matrix for slope and intercept... i.e. stop trying to delete these!!!!!
+
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
 cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
