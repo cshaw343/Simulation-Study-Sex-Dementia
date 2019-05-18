@@ -270,62 +270,64 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #---- Slope Optimization ----
-time = 2
-optim_values <- 
-  replicate(3, 
-            optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
-                          fn = dem_inc_rate_match, 
-                          batch_n = 10000, timepoint = time, 
-                          dem_inc_data = dem_inc_data, 
-                          cp_survival = cp_survival, 
-                          opt_cij_slopes = opt_cij_slopes, 
-                          opt_cij_var1 = opt_cij_var1, 
-                          opt_base_haz = opt_base_haz, 
-                          lower = c(-0.8, cij_var1[time]), 
-                          upper = c(0, 2*cij_var1[time]), 
-                          method = "L-BFGS-B", 
-                          parallel = list(cl = cluster))$par)
-
-avg_optim_values <- colMeans(t(optim_values))
-opt_cij_slopes[time + 1] <- avg_optim_values[1]
-opt_cij_var1[time + 1] <- avg_optim_values[2]
-
-#---- Survival Re-optimization ----
-#Objective Function
-survival_match <- function(LAMBDA, obs, cp_survival){
-  lambda <- opt_base_haz
-  lambda[timepoint] <- LAMBDA
-  survival_data <- survival(obs)
-  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-  obs[, "survtime"] <- survival_data$survtimes
+for(time in 1:4){
+  optim_values <- 
+    replicate(10, 
+              optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
+                            fn = dem_inc_rate_match, 
+                            batch_n = 10000, timepoint = time, 
+                            dem_inc_data = dem_inc_data, 
+                            cp_survival = cp_survival, 
+                            opt_cij_slopes = opt_cij_slopes, 
+                            opt_cij_var1 = opt_cij_var1, 
+                            opt_base_haz = opt_base_haz, 
+                            lower = c(-0.8, cij_var1[time]), 
+                            upper = c(0, 2*cij_var1[time]), 
+                            method = "L-BFGS-B", 
+                            parallel = list(cl = cluster))$par)
   
-  #---- Calculating death data for each individual ----
-  #Indicator of 1 means the individual died in that interval
-  #NAs mean the individual died in a prior interval
-  obs[, "death0"] <- 0
-  obs[, na.omit(variable_names$deathij_varnames)] <- 
-    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
-  
-  #---- Survival Analysis ----
-  female_data <- obs %>% filter(sex == 0)
-  
-  p_alive_females <- female_data %>%
-    dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
-    map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
-  
-  return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+  avg_optim_values <- colMeans(t(optim_values))
+  opt_cij_slopes[time + 1] <- avg_optim_values[1]
+  opt_cij_var1[time + 1] <- avg_optim_values[2]
 }
 
-#!!!!MAKE SURE YOU PLUGGED IN OPTIMIZED SLOPE STUFF IN THE PARAMETER FILE!!!!
-obs <- data_gen()
 
-for(timepoint in 1:length(opt_base_haz)){
-  #Replace lambda with optimized lambda value
-  opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
-                                   fn = survival_match, 
-                                   obs = obs, cp_survival = cp_survival, 
-                                   lower = lambda[timepoint], 
-                                   upper = 2.75*lambda[timepoint], 
-                                   method = "L-BFGS-B")$par
-}
-
+# #---- Survival Re-optimization ----
+# #Objective Function
+# survival_match <- function(LAMBDA, obs, cp_survival){
+#   lambda <- opt_base_haz
+#   lambda[timepoint] <- LAMBDA
+#   survival_data <- survival(obs)
+#   obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+#   obs[, "survtime"] <- survival_data$survtimes
+#   
+#   #---- Calculating death data for each individual ----
+#   #Indicator of 1 means the individual died in that interval
+#   #NAs mean the individual died in a prior interval
+#   obs[, "death0"] <- 0
+#   obs[, na.omit(variable_names$deathij_varnames)] <- 
+#     (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+#   
+#   #---- Survival Analysis ----
+#   female_data <- obs %>% filter(sex == 0)
+#   
+#   p_alive_females <- female_data %>%
+#     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+#     map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
+#   
+#   return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+# }
+# 
+# #!!!!MAKE SURE YOU PLUGGED IN OPTIMIZED SLOPE STUFF IN THE PARAMETER FILE!!!!
+# obs <- data_gen()
+# 
+# for(timepoint in 1:length(opt_base_haz)){
+#   #Replace lambda with optimized lambda value
+#   opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
+#                                    fn = survival_match, 
+#                                    obs = obs, cp_survival = cp_survival, 
+#                                    lower = lambda[timepoint], 
+#                                    upper = 2.75*lambda[timepoint], 
+#                                    method = "L-BFGS-B")$par
+# }
+# 
