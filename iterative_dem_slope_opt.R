@@ -14,6 +14,9 @@ source(here("RScripts", "survival_times.R"))
 source(here("RScripts", "dementia_onset.R"))
 source(here("RScripts", "compare_survtime_timetodem.R"))
 
+#For survival re-optimization
+source(here("RScripts", "sex-dementia_sim_data_gen.R"))
+
 #---- Objective Function ----
 dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1 
                                batch_n, timepoint, 
@@ -308,10 +311,16 @@ survival_match <- function(LAMBDA, obs, cp_survival){
   return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
 }
 
-#Replace lambda with optimized lambda value
-opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
-                                 fn = survival_match, 
-                                 obs = obs, cp_survival = cp_survival, 
-                                 lower = lambda[timepoint], 
-                                 upper = 2.75*lambda[timepoint], 
-                                 method = "L-BFGS-B")$par
+#!!!!MAKE SURE YOU PLUGGED IN OPTIMIZED SLOPE STUFF IN THE PARAMETER FILE!!!!
+obs <- data_gen()
+
+for(timepoint in 1:length(opt_base_haz)){
+  #Replace lambda with optimized lambda value
+  opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
+                                   fn = survival_match, 
+                                   obs = obs, cp_survival = cp_survival, 
+                                   lower = lambda[timepoint], 
+                                   upper = 2.75*lambda[timepoint], 
+                                   method = "L-BFGS-B")$par
+}
+
