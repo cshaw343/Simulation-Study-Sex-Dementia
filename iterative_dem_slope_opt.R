@@ -272,15 +272,19 @@ clusterExport(cl = cluster,
 #---- Slope Optimization ----
 time = 2
 optim_values <- 
-  optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
-                fn = dem_inc_rate_match, 
-                batch_n = 10000, timepoint = time, dem_inc_data = dem_inc_data, 
-                cp_survival = cp_survival, opt_cij_slopes = opt_cij_slopes, 
-                opt_cij_var1 = opt_cij_var1, opt_base_haz = opt_base_haz, 
-                lower = c(-1, cij_var1[time]), 
-                upper = c(0, 2*cij_var1[time]), 
-                method = "L-BFGS-B", 
-                parallel = list(cl = cluster))$par
+  replicate(3, 
+            optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
+                          fn = dem_inc_rate_match, 
+                          batch_n = 10000, timepoint = time, 
+                          dem_inc_data = dem_inc_data, 
+                          cp_survival = cp_survival, 
+                          opt_cij_slopes = opt_cij_slopes, 
+                          opt_cij_var1 = opt_cij_var1, 
+                          opt_base_haz = opt_base_haz, 
+                          lower = c(-1, cij_var1[time]), 
+                          upper = c(0, 2*cij_var1[time]), 
+                          method = "L-BFGS-B", 
+                          parallel = list(cl = cluster))$par)
 
 opt_cij_slopes[time + 1] <- optim_values[1]
 opt_cij_var1[time + 1] <- optim_values[2]
