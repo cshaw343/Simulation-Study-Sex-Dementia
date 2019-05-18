@@ -200,21 +200,6 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
   obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
   obs <- compare_survtime_timetodem(obs)
-  obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
-  
-  #Dementia status at death
-  for(i in 1:nrow(obs)){
-    if(obs[i, "dem"] == 1 & obs[i, "timetodem"] <= obs[i, "survtime"]){
-      obs[i, "dem_death"] <- 1
-    } else if(obs[i, "study_death"] == 1 & 
-              (obs[i, "dem"] == 0 | (obs[i, "dem"] == 1 & 
-                                     obs[i, "timetodem"] > 
-                                     obs[i, "survtime"]))){
-      obs[i, "dem_death"] <- 2
-    } else {
-      obs[i, "dem_death"] <- 0
-    }
-  }
   
   #Time to dem_death
   for(i in 1:nrow(obs)){
@@ -224,10 +209,6 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
       obs[i, "timetodem_death"] <- min(obs[i, "timetodem"], obs[i, "survtime"])
     }
   }
-  
-  obs[, "ageatdem_death"] <- obs[, "age0"] + obs[, "timetodem_death"]
-  obs[obs[, "dem_death"] == 1, "dem_alive"] <- 1
-  obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
   
   #---- Contributed time ----
   for(i in 1:nrow(obs)){
@@ -243,7 +224,27 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   }
   
   #---- Dementia Incidence Analysis ----
+  sim_rates <- vector(length = timepoint) 
   
+  #Computing incidence rates
+  for(slot in 1:num_tests){
+    if(slot == 1){
+      dem_last_wave <- paste0("dem", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    } else {
+      dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+      contributed <- paste0("contributed", (slot - 1), "-", slot)
+    }
+    PY_data <- data %>% 
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(dem_last_wave) == 0) 
+    
+    sim_rates[slot] = 
+      round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                    sum(PY_data[, contributed], na.rm = TRUE)), 3)
+  }
   
   return(abs(dem_inc - dem_inc_data[timepoint]))
 }
