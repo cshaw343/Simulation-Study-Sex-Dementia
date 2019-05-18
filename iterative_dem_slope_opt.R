@@ -133,17 +133,17 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
     
     p_alive_females <- female_data %>%
       dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
-      map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
+      map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
     
-    return(abs(p_alive_females[timepoint] - survival_data[timepoint]))
+    return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
   }
   
-  optim(lambda[timepoint], survival_match, 
-        lower = lambda[timepoint], upper = 1.5*lambda[timepoint], 
-        method = "L-BFGS-B")
-  
-  #Use optimized lambda values
-  
+  #Replace lambda with optimized lambda value
+  lambda[timepoint] <- optim(par = lambda[timepoint], fn = survival_match, 
+                             obs = obs, cp_survival = cp_survival, 
+                             lower = lambda[timepoint], 
+                             upper = 2.75*lambda[timepoint], 
+                             method = "L-BFGS-B")
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
