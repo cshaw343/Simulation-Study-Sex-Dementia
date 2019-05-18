@@ -224,27 +224,22 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   }
   
   #---- Dementia Incidence Analysis ----
-  sim_rates <- vector(length = timepoint) 
-  
-  #Computing incidence rates
-  for(slot in 1:num_tests){
-    if(slot == 1){
-      dem_last_wave <- paste0("dem", (slot - 1))
-      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      contributed <- paste0("contributed", (slot - 1), "-", slot)
-    } else {
-      dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-      dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-      contributed <- paste0("contributed", (slot - 1), "-", slot)
-    }
-    PY_data <- data %>% 
-      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(dem_last_wave) == 0) 
-    
-    sim_rates[slot] = 
-      round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
-                    sum(PY_data[, contributed], na.rm = TRUE)), 3)
+  if(timepoint == 1){
+    dem_last_wave <- paste0("dem", (timepoint - 1))
+    dem_this_wave <- paste0("dem", (timepoint - 1), "-", timepoint)
+    contributed <- paste0("contributed", (timepoint - 1), "-", timepoint)
+  } else {
+    dem_last_wave <- paste0("dem", (timepoint - 2), "-", (timepoint - 1))
+    dem_this_wave <- paste0("dem", (timepoint - 1), "-", timepoint)
+    contributed <- paste0("contributed", (timepoint - 1), "-", timepoint)
   }
+  PY_data <- data %>% 
+    dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+    filter(!! as.name(dem_last_wave) == 0) 
+  
+  dem_inc = 
+    round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
+                  sum(PY_data[, contributed], na.rm = TRUE)), 3)
   
   return(abs(dem_inc - dem_inc_data[timepoint]))
 }
