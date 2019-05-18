@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse")
+p_load("here", "tidyverse", "MASS")
 
 #---- Source files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))
@@ -22,7 +22,7 @@ opt_base_haz <- lambda          #Start with original hazards
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc <- c(0.25, 0.5, 1, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
-survival_data <- female_life_netherlands$CP
+survival_data <- female_life_netherlands$CP[c(-1, -2)]
 
 #---- Objective Function ----
 dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1 
@@ -32,9 +32,9 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   
   #---- Plug in parameters to optimize for ----
   cij_slopes <- opt_cij_slopes
-  cij_slopes[timepoint] <- PARAMETERS[1]
+  cij_slopes[timepoint + 1] <- PARAMETERS[1]
   cij_var1 <- opt_cij_var1
-  cij_var1[timepoint] <- PARAMETERS[2]
+  cij_var1[timepoint + 1] <- PARAMETERS[2]
   
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = batch_n, ncol = length(column_names)) %>% 
