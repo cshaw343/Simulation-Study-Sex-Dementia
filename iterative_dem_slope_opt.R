@@ -281,13 +281,14 @@ optim_values <-
                           opt_cij_slopes = opt_cij_slopes, 
                           opt_cij_var1 = opt_cij_var1, 
                           opt_base_haz = opt_base_haz, 
-                          lower = c(-1, cij_var1[time]), 
+                          lower = c(-0.8, cij_var1[time]), 
                           upper = c(0, 2*cij_var1[time]), 
                           method = "L-BFGS-B", 
                           parallel = list(cl = cluster))$par)
 
-opt_cij_slopes[time + 1] <- optim_values[1]
-opt_cij_var1[time + 1] <- optim_values[2]
+avg_optim_values <- colMeans(t(optim_values))
+opt_cij_slopes[time + 1] <- avg_optim_values[1]
+opt_cij_var1[time + 1] <- avg_optim_values[2]
 
 #---- Survival Re-optimization ----
 #Objective Function
