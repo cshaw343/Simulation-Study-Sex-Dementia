@@ -135,8 +135,8 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
                                    fn = survival_match, 
                                    obs = obs, cp_survival = cp_survival, 
-                                   lower = lambda[timepoint], 
-                                   upper = 2.75*lambda[timepoint], 
+                                   upper = lambda[timepoint], 
+                                   lower = 0.5*lambda[timepoint], 
                                    method = "L-BFGS-B")$par
   
   #---- Calculating Sij for each individual ----
@@ -270,7 +270,7 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #---- Slope Optimization ----
-for(time in 1:4){
+for(time in 1:1){
   optim_values <- 
     replicate(10, 
               optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
