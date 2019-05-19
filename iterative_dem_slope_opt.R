@@ -291,43 +291,45 @@ for(time in 1:4){
   opt_cij_var1[time + 1] <- avg_optim_values[2]
 }
 
+#---- Generate data with newly optimized slopes and variances ----
+cij_slopes <- opt_cij_slopes
+cij_var1 <- opt_cij_var1
 
-# #---- Survival Re-optimization ----
-# #Objective Function
-# survival_match <- function(LAMBDA, obs, cp_survival){
-#   lambda <- opt_base_haz
-#   lambda[timepoint] <- LAMBDA
-#   survival_data <- survival(obs)
-#   obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-#   obs[, "survtime"] <- survival_data$survtimes
-#   
-#   #---- Calculating death data for each individual ----
-#   #Indicator of 1 means the individual died in that interval
-#   #NAs mean the individual died in a prior interval
-#   obs[, "death0"] <- 0
-#   obs[, na.omit(variable_names$deathij_varnames)] <- 
-#     (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
-#   
-#   #---- Survival Analysis ----
-#   female_data <- obs %>% filter(sex == 0)
-#   
-#   p_alive_females <- female_data %>%
-#     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
-#     map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
-#   
-#   return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
-# }
-# 
-# #!!!!MAKE SURE YOU PLUGGED IN OPTIMIZED SLOPE STUFF IN THE PARAMETER FILE!!!!
-# obs <- data_gen()
-# 
-# for(timepoint in 1:length(opt_base_haz)){
-#   #Replace lambda with optimized lambda value
-#   opt_base_haz[timepoint] <- optim(par = lambda[timepoint], 
-#                                    fn = survival_match, 
-#                                    obs = obs, cp_survival = cp_survival, 
-#                                    lower = lambda[timepoint], 
-#                                    upper = 2.75*lambda[timepoint], 
-#                                    method = "L-BFGS-B")$par
-# }
-# 
+obs <- data_gen()
+
+#---- Survival Re-optimization ----
+#Objective Function
+survival_match <- function(LAMBDA, obs, cp_survival){
+  lambda <- opt_base_haz
+  lambda[timepoint] <- LAMBDA
+  survival_data <- survival(obs)
+  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
+  obs[, "survtime"] <- survival_data$survtimes
+
+  #---- Calculating death data for each individual ----
+  #Indicator of 1 means the individual died in that interval
+  #NAs mean the individual died in a prior interval
+  obs[, "death0"] <- 0
+  obs[, na.omit(variable_names$deathij_varnames)] <-
+    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1
+
+  #---- Survival Analysis ----
+  female_data <- obs %>% filter(sex == 0)
+
+  p_alive_females <- female_data %>%
+    dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
+    map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
+
+  return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+}
+
+for(timepoint in 1:length(opt_base_haz)){
+  #Replace lambda with optimized lambda value
+  opt_base_haz[timepoint] <- optim(par = lambda[timepoint],
+                                   fn = survival_match,
+                                   obs = obs, cp_survival = cp_survival,
+                                   upper = lambda[timepoint],
+                                   lower = 0.5*lambda[timepoint],
+                                   method = "L-BFGS-B")$par
+}
+
