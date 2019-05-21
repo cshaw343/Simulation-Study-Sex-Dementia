@@ -14,14 +14,9 @@ source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 
 #---- Plug in newly optimized data ----
-cij_slopes <- c(0.0000000, -0.0576876, -0.1313314, -0.2601800, -0.3294733,  
-                0.0000000,  0.0000000,  0.0000000,  0.0000000, 0.0000000)
-
-cij_var1 <- c(0.00100000, 0.00100000, 0.00199805, 0.00200000, 0.00200178, 
-              0.00100000, 0.00100000, 0.00100000, 0.00100000, 0.00100000)
-
-lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            0.10918, 0.20142)
+cij_slopes <- opt_cij_slopes
+cij_var1 <- opt_cij_var1
+lambda <- opt_base_haz
 
 #---- Generate the data ----
 data <- data_gen()
