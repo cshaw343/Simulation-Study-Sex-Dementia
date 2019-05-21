@@ -51,6 +51,8 @@ Results/Scenario_A_no_bias/*.html
 #Simulation results
 Results/Scenario_A_no_bias/test_sim_results_20190312.csv
 Results/Scenario_A_no_bias/sim_results*
+Results/Scenario_A_no_bias/uniform_timetodem*
+
 
 #Scratch Code
 RScripts/scratch*
