@@ -54,7 +54,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "sim_results_20_20190415.csv"))
+                               "unform_timetodem_100_20190505.csv"))
   
 
 
