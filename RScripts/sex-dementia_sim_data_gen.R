@@ -29,13 +29,9 @@ small_batch_gen <- function(small_batch_n){
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
-  for(j in 1:length(variable_names$age_varnames)){
-    if(j == 1){
-      obs[, variable_names$age_varnames[j]] = age0 #Creates column of baseline ages
-    } else 
-      obs[, variable_names$age_varnames[j]] = 
-        obs[, variable_names$age_varnames[j - 1]] + int_time #Creates ages at following timepoints
-  }
+  ages = matrix(seq(50, 95, by = 5), nrow = 1)
+  ones = matrix(1, nrow = small_batch_n, ncol = 1)
+  obs[, variable_names$age_varnames] <- ones %*% ages
   
   #---- Generating centered age data ----
   #Creating baseline-mean-centered ages at each timepoint j
@@ -80,6 +76,16 @@ small_batch_gen <- function(small_batch_n){
   obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
   obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
   
+  #---- Create a competing risk outcome ----
+  dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
+                         ncol = length(variable_names$Cij_varnames), 
+                         byrow = TRUE)
+  
+  obs[, variable_names$dem_varnames] <- 
+    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
+  
+  obs %<>% filter(dem0 == 0)
+  
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
@@ -111,15 +117,6 @@ small_batch_gen <- function(small_batch_n){
   #   set_colnames(variable_names$std_Cij_varnames)
   # 
   # obs %<>% bind_cols(., std_Cij)
-  
-  #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(dem_cuts, nrow = nrow(obs), ncol = length(dem_cuts), 
-                         byrow = TRUE)
-  
-  obs[, variable_names$dem_varnames] <- 
-    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
-  
-  obs %<>% filter(dem0 == 0)
   
   #---- Survival censoring matrix ----
   censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1

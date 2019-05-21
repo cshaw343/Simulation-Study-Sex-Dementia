@@ -57,4 +57,9 @@ Results/Scenario_A_no_bias/unform_timetodem*
 #Scratch Code
 RScripts/scratch*
 
+#Test methods
+RScripts/logit_transform_Cij.R
+RScripts/simple_probabilistic_method.R
+Results/Scenario_A_no_bias/uniform*
+
 

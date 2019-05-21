@@ -10,7 +10,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "ggplot2", "here")
+p_load("tidyverse", "ggplot2", "here", "reshape2")
 
 #---- Source Files ----
 source(here("RScripts", "misc_custom_functions.R"))

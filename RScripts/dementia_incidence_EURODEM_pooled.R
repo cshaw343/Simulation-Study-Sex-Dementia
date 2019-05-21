@@ -33,6 +33,8 @@ EURODEM_inc_rates <- tibble("Low_Age" = seq(65, 95, by = 5),
                             "Total_AD" = M_AD + F_AD, 
                             "Total_Vasc" = M_Vasc + F_Vasc, 
                             "Total_All_Dementia_1000PY" = 
-                              1000*Total_All_Dementia/Total_Person_Years)
+                              1000*Total_All_Dementia/Total_Person_Years, 
+                            "Total_AD_1000PY" = 
+                              1000*Total_AD/Total_Person_Years)
   
   
