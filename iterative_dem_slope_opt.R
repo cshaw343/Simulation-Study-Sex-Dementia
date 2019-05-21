@@ -270,7 +270,7 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #---- Slope Optimization ----
-for(time in 1:1){
+for(time in 2:2){
   optim_values <- 
     replicate(10, 
               optimParallel(par = c(cij_slopes[time + 1], cij_var1[time + 1]), 
@@ -323,7 +323,7 @@ survival_match <- function(LAMBDA, obs, cp_survival){
   return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
 }
 
-for(timepoint in 1:length(opt_base_haz)){
+for(timepoint in 2:3){
   #Replace lambda with optimized lambda value
   opt_base_haz[timepoint] <- optim(par = lambda[timepoint],
                                    fn = survival_match,
