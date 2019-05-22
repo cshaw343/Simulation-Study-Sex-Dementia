@@ -19,7 +19,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
-data <- data_gen()
+obs <- data_gen()
 
 #---- Compute incidence rates ----
 sim_inc_rates <- matrix(ncol = 9, nrow = 1)
