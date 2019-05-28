@@ -232,7 +232,7 @@ ggplot(plot_data_female,
   labs(title = "Females", 
        y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
-  theme_minimal()
+  theme_minimal() + theme(text = element_text(size = 40))
 
 #Male survival plot
 plot_data_Male <- plot_data %>% dplyr::select(age, contains("Male")) %>%
@@ -249,7 +249,7 @@ ggplot(plot_data_Male,
   labs(title = "Males", 
        y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
-  theme_minimal()
+  theme_minimal() + theme(text = element_text(size = 40))
 
 #All survival plot
 plot_data_all <- plot_data %>% dplyr::select(age, contains("all")) %>%
@@ -296,6 +296,7 @@ ggplot(pub_sim_HR_data_cox, aes(Age, HR)) +
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(y = "Mortality Hazard Ratio (Female:Memale)", x = "Age", 
        color = "") + theme_minimal() + 
+  theme(text = element_text(size = 40)) + 
   ggtitle("Mortality Hazard Ratios")
 ```
  
@@ -451,7 +452,7 @@ ggplot(samp_Cij, aes(Age, value)) +
        color = "Mean Cognitive \n Function") + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("Mean Cognitive Trajectories") +
-  theme_minimal()
+  theme_minimal() + theme(text = element_text(size = 28))
 ```
 
 <br>
