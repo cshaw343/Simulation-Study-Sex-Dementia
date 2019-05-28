@@ -42,8 +42,8 @@ DAGs/*
 #Plots
 Plots/*
 
-#Search results
-Data/best_slopes_cuts_*
+#Search results and other data files
+Data/*
 
 #Markdown .html files
 Results/Scenario_A_no_bias/*.html
