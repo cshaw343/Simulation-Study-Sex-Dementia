@@ -38,7 +38,8 @@ psex <- 0.49
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
 cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
-              0.001, 0.002, 0.002, 0.003, 0.004, 0.005, 0.011, 0.01775, 0.0195) #Time-dependent variance of random cognitive slope
+#              0.001, 0.002, 0.002, 0.003, 0.004, 0.005, 0.011, 0.01775, 0.0195) #Time-dependent variance of random cognitive slope
+              0.001, 0.0012, 0.00204, 0.00204, 0.204, 0.00253161, 0.00253161, 0.00253161, 0.00253161)
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -59,8 +60,10 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 cij_slopes <- c(0, 
-                -0.00475552, -0.01820177, -0.02680375, -0.03914714, 
-                -0.03312803, -0.06, -0.03056074, -0.15, -0.40)
+#                -0.00475552, -0.01820177, -0.02680375, -0.03914714, 
+#                -0.03312803, -0.06, -0.03056074, -0.15, -0.40)
+                -0.00475552, -0.01630603, -0.00773323, -0.01184527, -0.00968730, -0.09400000,  
+                0.00000000,  0.00000000,  0.00000000)
 
 b11 <- 0      #Effect of sex on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -81,8 +84,9 @@ g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))
 #---- Baseline hazard of death for unexposed ----
 #Computed in lambda_search_euro.R script
 #Based on 35x3000 = 105000 observations
-lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            0.10918, 0.20142) 
+lambda <- c(0.004140, 0.004944, 0.004944, 0.009450, 0.012630, 0.021630, 0.003000, 0.003000, 0.003000)
+  #c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
+            #0.10918, 0.20142) 
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline

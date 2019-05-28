@@ -32,6 +32,7 @@ Meetings/*
 Data/test_sim_results*
 Data/dataset*
 Results/Scenario_A_no_bias/sim_results*
+Results/Scenario_A_no_bias/one_demcut*
 
 #Debugging files
 RScripts/debugging*
@@ -42,8 +43,8 @@ DAGs/*
 #Plots
 Plots/*
 
-#Search results
-Data/best_slopes_cuts_*
+#Search results and other data files
+Data/*
 
 #Markdown .html files
 Results/Scenario_A_no_bias/*.html
@@ -51,6 +52,8 @@ Results/Scenario_A_no_bias/*.html
 #Simulation results
 Results/Scenario_A_no_bias/test_sim_results_20190312.csv
 Results/Scenario_A_no_bias/sim_results*
+Results/Scenario_A_no_bias/unform_timetodem*
+
 
 #Scratch Code
 RScripts/scratch*

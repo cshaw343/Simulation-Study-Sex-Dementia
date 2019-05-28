@@ -171,48 +171,48 @@ all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F,
                     Denmark_total, Denmark_M, Denmark_F, 
                     France_total, France_M, France_F)
 
-#---- Making Plots ----
-#Comparing countries for 1910-1919 birth cohort, facet by sex
-all_countries_1910_1919 <- ggplot(all_tables, aes(Age, CP)) + 
-  geom_line(data = subset(all_tables, Year == "1910-1919" & 
-                            Age %in% seq(45, 100, by = 5)), 
-            aes(color = Country, group = Country), size = 1.25,
-            alpha = 0.6) + ylim(0, 1) + 
-  labs(y = "Conditional Probability of Survival", x = "Age", 
-       color = "") + theme_minimal() + facet_wrap(~Sex) + 
-  ggtitle("1910-1919 Birth Cohort")
-
-ggsave(filename = "Plots/1910-1919_birth_cohort.jpeg", width = 10, height = 7, 
-       plot = all_countries_1910_1919)
-
-#Comparing countries for 1920-1925 birth cohort, facet by sex
-all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) + 
-  geom_line(data = subset(all_tables, Year == "1920-1925" & 
-                            Age %in% seq(45, 100, by = 5)), 
-            aes(color = Country, group = Country), size = 1.25,
-            alpha = 0.6) + ylim(0, 1) + 
-  labs(y = "Conditional Probability of Survival", x = "Age", 
-       color = "") + theme_minimal() + facet_wrap(~Sex) + 
-  ggtitle("1920-1925 Birth Cohort")
-
-ggsave(filename = "Plots/1920-1925_birth_cohort.jpeg", width = 10, height = 7, 
-       plot = all_countries_1920_1925)
-
-#Comparing countries for 1910-1919 birth cohort
-all_countries_1920_1925_combined <- ggplot(all_tables, aes(Age, CP)) + 
-  geom_line(data = subset(all_tables, Year == "1920-1925" & Sex == "Male"), 
-            aes(color = Country, group = Country), 
-            size = 1.25, linetype = "longdash", alpha = 0.6) + 
-  geom_line(data = subset(all_tables, Year == "1910-1919" & Sex == "Female"), 
-            aes(color = Country, group = Country), size = 1.25,
-            alpha = 0.6) + 
-  ylim(0, 1) + 
-  labs(y = "Conditional Probability of Survival", x = "Age", 
-       color = "") + theme_minimal() + 
-  ggtitle("1920-1925 Birth Cohort")
-
-ggsave(filename = "Plots/1920-1925_birth_cohort_combined.jpeg", width = 10, 
-       height = 7, plot = all_countries_1920_1925_combined)
+# #---- Making Plots ----
+# #Comparing countries for 1910-1919 birth cohort, facet by sex
+# all_countries_1910_1919 <- ggplot(all_tables, aes(Age, CP)) + 
+#   geom_line(data = subset(all_tables, Year == "1910-1919" & 
+#                             Age %in% seq(45, 100, by = 5)), 
+#             aes(color = Country, group = Country), size = 1.25,
+#             alpha = 0.6) + ylim(0, 1) + 
+#   labs(y = "Conditional Probability of Survival", x = "Age", 
+#        color = "") + theme_minimal() + facet_wrap(~Sex) + 
+#   ggtitle("1910-1919 Birth Cohort")
+# 
+# ggsave(filename = "Plots/1910-1919_birth_cohort.jpeg", width = 10, height = 7, 
+#        plot = all_countries_1910_1919)
+# 
+# #Comparing countries for 1920-1925 birth cohort, facet by sex
+# all_countries_1920_1925 <- ggplot(all_tables, aes(Age, CP)) + 
+#   geom_line(data = subset(all_tables, Year == "1920-1925" & 
+#                             Age %in% seq(45, 100, by = 5)), 
+#             aes(color = Country, group = Country), size = 1.25,
+#             alpha = 0.6) + ylim(0, 1) + 
+#   labs(y = "Conditional Probability of Survival", x = "Age", 
+#        color = "") + theme_minimal() + facet_wrap(~Sex) + 
+#   ggtitle("1920-1925 Birth Cohort")
+# 
+# ggsave(filename = "Plots/1920-1925_birth_cohort.jpeg", width = 10, height = 7, 
+#        plot = all_countries_1920_1925)
+# 
+# #Comparing countries for 1910-1919 birth cohort
+# all_countries_1920_1925_combined <- ggplot(all_tables, aes(Age, CP)) + 
+#   geom_line(data = subset(all_tables, Year == "1920-1925" & Sex == "Male"), 
+#             aes(color = Country, group = Country), 
+#             size = 1.25, linetype = "longdash", alpha = 0.6) + 
+#   geom_line(data = subset(all_tables, Year == "1910-1919" & Sex == "Female"), 
+#             aes(color = Country, group = Country), size = 1.25,
+#             alpha = 0.6) + 
+#   ylim(0, 1) + 
+#   labs(y = "Conditional Probability of Survival", x = "Age", 
+#        color = "") + theme_minimal() + 
+#   ggtitle("1920-1925 Birth Cohort")
+# 
+# ggsave(filename = "Plots/1920-1925_birth_cohort_combined.jpeg", width = 10, 
+#        height = 7, plot = all_countries_1920_1925_combined)
 
 #---- Selected life table subsets ----
 all_life_netherlands <- Netherlands_total %>% 
@@ -270,15 +270,15 @@ HR_plot_data <-
   mutate("Age" = seq(0, 100, by = 5)) %>%
   gather(contains("HR"), key = "Country", value = "HR")
   
-#Plot Hazard Ratios 
-all_countries_1920_1925_HR <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
-  labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
-       color = "") + theme_minimal() + 
-  ggtitle("1920-1925 Birth Cohort")
-
-ggsave(filename = "Plots/1920-1925_birth_cohort_HR.jpeg", width = 10, 
-       height = 7, plot = all_countries_1920_1925_HR)
+# #Plot Hazard Ratios 
+# all_countries_1920_1925_HR <- ggplot(HR_plot_data, aes(Age, HR)) + 
+#   geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
+#   labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
+#        color = "") + theme_minimal() + 
+#   ggtitle("1920-1925 Birth Cohort")
+# 
+# ggsave(filename = "Plots/1920-1925_birth_cohort_HR.jpeg", width = 10, 
+#        height = 7, plot = all_countries_1920_1925_HR)
 
 
 

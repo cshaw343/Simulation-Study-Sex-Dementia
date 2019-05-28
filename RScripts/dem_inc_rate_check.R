@@ -19,7 +19,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
-data <- data_gen()
+obs <- data_gen()
 
 #---- Compute incidence rates ----
 sim_inc_rates <- matrix(ncol = 9, nrow = 1)
@@ -40,7 +40,7 @@ for(slot in 1:num_tests){
     death_this_wave <- paste0("death", (slot - 1), "-", slot)
     contributed <- paste0("contributed", (slot - 1), "-", slot)
   }
-  PY_data <- data %>% 
+  PY_data <- obs %>% 
     dplyr::select(death_last_wave, death_this_wave, 
                   dem_last_wave, dem_this_wave, contributed) %>% 
     filter(!! as.name(death_last_wave) == 0 & 
@@ -53,16 +53,14 @@ for(slot in 1:num_tests){
 
 #---- Compute survival data ----
 #---- Data by sex ----
-female_data <- data %>% filter(sex == 0)
-male_data <- data %>% filter(sex == 1)
+female_data <- obs %>% filter(sex == 0)
 
 #---- Cohort size ----
-num_obs <- nrow(data)
+num_obs <- nrow(obs)
 num_females <- nrow(female_data)
-num_males <- nrow(male_data)
 
 #---- Survival probabilities ----
-p_alive <- data %>% 
+p_alive <- obs %>% 
   dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_obs
 
@@ -71,6 +69,3 @@ p_alive_females <- female_data %>%
   dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
 
-p_alive_males <- male_data %>%
-  dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
-  map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
