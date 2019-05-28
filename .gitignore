@@ -59,5 +59,7 @@ RScripts/scratch*
 RScripts/logit_transform_Cij.R
 RScripts/simple_probabilistic_method.R
 Results/Scenario_A_no_bias/uniform*
+Results/Scenario_A_no_bias/one_demcut*
+Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut.Rmd
 
 
