@@ -32,6 +32,7 @@ Meetings/*
 Data/test_sim_results*
 Data/dataset*
 Results/Scenario_A_no_bias/sim_results*
+Results/Scenario_A_no_bias/one_demcut*
 
 #Debugging files
 RScripts/debugging*
