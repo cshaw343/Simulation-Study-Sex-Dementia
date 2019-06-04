@@ -91,7 +91,7 @@ lambda <- c(0.004140, 0.004944, 0.004944, 0.009450, 0.012630, 0.021630, 0.003000
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cut <- -5.75
+dem_cut <- -4.75
 # dem_cuts <- c(-2.98629, 
 #               -2.98629, -3.28948, -3.77503, -4.45, -4.975, -5.25, -6.225, 
 #               -6.8225, -7.05)
