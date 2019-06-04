@@ -237,11 +237,12 @@ opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
 opt_base_haz <- rep(0.003, 9)   #Testing replacement of values
 old_lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
                 0.10918, 0.20142) #Previous baseline hazards (use as starting point)
-timepoint = 2
+timepoint = 1
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
-dem_inc_data <- c(0, 0.25, 0.6, head(EURODEM_inc_rates$Total_AD_1000PY, -1))
+dem_inc_data <- c(0.5, 1, 2.00, 
+                  head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1))
 cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
 #---- Setup cluster ----
@@ -275,7 +276,7 @@ clusterExport(cl = cluster,
               envir = environment())
 
 #---- Slope Optimization ----
-for(time in 2:2){
+for(time in 1:1){
   optim_values <- 
     replicate(5, 
               optimParallel(par = c(-0.015, 1.5*opt_cij_var1[time]), 
@@ -366,11 +367,13 @@ for(timepoint in 2:2){
                                 parallel = list(cl = cluster))$par)
   } else {
     base_haz <- replicate(10, 
-                          optimParallel(par = 1.5*opt_base_haz[timepoint - 1],
+                          optimParallel(par = 1*opt_base_haz[timepoint - 1],
+                                #par = 1.5*opt_base_haz[timepoint - 1],
                                 fn = survival_match,
                                 cp_survival = cp_survival,
                                 timepoint = timepoint,
-                                upper = 2.75*opt_base_haz[timepoint - 1],
+                                upper = 0.0087,
+                                #upper = 2.75*opt_base_haz[timepoint - 1],
                                 lower = opt_base_haz[timepoint - 1],
                                 method = "L-BFGS-B", 
                                 parallel = list(cl = cluster))$par)
