@@ -132,12 +132,22 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
   }
   
   #Replace lambda with optimized lambda value
-  opt_base_haz[timepoint] <- optim(par = 0.6*old_lambda[timepoint], 
-                                   fn = survival_match, 
-                                   obs = obs, cp_survival = cp_survival, 
-                                   upper = old_lambda[timepoint], 
-                                   lower = 0.4*old_lambda[timepoint], 
-                                   method = "L-BFGS-B")$par
+  if(timepoint == 1){
+    opt_base_haz[timepoint] <- optim(par = opt_base_haz[timepoint], 
+                                     fn = survival_match, 
+                                     obs = obs, cp_survival = cp_survival, 
+                                     upper = opt_base_haz[timepoint], 
+                                     lower = 0.8*opt_base_haz[timepoint], 
+                                     method = "L-BFGS-B")$par
+  } else {
+    opt_base_haz[timepoint] <- optim(par = opt_base_haz[timepoint - 1], 
+                                     fn = survival_match, 
+                                     obs = obs, cp_survival = cp_survival, 
+                                     upper = 2.75*opt_base_haz[timepoint - 1], 
+                                     lower = opt_base_haz[timepoint - 1], 
+                                     method = "L-BFGS-B")$par
+  }
+  
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -234,14 +244,13 @@ dem_inc_rate_match <- function(PARAMETERS, #cij_slope[j], cij_var1
 #---- Pre-allocation ----
 opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
 opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
-opt_base_haz <- rep(0.003, 9)   #Testing replacement of values
-old_lambda <- c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-                0.10918, 0.20142) #Previous baseline hazards (use as starting point)
+opt_base_haz <- rep(0.00414, 9)   #Testing replacement of values
+
 timepoint = 1
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
-dem_inc_data <- c(0.5, 1, 2.00, 
+dem_inc_data <- c(0.03, 0.25, 1.00, 
                   head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1))
 cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 
@@ -250,6 +259,7 @@ cp_survival <- female_life_netherlands$CP[c(-1, -2)]
 #If using a Mac/Linux system, it's highly recommended to use the type = "FORK"
 #option instead and comment out the clusterEvalQ() lines
 
+stopCluster(cluster)
 cluster <- makeCluster(0.5*detectCores(), type = "PSOCK")
 clusterEvalQ(cl = cluster, {
   if (!require("pacman")) 
@@ -271,15 +281,15 @@ clusterEvalQ(cl = cluster, {
 
 clusterExport(cl = cluster, 
               varlist = c("opt_cij_slopes", "opt_cij_var1", "opt_base_haz", 
-                          "dem_inc_data", "old_lambda", "timepoint", "column_names", 
+                          "dem_inc_data", "timepoint", "column_names", 
                           "variable_names"), 
               envir = environment())
 
 #---- Slope Optimization ----
-for(time in 1:1){
+for(time in timepoint:timepoint){
   optim_values <- 
     replicate(5, 
-              optimParallel(par = c(-0.015, 1.5*opt_cij_var1[time]), 
+              optimParallel(par = c(0, 1.5*opt_cij_var1[time]), 
                             fn = dem_inc_rate_match, 
                             batch_n = 20000, timepoint = time, 
                             dem_inc_data = dem_inc_data, 
@@ -287,14 +297,14 @@ for(time in 1:1){
                             opt_cij_slopes = opt_cij_slopes, 
                             opt_cij_var1 = opt_cij_var1, 
                             opt_base_haz = opt_base_haz, 
-                            lower = c(-0.075, opt_cij_var1[time]), 
+                            lower = c(-0.01, opt_cij_var1[time]), 
                             upper = c(0, 2*opt_cij_var1[time]), 
                             method = "L-BFGS-B", 
                             parallel = list(cl = cluster))$par)
   
   avg_optim_values <- colMeans(t(optim_values))
   opt_cij_slopes[time + 1] <- avg_optim_values[1]
-  opt_cij_var1[time + 1] <- avg_optim_values[2]
+  opt_cij_var1[time + 1:length(opt_cij_var1)] <- avg_optim_values[2]
 }
 
 #---- Generate data with newly optimized slopes and variances ----
@@ -303,10 +313,10 @@ cij_var1 <- opt_cij_var1
 
 #---- Survival Re-optimization ----
 #Objective Function
-survival_match <- function(LAMBDA, cp_survival, timepoint){
+survival_match <- function(LAMBDA, cp_survival, time){
   obs <- data_gen()
   lambda <- opt_base_haz
-  lambda[timepoint] <- LAMBDA
+  lambda[time] <- LAMBDA
   survival_data <- survival(obs)
   obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
   obs[, "survtime"] <- survival_data$survtimes
@@ -325,7 +335,7 @@ survival_match <- function(LAMBDA, cp_survival, timepoint){
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
     map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
 
-  return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+  return(abs(p_alive_females[time] - cp_survival[time]))
 }
 
 stopCluster(cluster)
@@ -350,37 +360,37 @@ clusterEvalQ(cl = cluster, {
 
 clusterExport(cl = cluster, 
               varlist = c("opt_cij_slopes", "opt_cij_var1", "opt_base_haz", 
-                          "dem_inc_data", "old_lambda", "timepoint", "column_names", 
+                          "dem_inc_data", "timepoint", "column_names", 
                           "variable_names", "survival_match"), 
               envir = environment())
 
-for(timepoint in 2:2){
-  if (timepoint == 1) {
+for(time in timepoint:timepoint){
+  if (time == 1) {
     base_haz <- replicate(10, 
-                          optimParallel(par = old_lambda[1],
+                          optimParallel(par = opt_base_haz[1],
                                 fn = survival_match,
                                 cp_survival = cp_survival,
-                                timepoint = timepoint,
-                                upper = 2.75*old_lambda[1],
-                                lower = 0.5*old_lambda[1],
+                                time = time,
+                                upper = opt_base_haz[1],
+                                lower = 0.8*opt_base_haz[1],
                                 method = "L-BFGS-B", 
                                 parallel = list(cl = cluster))$par)
   } else {
     base_haz <- replicate(10, 
-                          optimParallel(par = 1*opt_base_haz[timepoint - 1],
-                                #par = 1.5*opt_base_haz[timepoint - 1],
+                          optimParallel(#par = 1*opt_base_haz[time - 1],
+                                par = 1.5*opt_base_haz[timepoint - 1],
                                 fn = survival_match,
                                 cp_survival = cp_survival,
-                                timepoint = timepoint,
-                                upper = 0.0087,
-                                #upper = 2.75*opt_base_haz[timepoint - 1],
-                                lower = opt_base_haz[timepoint - 1],
+                                time = time,
+                                #upper = 0.0087,
+                                upper = 2.75*opt_base_haz[time - 1],
+                                lower = opt_base_haz[time - 1],
                                 method = "L-BFGS-B", 
                                 parallel = list(cl = cluster))$par)
   }
   
   #Replace lambda with optimized lambda value
-  opt_base_haz[timepoint] <- mean(base_haz)
+  opt_base_haz[time:length(opt_base_haz)] <- mean(base_haz)
 }
 
 
