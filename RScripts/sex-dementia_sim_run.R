@@ -4,7 +4,7 @@ if (!require("pacman"))
 
 p_load("future.apply", "parallel", "here", "magrittr")
 
-set.seed(20190311)
+set.seed(20190623)
 
 #---- Source Files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))          #The parameter file
@@ -13,7 +13,7 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
-data_gen() %>% saveRDS(here("Data", "dataset_A_onedemcut_20190528"))
+data_gen() %>% saveRDS(here("Data", "dataset_A_onedemcut_20190623"))
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
@@ -54,7 +54,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_100_20190528.csv"))
+                               "one_demcut_1000_20190623.csv"))
   
 
 
