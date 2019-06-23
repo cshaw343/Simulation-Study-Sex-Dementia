@@ -19,6 +19,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
+num_obs = 200000
 obs <- data_gen()
 
 #---- Compute incidence rates ----
