@@ -25,18 +25,18 @@ small_batch_gen <- function(small_batch_n){
   obs["id", ] <- seq(from = 1, to = small_batch_n, by = 1)
   obs["sex", ] <- rbinom(small_batch_n, size = 1, prob = psex)
   obs["female", ] <- 1 - obs["sex", ]
-  obs$U <- rnorm(small_batch_n, mean = 0, sd = 1)
+  obs["U", ] <- rnorm(small_batch_n, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
   ages = matrix(seq(50, 95, by = 5), nrow = 1)
   ones = matrix(1, nrow = small_batch_n, ncol = 1)
-  obs[, variable_names$age_varnames] <- ones %*% ages
+  obs[variable_names$age_varnames, ] <- t(ones %*% ages)
   
   #---- Generating centered age data ----
   #Creating baseline-mean-centered ages at each timepoint j
-  obs[, variable_names$agec_varnames] <- 
-    obs[, variable_names$age_varnames] - mean(age0)
+  obs[variable_names$agec_varnames, ] <- 
+    obs[variable_names$age_varnames, ] - mean(age0)
   
   #---- Generating "true" cognitive function Cij ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
@@ -55,7 +55,7 @@ small_batch_gen <- function(small_batch_n){
   for(i in 1:(num_tests + 1)){
     noise <- mvrnorm(n = small_batch_n, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
-    obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
+    obs[c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i")), ] <- noise
   }
   
   #Generating noise term (unexplained variance in Cij) for each visit
@@ -67,7 +67,7 @@ small_batch_gen <- function(small_batch_n){
   cij_cov_mat <- S%*%corr%*%S                               #Covariance matrix
   
   #Generating noise terms
-  obs[, variable_names$eps_varnames] <- 
+  obs[variable_names$eps_varnames, ] <- 
     mvrnorm(n = small_batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
