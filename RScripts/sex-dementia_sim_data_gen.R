@@ -222,24 +222,25 @@ small_batch_gen <- function(small_batch_n){
   #   }
   # }
   # 
-  # #---- Dementia indicators (1-year bands) ----
-  # for(i in 1:nrow(obs)){
-  #   for(j in 2:(num_tests + 1)){
-  #     dem_var <- na.omit(variable_names$dem_varnames)[j]
-  #     dem_vars_1year_block <- 
-  #       variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-  #     contributed_vars_1year_block <- 
-  #       variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
-  #     if(is.na(obs[i, dem_var])){
-  #       break
-  #     } else if(obs[i, dem_var] == 0){
-  #       obs[i, dem_vars_1year_block] <- 0
-  #     } else{
-  #       obs[i, dem_vars_1year_block] <- 
-  #         (obs[i, contributed_vars_1year_block] < 1)*1
-  #     }
-  #   }
-  # }
+  
+  #---- Dementia indicators (1-year bands) ----
+  for(i in 1:nrow(obs)){
+    for(j in 2:(num_tests + 1)){
+      dem_var <- na.omit(variable_names$dem_varnames)[j]
+      dem_vars_1year_block <-
+        variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
+      contributed_vars_1year_block <-
+        variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
+      if(is.na(obs[i, dem_var])){
+        break
+      } else if(obs[i, dem_var] == 0){
+        obs[i, dem_vars_1year_block] <- 0
+      } else{
+        obs[i, dem_vars_1year_block] <-
+          (obs[i, contributed_vars_1year_block] < 1)*1
+      }
+    }
+  }
   
   #---- Values to return ----
   return(obs)
