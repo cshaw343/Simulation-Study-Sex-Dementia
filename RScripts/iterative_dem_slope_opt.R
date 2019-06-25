@@ -251,13 +251,13 @@ opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
 opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
 opt_base_haz <- rep(0.00414, 9)   #Testing replacement of values
 
-timepoint = 9
+timepoint = 5
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc_data <- c(0.03, 0.25, 1.00, 
                   head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1))
-cp_survival <- female_life_netherlands$CP[c(-1, -2)]
+cp_survival <- head(female_life_netherlands$CP[-1], -1)
 
 #---- Setup cluster ----
 #Setting up cluster for parallel optimization
@@ -423,25 +423,28 @@ clusterExport(cl = cluster,
 for(time in timepoint:timepoint){
   if (time == 1) {
     base_haz <- replicate(10, 
-                          optimParallel(par = 1.25*opt_base_haz[1],
-                                fn = survival_match,
-                                cp_survival = cp_survival,
-                                time = time,
-                                upper = 2*opt_base_haz[1],
-                                lower = opt_base_haz[1],
-                                method = "L-BFGS-B", 
-                                parallel = list(cl = cluster))$par)
+                          optimParallel(#par = 1.25*opt_base_haz[1],
+                            par = 0.0035,
+                            fn = survival_match,
+                            cp_survival = cp_survival,
+                            time = time,
+                            #upper = 2*opt_base_haz[1],
+                            upper = 0.0041,
+                            #lower = opt_base_haz[1],
+                            lower = 0.002,
+                            method = "L-BFGS-B", 
+                            parallel = list(cl = cluster))$par)
   } else {
     base_haz <- replicate(10, 
-                          optimParallel(par = 1.25*opt_base_haz[time - 1],
-                                #par = 0.06,
+                          optimParallel(#par = 1.25*opt_base_haz[time - 1],
+                                par = 0.0052,
                                 fn = survival_match,
                                 cp_survival = cp_survival,
                                 time = time,
-                                #upper = opt_base_haz[time],
-                                upper = 2.75*opt_base_haz[time - 1],
-                                lower = opt_base_haz[time - 1],
-                                #lower = 0.055,
+                                upper = 0.00893749,
+                                #upper = 2.75*opt_base_haz[time - 1],
+                                #lower = opt_base_haz[time - 1],
+                                lower = 0.0051,
                                 method = "L-BFGS-B", 
                                 parallel = list(cl = cluster))$par)
   }
