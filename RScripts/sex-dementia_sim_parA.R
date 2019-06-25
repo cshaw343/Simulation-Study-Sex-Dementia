@@ -79,16 +79,7 @@ g5 <- 0     #Effect of cognitive function at time j on log hazard of death
 g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))      
 
 #---- Baseline hazard of death for unexposed ----
-#Computed in lambda_search_euro.R script
-#Based on 35x3000 = 105000 observations
-<<<<<<< HEAD
-lambda <- c(rep(0.004140, 3), 0.00893749, 0.01569772, 0.02026695, 0.03830530, 
-            0.06852451, 0.10340818)
-=======
 lambda <- c(rep(0.00312805, 4), 0.008, 0.013, 0.02, 0.0325, 0.065)
-  #c(0.00414, 0.00577, 0.00824, 0.01260, 0.02105, 0.03605, 0.06316, 
-            #0.10918, 0.20142) 
->>>>>>> 76c77c4d935d4ba9685a1e68cf3534c33f8c3058
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
