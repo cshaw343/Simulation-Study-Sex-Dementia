@@ -215,59 +215,64 @@ all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F,
 #        height = 7, plot = all_countries_1920_1925_combined)
 
 #---- Selected life table subsets ----
+#Add computations for cumulative survival conditional on survival to age 50
 all_life_netherlands <- Netherlands_total %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5))
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>% 
+  mutate("cum_surv_cond50" = lx/all_life_netherlands$lx[1])
 
 female_life_netherlands <- Netherlands_F %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5))
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>%
+  mutate("cum_surv_cond50" = lx/female_life_netherlands$lx[1])
 
 male_life_netherlands <- Netherlands_M %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 100, by = 5))
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>%
+  mutate("cum_surv_cond50" = lx/male_life_netherlands$lx[1])
 
 #---- Hazard ratios ----
 #Netherlands
 male_haz_netherlands <- Netherlands_M %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
 female_haz_netherlands <- Netherlands_F %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
-Hratio_Netherlands <- male_haz_netherlands$Haz/female_haz_netherlands$Haz %>%
-  as.data.frame() %>% set_colnames("Netherlands_HR") 
+Hratio_Netherlands <- female_haz_netherlands$Haz/male_haz_netherlands$Haz %>%
+  as.data.frame() %>% set_colnames("Netherlands") 
 
 #Denmark
 male_haz_denmark <- Denmark_M %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
 female_haz_denmark <- Denmark_F %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
-Hratio_Denmark <- male_haz_denmark$Haz/female_haz_denmark$Haz %>% 
-  as.data.frame() %>% set_colnames("Denmark_HR")
+Hratio_Denmark <- female_haz_denmark$Haz/male_haz_denmark$Haz %>% 
+  as.data.frame() %>% set_colnames("Denmark")
 
 #France
 male_haz_france <- France_M %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
 female_haz_france <- France_F %>% 
-  filter(Year == "1920-1925" & Age %in% seq(0, 100, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(0, 95, by = 5)) %>% 
   dplyr::select("Year", "Haz")
 
-Hratio_France <- male_haz_france$Haz/female_haz_france$Haz %>%
-  as.data.frame() %>% set_colnames("France_HR") 
+Hratio_France <- female_haz_france$Haz/male_haz_france$Haz %>%
+  as.data.frame() %>% set_colnames("France") 
 
 #Format US HR data
-Hratio_US <- Hratio$ratio %>% as.data.frame() %>% set_colnames("US_HR")
+#Hratio_US <- Hratio$ratio %>% as.data.frame() %>% set_colnames("US_HR")
 
 #Combine hazard ratios
 HR_plot_data <- 
-  cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France, Hratio_US) %>% 
-  mutate("Age" = seq(0, 100, by = 5)) %>%
+  cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France) %>% 
+  #, Hratio_US) 
+  mutate("Age" = seq(0, 95, by = 5)) %>%
   gather(contains("HR"), key = "Country", value = "HR")
   
 # #Plot Hazard Ratios 
