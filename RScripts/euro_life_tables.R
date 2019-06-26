@@ -166,10 +166,10 @@ France_F %<>% group_by(Year) %>%
          "Haz" = haz(age = Age, logprobs = logProb)) %>% 
   write_csv(here("Data", "France_cohort_F_calcs"))
   
-#---- Combine tables into one dataset ----
-all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F, 
-                    Denmark_total, Denmark_M, Denmark_F, 
-                    France_total, France_M, France_F)
+# #---- Combine tables into one dataset ----
+# all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F, 
+#                     Denmark_total, Denmark_M, Denmark_F, 
+#                     France_total, France_M, France_F)
 
 # #---- Making Plots ----
 # #Comparing countries for 1910-1919 birth cohort, facet by sex
@@ -271,22 +271,6 @@ Hratio_France <- female_haz_france$Haz/male_haz_france$Haz %>%
 #Format US HR data
 #Hratio_US <- Hratio$ratio %>% as.data.frame() %>% set_colnames("US_HR")
 
-#Combine hazard ratios
-HR_plot_data <- 
-  cbind(Hratio_Netherlands, Hratio_Denmark, Hratio_France) %>% 
-  #, Hratio_US) 
-  mutate("Age" = seq(0, 95, by = 5)) %>%
-  gather(contains("HR"), key = "Country", value = "HR")
-  
-# #Plot Hazard Ratios 
-# all_countries_1920_1925_HR <- ggplot(HR_plot_data, aes(Age, HR)) + 
-#   geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
-#   labs(y = "Hazard Ratio (Male:Female)", x = "Age", 
-#        color = "") + theme_minimal() + 
-#   ggtitle("1920-1925 Birth Cohort")
-# 
-# ggsave(filename = "Plots/1920-1925_birth_cohort_HR.jpeg", width = 10, 
-#        height = 7, plot = all_countries_1920_1925_HR)
 
 
 
