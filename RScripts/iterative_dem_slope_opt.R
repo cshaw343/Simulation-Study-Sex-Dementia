@@ -258,7 +258,11 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
 # opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
 # opt_base_haz <- rep(0.00414, 9)   #Testing replacement of values
 
-timepoint = 5
+opt_cij_slopes = cij_slopes
+opt_cij_var1 = cij_var1
+opt_base_haz = lambda
+
+timepoint = 1
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
@@ -379,16 +383,19 @@ survival_match <- function(LAMBDA, cum_surv_cond50, time){
   lambda <- opt_base_haz
   lambda[time] <- LAMBDA
   survival_data <- survival(obs)
-  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-  obs[, "survtime"] <- survival_data$survtimes
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data$Sij
+  obs["survtime", ] <- survival_data$survtimes
 
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  obs[, "death0"] <- 0
-  obs[, na.omit(variable_names$deathij_varnames)] <-
-    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1
+  obs["death0", ] <- 0
+  obs[variable_names$deathij_varnames[1:num_tests], ] <-
+    (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1
 
+  #---- Transpose matrix ----
+  obs <- t(obs)
+  
   #---- Survival Analysis ----
   p_alive_males <- obs %>%
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
@@ -429,15 +436,15 @@ for(time in timepoint:timepoint){
   if (time == 1) {
     base_haz <- replicate(10, 
                           optimParallel(#par = 1.25*opt_base_haz[1],
-                            par = 0.0035,
+                            par = 0.00414,
                             fn = survival_match,
                             cum_surv_cond50 = cum_surv_cond50,
-                            num_obs = 20000,
+                            num_obs = 40000,
                             time = time,
                             #upper = 2*opt_base_haz[1],
-                            upper = 0.0041,
+                            upper = 0.0055,
                             #lower = opt_base_haz[1],
-                            lower = 0.002,
+                            lower = 0.0032,
                             method = "L-BFGS-B", 
                             parallel = list(cl = cluster))$par)
   } else {
