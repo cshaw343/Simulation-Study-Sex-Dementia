@@ -42,9 +42,9 @@ sex_dem_sim <- function(){
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
   #---- Mortality logHR (F:M) ----
-  survival_data <- data[, na.omit(variable_names$Sij_varnames)]
+  survival_data <- data[, variable_names$Sij_varnames[1:num_tests]]
   survival_data[survival_data == 5] <- 4.99999
-  data[, na.omit(variable_names$Sij_varnames)] <- survival_data
+  data[, variable_names$Sij_varnames[1:num_tests]] <- survival_data
   
   simulated_mortality_logHRs <- vector(length = num_tests)
   
@@ -204,67 +204,67 @@ sex_dem_sim <- function(){
   simulated_dementia_logIRRs_data <-
     as.vector(t(simulated_dementia_logIRRs_data))
   
-  # #---- Dementia incidence cases, rates, and PY by sex (1-year bands) ----
-  # inc_cases_females_1year <- vector(length = num_tests*5) 
-  # inc_cases_males_1year <- vector(length = num_tests*5) 
-  # 
-  # PY_females_1year <- vector(length = num_tests*5) 
-  # PY_males_1year <- vector(length = num_tests*5) 
-  # 
-  # #Computing female incidence cases, rates, PY
-  # for(slot in 1:(num_tests*5)){
-  #   if(slot == 1){
-  #     dem_last_wave <- paste0("dem", (slot - 1))
-  #     dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
-  #     contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
-  #   } else {
-  #     dem_last_wave <- paste0("dem", ((slot - 2) + 50), "-", ((slot - 1) + 50))
-  #     dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
-  #     contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
-  #   }
-  #   PY_data <- female_data %>% 
-  #     dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-  #     filter(!! as.name(dem_last_wave) == 0) 
-  #   
-  #   inc_cases_females_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
-  #   
-  #   PY_females_1year[slot] = sum(PY_data[, contributed], na.rm = TRUE)
-  # }
-  # 
-  # sim_rates_females_1year <- 
-  #   round(1000*(inc_cases_females_1year/PY_females_1year), 3)
-  # 
-  # 
-  # #Computing male incidence cases and rates
-  # inc_cases_males_1year <- vector(length = num_tests*5) 
-  # inc_cases_males_1year <- vector(length = num_tests*5) 
-  # 
-  # PY_males_1year <- vector(length = num_tests*5) 
-  # PY_males_1year <- vector(length = num_tests*5) 
-  # 
-  # #Computing female incidence cases, rates, PY
-  # for(slot in 1:(num_tests*5)){
-  #   if(slot == 1){
-  #     dem_last_wave <- paste0("dem", (slot - 1))
-  #     dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
-  #     contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
-  #   } else {
-  #     dem_last_wave <- paste0("dem", ((slot - 2) + 50), "-", ((slot - 1) + 50))
-  #     dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
-  #     contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
-  #   }
-  #   PY_data <- male_data %>% 
-  #     dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-  #     filter(!! as.name(dem_last_wave) == 0) 
-  #   
-  #   inc_cases_males_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
-  #   
-  #   PY_males_1year[slot] = sum(PY_data[, contributed], na.rm = TRUE)
-  # }
-  # 
-  # sim_rates_males_1year <- 
-  #   round(1000*(inc_cases_males_1year/PY_males_1year), 3)
-  # 
+  #---- Dementia incidence cases, rates, and PY by sex (1-year bands) ----
+  inc_cases_females_1year <- vector(length = num_tests*5)
+  inc_cases_males_1year <- vector(length = num_tests*5)
+
+  PY_females_1year <- vector(length = num_tests*5)
+  PY_males_1year <- vector(length = num_tests*5)
+
+  #Computing female incidence cases, rates, PY
+  for(slot in 1:(num_tests*5)){
+    if(slot == 1){
+      dem_last_wave <- paste0("dem", (slot - 1))
+      dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
+      contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
+    } else {
+      dem_last_wave <- paste0("dem", ((slot - 2) + 50), "-", ((slot - 1) + 50))
+      dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
+      contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
+    }
+    PY_data <- female_data %>%
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>%
+      filter(!! as.name(dem_last_wave) == 0)
+
+    inc_cases_females_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
+
+    PY_females_1year[slot] = sum(PY_data[, contributed], na.rm = TRUE)
+  }
+
+  sim_rates_females_1year <-
+    round(1000*(inc_cases_females_1year/PY_females_1year), 3)
+
+
+  #Computing male incidence cases and rates
+  inc_cases_males_1year <- vector(length = num_tests*5)
+  inc_cases_males_1year <- vector(length = num_tests*5)
+
+  PY_males_1year <- vector(length = num_tests*5)
+  PY_males_1year <- vector(length = num_tests*5)
+
+  #Computing female incidence cases, rates, PY
+  for(slot in 1:(num_tests*5)){
+    if(slot == 1){
+      dem_last_wave <- paste0("dem", (slot - 1))
+      dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
+      contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
+    } else {
+      dem_last_wave <- paste0("dem", ((slot - 2) + 50), "-", ((slot - 1) + 50))
+      dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
+      contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
+    }
+    PY_data <- male_data %>%
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>%
+      filter(!! as.name(dem_last_wave) == 0)
+
+    inc_cases_males_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
+
+    PY_males_1year[slot] = sum(PY_data[, contributed], na.rm = TRUE)
+  }
+
+  sim_rates_males_1year <-
+    round(1000*(inc_cases_males_1year/PY_males_1year), 3)
+
   # #---- Dementia logIRRs (1-year bands) ----
   # IRRs_1year <- sim_rates_females_1year/sim_rates_males_1year
   # 
@@ -321,25 +321,25 @@ sex_dem_sim <- function(){
   # 
   # 
   
-  # #---- Dementia logHR (F:M) ----
-  # simulated_dementia_logHRs_model_data <- 
-  #   matrix(nrow = num_tests, ncol = 5)
-  # 
-  # for(i in 1:num_tests){
-  #   PY_contributed_name <- paste0("contributed", i - 1, "-", i)
-  #   dem_indicator_name <- paste0("dem", i - 1, "-", i)
-  #   cox_model <- coxph(Surv(data[, PY_contributed_name], 
-  #                           data[, dem_indicator_name]) ~ data$female)
-  #   simulated_dementia_logHRs_model_data[i, 1:4] <-  
-  #     c(summary(cox_model)$coefficients[, c(1, 3)], confint(cox_model))
-  # }
-  # 
-  # simulated_dementia_logHRs_model_data[, 5] <- 
-  #   (simulated_dementia_logHRs_model_data[, 3] < 0 & 
-  #      simulated_dementia_logHRs_model_data[, 4] > 0)*1
-  # 
-  # simulated_dementia_logHRs_model_data <- 
-  #   as.vector(t(simulated_dementia_logHRs_model_data))
+  #---- Dementia logHR (F:M) ----
+  simulated_dementia_logHRs_model_data <-
+    matrix(nrow = num_tests, ncol = 5)
+
+  for(i in 1:num_tests){
+    PY_contributed_name <- paste0("contributed", i - 1, "-", i)
+    dem_indicator_name <- paste0("dem", i - 1, "-", i)
+    cox_model <- coxph(Surv(data[, PY_contributed_name],
+                            data[, dem_indicator_name]) ~ data$female)
+    simulated_dementia_logHRs_model_data[i, 1:4] <-
+      c(summary(cox_model)$coefficients[, c(1, 3)], confint(cox_model))
+  }
+
+  simulated_dementia_logHRs_model_data[, 5] <-
+    (simulated_dementia_logHRs_model_data[, 3] < 0 &
+       simulated_dementia_logHRs_model_data[, 4] > 0)*1
+
+  simulated_dementia_logHRs_model_data <-
+    as.vector(t(simulated_dementia_logHRs_model_data))
   
   #---- Total dementia cases (incident + prevalent) ----
   dem_cases_female <- female_data %>% 
@@ -365,11 +365,11 @@ sex_dem_sim <- function(){
                    p_alive_males, simulated_mortality_logHRs, at_risk_females, 
                    at_risk_males, sim_rates, sim_rates_females, sim_rates_males, 
                    inc_cases_females, inc_cases_males, PY_females, PY_males, 
-                   #inc_cases_females_1year, inc_cases_males_1year, 
-                   #PY_females_1year, PY_males_1year,
+                   inc_cases_females_1year, inc_cases_males_1year, 
+                   PY_females_1year, PY_males_1year,
                    simulated_dementia_logIRRs_data, 
                    #simulated_dementia_logIRRs_data_1yr,
-                   #simulated_dementia_logHRs_model_data, 
+                   simulated_dementia_logHRs_model_data, 
                    dem_cases_female, 
                    dem_cases_male, prop_dem_females, prop_dem_males, 
                    mean_U_at_risk_females, mean_U_at_risk_males)
@@ -377,23 +377,23 @@ sex_dem_sim <- function(){
   names(results_vec) <- 
     c("num_obs_baseline", "num_females_baseline", 
       "num_males_baseline", 
-      na.omit(variable_names$p_alive_varnames), 
-      na.omit(variable_names$p_alive_females_varnames), 
-      na.omit(variable_names$p_alive_males_varnames), 
-      na.omit(variable_names$mortality_logHR_varnames),
-      na.omit(variable_names$at_risk_females_varnames), 
-      na.omit(variable_names$at_risk_males_varnames), 
-      na.omit(variable_names$dem_inc_rate_varnames), 
-      na.omit(variable_names$dem_inc_rate_females_varnames), 
-      na.omit(variable_names$dem_inc_rate_males_varnames), 
-      na.omit(variable_names$inc_cases_females_varnames), 
-      na.omit(variable_names$inc_cases_males_varnames), 
-      na.omit(variable_names$PY_females_varnames), 
-      na.omit(variable_names$PY_males_varnames),
-      #variable_names_1year$inc_cases_females_varnames, 
-      #variable_names_1year$inc_cases_males_varnames,
-      #variable_names_1year$PY_females_varnames, 
-      #variable_names_1year$PY_males_varnames, 
+      variable_names$p_alive_varnames[1:num_tests], 
+      variable_names$p_alive_females_varnames[1:num_tests], 
+      variable_names$p_alive_males_varnames[1:num_tests], 
+      variable_names$mortality_logHR_varnames[1:num_tests],
+      variable_names$at_risk_females_varnames[1:num_tests], 
+      variable_names$at_risk_males_varnames[1:num_tests], 
+      variable_names$dem_inc_rate_varnames[1:num_tests], 
+      variable_names$dem_inc_rate_females_varnames[1:num_tests], 
+      variable_names$dem_inc_rate_males_varnames[1:num_tests], 
+      variable_names$inc_cases_females_varnames[1:num_tests], 
+      variable_names$inc_cases_males_varnames[1:num_tests], 
+      variable_names$PY_females_varnames[1:num_tests], 
+      variable_names$PY_males_varnames[1:num_tests],
+      variable_names_1year$inc_cases_females_varnames, 
+      variable_names_1year$inc_cases_males_varnames,
+      variable_names_1year$PY_females_varnames, 
+      variable_names_1year$PY_males_varnames, 
       t(
         cbind(
           na.omit(variable_names$logIRR_varnames),
@@ -410,20 +410,20 @@ sex_dem_sim <- function(){
       #     variable_names_1year$logIRR_95CI_Upper_varnames, 
       #     variable_names_1year$logIRR_95CI_Coverage_varnames)) %>% 
       #   as.vector(),
-      # t(
-      #   cbind(
-      #     na.omit(variable_names$dementia_logHR_varnames), 
-      #     na.omit(variable_names$dementia_logHR_SE_varnames), 
-      #     na.omit(variable_names$dementia_logHR_95CI_Lower_varnames), 
-      #     na.omit(variable_names$dementia_logHR_95CI_Upper_varnames), 
-      #     na.omit(variable_names$dementia_logHR_95CI_Coverage_varnames))) %>% 
-      #   as.vector(), 
-      na.omit(variable_names$dem_cases_females_varnames), 
-      na.omit(variable_names$dem_cases_males_varnames), 
-      na.omit(variable_names$prop_dem_females_varnames), 
-      na.omit(variable_names$prop_dem_males_varnames), 
-      na.omit(variable_names$mean_U_at_risk_females_varnames), 
-      na.omit(variable_names$mean_U_at_risk_males_varnames))
+      t(
+        cbind(
+          na.omit(variable_names$dementia_logHR_varnames),
+          na.omit(variable_names$dementia_logHR_SE_varnames),
+          na.omit(variable_names$dementia_logHR_95CI_Lower_varnames),
+          na.omit(variable_names$dementia_logHR_95CI_Upper_varnames),
+          na.omit(variable_names$dementia_logHR_95CI_Coverage_varnames))) %>%
+        as.vector(),
+      variable_names$dem_cases_females_varnames[1:num_tests], 
+      variable_names$dem_cases_males_varnames[1:num_tests], 
+      variable_names$prop_dem_females_varnames[1:num_tests], 
+      variable_names$prop_dem_males_varnames[1:num_tests], 
+      variable_names$mean_U_at_risk_females_varnames[1:num_tests], 
+      variable_names$mean_U_at_risk_males_varnames[1:num_tests])
   
   #---- Return ----
   return(results_vec)
