@@ -41,10 +41,13 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
   obs$female <- 1 - obs$sex
   obs$U <- rnorm(samp_size, mean = 0, sd = 1)
   
+  #---- Restrict to male dataset ----
+  obs %<>% filter(female == 0)
+  
   #---- Generating age data ----
   #Creating ages at each timepoint j
   ages = matrix(seq(50, 95, by = 5), nrow = 1)
-  ones = matrix(1, nrow = samp_size, ncol = 1)
+  ones = matrix(1, nrow = nrow(obs), ncol = 1)
   obs[, variable_names$age_varnames] <- ones %*% ages
   
   #---- Generating centered age data ----
@@ -67,7 +70,7 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = samp_size, mu = rep(0, 2), 
+    noise <- mvrnorm(n = nrow(obs), mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -82,7 +85,7 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = samp_size, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = nrow(obs), mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
@@ -105,7 +108,7 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
   
   #---- Generating uniform random variables per interval for Sij ----
   obs[, variable_names$rij_varnames[1:num_tests]]<- 
-    replicate(num_tests, runif(samp_size, min = 0, max = 1))
+    replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
   
   #---- Transpose the matrix for subsequent calculations ----
   obs <- t(obs)
@@ -127,13 +130,11 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
       (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
     
     #---- Survival Analysis ----
-    female_data <- obs %>% filter(sex == 0)
-    
-    p_alive_females <- female_data %>%
+    p_alive_males <- obs %>%
       dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
-      map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
+      map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(obs)
     
-    return(abs(p_alive_females[timepoint] - cum_surv_cond50[timepoint]))
+    return(abs(p_alive_males[timepoint] - cum_surv_cond50[timepoint]))
   }
   
   #Replace lambda with optimized lambda value
@@ -253,17 +254,17 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
 
 #---- Pre-allocation ----
 
-opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
-opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
-opt_base_haz <- rep(0.00414, 9)   #Testing replacement of values
+# opt_cij_slopes <- rep(0, 10)    #Start with 0 slopes
+# opt_cij_var1 <- rep(0.001, 10)  #Start with tiny variances in slopes
+# opt_base_haz <- rep(0.00414, 9)   #Testing replacement of values
 
 timepoint = 5
 
 #---- Values to match ----
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc_data <- c(0.03, 0.25, 1.00, 
-                  head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1))
-cum_surv_cond50 <- head(female_life_netherlands$CP[-1], -1)
+                  head(EURODEM_inc_rates$Male_All_Dementia_1000PY, -1))
+cum_surv_cond50 <- male_life_netherlands$cum_surv_cond50[-1]
 
 #---- Setup cluster ----
 #Setting up cluster for parallel optimization
@@ -374,7 +375,7 @@ cij_var1 <- opt_cij_var1
 #---- Survival Re-optimization ----
 #Objective Function
 survival_match <- function(LAMBDA, cum_surv_cond50, time){
-  obs <- data_gen()
+  obs <- data_gen(num_obs)
   lambda <- opt_base_haz
   lambda[time] <- LAMBDA
   survival_data <- survival(obs)
@@ -389,13 +390,11 @@ survival_match <- function(LAMBDA, cum_surv_cond50, time){
     (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1
 
   #---- Survival Analysis ----
-  female_data <- obs %>% filter(sex == 0)
-
-  p_alive_females <- female_data %>%
+  p_alive_males <- obs %>%
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
-    map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
+    map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(obs)
 
-  return(abs(p_alive_females[time] - cum_surv_cond50[time]))
+  return(abs(p_alive_males[time] - cum_surv_cond50[time]))
 }
 
 #---- New cluster ----
@@ -433,6 +432,7 @@ for(time in timepoint:timepoint){
                             par = 0.0035,
                             fn = survival_match,
                             cum_surv_cond50 = cum_surv_cond50,
+                            num_obs = 20000,
                             time = time,
                             #upper = 2*opt_base_haz[1],
                             upper = 0.0041,
