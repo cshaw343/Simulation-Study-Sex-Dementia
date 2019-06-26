@@ -379,7 +379,7 @@ cij_var1 <- opt_cij_var1
 #---- Survival Re-optimization ----
 #Objective Function
 survival_match <- function(LAMBDA, cum_surv_cond50, time){
-  obs <- data_gen(num_obs)
+  obs <- data_gen(num_obs) %>% t() %>% as.data.frame()
   lambda <- opt_base_haz
   lambda[time] <- LAMBDA
   survival_data <- survival(obs)
@@ -394,11 +394,11 @@ survival_match <- function(LAMBDA, cum_surv_cond50, time){
     (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1
 
   #---- Transpose matrix ----
-  obs <- t(obs)
+  obs <- t(obs) %>% as.data.frame()
   
   #---- Survival Analysis ----
   p_alive_males <- obs %>%
-    dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
+    dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>%
     map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(obs)
 
   return(abs(p_alive_males[time] - cum_surv_cond50[time]))
