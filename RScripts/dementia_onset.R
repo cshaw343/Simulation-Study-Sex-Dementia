@@ -1,25 +1,30 @@
 #---- Function for computing dementia onset ----
-dem_onset <- function(obs_matrix, dem_cuts){
+dem_onset <- function(obs_matrix, dem_cut){
   #Function we are trying to find the root of
   event_est <- function(t, M, B, dem_cut){
     cij = B + M*t
     return(abs(cij - dem_cut))
   }
     
-  timetodem <- vector(length = nrow(obs_matrix))
-  for(i in 1:nrow(obs_matrix)){
-    if(is.na(obs_matrix[i, "dem_wave"])){
-      timetodem[i] = as.double(obs_matrix[i, "survtime"])
+  timetodem <- vector(length = ncol(obs_matrix))
+  for(i in 1:ncol(obs_matrix)){
+    if(is.na(obs_matrix["dem_wave", i])){
+      timetodem[i] = as.double(obs_matrix["survtime", i])
     } else {
-      wave = as.double(obs_matrix[i, "dem_wave"])
-      # slope <- paste("cij_slope", wave - 1, "-", wave, sep = "")
-      # int <- paste("Ci", wave - 1, sep = "")
-      # m = as.double(obs_matrix[i, slope])
-      # b = as.double(obs_matrix[i, int])
-      # interp_dem_cuts = seq(dem_cuts[wave], dem_cuts[wave + 1], length = 6)
+      wave = as.double(obs_matrix["dem_wave", i])
+      slope <- paste("cij_slope", wave - 1, "-", wave, sep = "")
+      int <- paste("Ci", wave - 1, sep = "")
+      m = as.double(obs_matrix[slope, i])
+      b = as.double(obs_matrix[int, i])
+      
+      time = optimize(event_est, M = m, B = b, dem_cut = dem_cut, 
+                      interval = c(0, 5))$minimum
+      timetodem[i] = (wave - 1)*int_time + time
+      
       
       # #Linear interpolation of dementia cutoffs
-      # for(j in 1:(length(interp_dem_cuts) - 1)){ 
+      # interp_dem_cuts = seq(dem_cuts[wave], dem_cuts[wave + 1], length = 6)
+      # for(j in 1:(length(interp_dem_cuts) - 1)){
       #   test_time = optimize(event_est, M = m, B = b,
       #                        dem_cut = interp_dem_cuts[j + 1],
       #                        interval = c(0, 5))$minimum
@@ -29,7 +34,7 @@ dem_onset <- function(obs_matrix, dem_cuts){
       #     break
       #   }
       # }
-
+      # 
       # #Probabilistic draw of dementia cutoffs
       # for(j in 1:length(interp_dem_cuts)){
       #   if(rbernoulli(1, p = 0.75)){
@@ -56,7 +61,7 @@ dem_onset <- function(obs_matrix, dem_cuts){
       #   #runif(n = 1, min = 0, max = 1)
       
       #Uniform assignment 
-      timetodem[i] = (wave - 1)*int_time + runif(n = 1, min = 0, max = 5)
+      #timetodem[i] = (wave - 1)*int_time + runif(n = 1, min = 0, max = 5)
       
     }
   }
