@@ -74,7 +74,7 @@ small_batch_gen <- function(small_batch_n){
   #Store Cij values and slope values for each assessment
   compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
   obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
-  obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
+  obs[, variable_names$cij_slopeij_varnames[1:num_tests]] <- compute_Cij$slopes
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
@@ -90,26 +90,29 @@ small_batch_gen <- function(small_batch_n){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  obs[, na.omit(variable_names$rij_varnames)]<- 
+  obs[, variable_names$rij_varnames[1:num_tests]]<- 
     replicate(num_tests, runif(small_batch_n, min = 0, max = 1))
+  
+  #---- Transpose the matrix for subsequent calculations ----
+  obs = t(obs)
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
   survival_data <- survival(obs)
-  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-  obs[, "survtime"] <- survival_data$survtimes
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data$Sij
+  obs["survtime", ] <- survival_data$survtimes
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  obs[, "death0"] <- 0
-  obs[, na.omit(variable_names$deathij_varnames)] <- 
-    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+  obs["death0", ] <- 0
+  obs[variable_names$deathij_varnames[1:num_tests], ] <- 
+    (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
   
-  obs[, "study_death"] <- 
-    rowSums(obs[, na.omit(variable_names$deathij_varnames)], na.rm = TRUE) #Study death indicator
+  obs["study_death", ] <- 
+    colSums(obs[variable_names$deathij_varnames[1:num_tests], ], na.rm = TRUE) #Study death indicator
 
-  obs[, "age_death"] <- obs[, "age0"] + obs[, "survtime"]
+  obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
   # #---- Standardize Cij values ----
   # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
@@ -119,131 +122,130 @@ small_batch_gen <- function(small_batch_n){
   # obs %<>% bind_cols(., std_Cij)
   
   #---- Survival censoring matrix ----
-  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
+  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
   censor[censor == 0] <- NA
-  censor %<>% cbind(1, .)
+  censor %<>% rbind(1, .)
   
-  shifted_censor <- cbind(1, censor[, 1:(ncol(censor) - 1)])
+  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
   
   #---- Censor Cij and dem data ----
-  obs[, variable_names$Cij_varnames] <- 
-    obs[, variable_names$Cij_varnames]*censor
+  obs[variable_names$Cij_varnames, ] <- 
+    obs[variable_names$Cij_varnames, ]*censor
   
-  obs[, variable_names$dem_varnames] <- 
-    obs[, variable_names$dem_varnames]*shifted_censor
+  obs[variable_names$dem_varnames, ] <- 
+    obs[variable_names$dem_varnames, ]*shifted_censor
   
   #---- Dementia indicators ----
-  for(i in 1:nrow(obs)){
-    dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
+  for(i in 1:ncol(obs)){
+    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
     if(is.finite(dem_int)){
-      obs[i, "dem_wave"] <- (dem_int - 1)
-      first_censor <- min(which(is.na(obs[i, variable_names$dem_varnames])))
+      obs["dem_wave", i] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
       if(dem_int < 10 & is.finite(first_censor)){
-        obs[i, variable_names$dem_varnames[dem_int:(first_censor - 1)]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
       if(dem_int < 10 & !is.finite(first_censor)){
         last_1 <- length(variable_names$dem_varnames)
-        obs[i, variable_names$dem_varnames[dem_int:last_1]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
     } else {
-      obs[i, "dem_wave"] = NA
+      obs["dem_wave", i] = NA
     }
   }
   
   #---- Dementia calcs ----
-  obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
-  obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
+  obs["dem", ] <- (1 - is.na(obs["dem_wave", ])) #Dementia diagnosis indicator
+  obs["timetodem", ] <- dem_onset(obs, dem_cut) #Time to dementia diagnosis
   obs <- compare_survtime_timetodem(obs)
-  obs[, "ageatdem"] <- obs[, "age0"] + obs[, "timetodem"] #Age at dementia diagnosis
+  obs["ageatdem", ] <- obs["age0", ] + obs["timetodem", ] #Age at dementia diagnosis
   
   #Dementia status at death
-  for(i in 1:nrow(obs)){
-    if(obs[i, "dem"] == 1 & obs[i, "timetodem"] <= obs[i, "survtime"]){
-      obs[i, "dem_death"] <- 1
-    } else if(obs[i, "study_death"] == 1 & 
-              (obs[i, "dem"] == 0 | (obs[i, "dem"] == 1 & 
-               obs[i, "timetodem"] > obs[i, "survtime"]))){
-      obs[i, "dem_death"] <- 2
+  for(i in 1:ncol(obs)){
+    if(obs["dem", i] == 1 & obs["timetodem", i] <= obs["survtime", i]){
+      obs["dem_death", i] <- 1
+    } else if(obs["study_death", i] == 1 & 
+              (obs["dem", i] == 0 | (obs["dem", i] == 1 & 
+               obs["timetodem", i] > obs["survtime", i]))){
+      obs["dem_death", i] <- 2
     } else {
-      obs[i, "dem_death"] <- 0
+      obs["dem_death", i] <- 0
     }
   }
   
   #Time to dem_death
-  for(i in 1:nrow(obs)){
-    if(obs[i, "dem"] == 0){
-      obs[i, "timetodem_death"] <- obs[i, "survtime"]
+  for(i in 1:ncol(obs)){
+    if(obs["dem", i] == 0){
+      obs["timetodem_death", i] <- obs["survtime", i]
     } else {
-      obs[i, "timetodem_death"] <- min(obs[i, "timetodem"], obs[i, "survtime"])
+      obs["timetodem_death", i] <- min(obs["timetodem", i], obs["survtime", i])
     }
   }
   
-  obs[, "ageatdem_death"] <- obs[, "age0"] + obs[, "timetodem_death"]
-  obs[obs[, "dem_death"] == 1, "dem_alive"] <- 1
-  obs[is.na(obs[, "dem_alive"]), "dem_alive"] <- 0
+  obs["ageatdem_death", ] <- obs["age0", ] + obs["timetodem_death", ]
+  obs["dem_alive", obs["dem_death", ] == 1] <- 1
+  obs["dem_alive", is.na(obs["dem_alive", ])] <- 0
   
   #---- Contributed time ----
-  for(i in 1:nrow(obs)){
+  for(i in 1:ncol(obs)){
     #5-year bands
-    last_full_slot <- floor(obs[i, "timetodem_death"]/5)
-    full_slots <- na.omit(variable_names$contributed_varnames)[1:last_full_slot]
-    obs[i, full_slots] <- 5
+    last_full_slot <- floor(obs["timetodem_death", i]/5)
+    full_slots <- variable_names$contributed_varnames[1:last_full_slot]
+    obs[full_slots, i] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
-      obs[i, na.omit(variable_names$contributed_varnames)[partial_slot]] <- 
-        obs[i, "timetodem_death"]%%5
+      obs[variable_names$contributed_varnames[partial_slot], i] <- 
+        obs["timetodem_death", i]%%5
     }
   }
   
-  # #---- Contributed time (1-year bands) ----
-  # for(i in 1:nrow(obs)){
-  #   for(j in 1:num_tests){
-  #     contributed_var <- na.omit(variable_names$contributed_varnames)[j]
-  #     contributed_vars_1year_block <- 
-  #       variable_names_1year$contributed_varnames[(5*(j-1) + 1):(5*j)]
-  #     
-  #     if(is.na(obs[i, contributed_var])){
-  #       break
-  #     } else if(obs[i, contributed_var] == int_time){
-  #       obs[i, contributed_vars_1year_block] <- 1
-  #     } else {
-  #       last_full_slot <- floor(obs[i, contributed_var])
-  #       if(last_full_slot == 0){
-  #         obs[i, contributed_vars_1year_block[1]] <- obs[i, contributed_var]
-  #       } else {
-  #         full_slots <- 
-  #           contributed_vars_1year_block[1:last_full_slot]
-  #         obs[i, full_slots] <- 1
-  #         partial_slot <- last_full_slot + 1
-  #         obs[i, contributed_vars_1year_block[partial_slot]] <- 
-  #           (obs[i, contributed_var] - last_full_slot)
-  #       }
-  #     }
-  #   }
-  # }
-  # 
+  #---- Contributed time (1-year bands) ----
+  for(i in 1:ncol(obs)){
+    for(j in 1:num_tests){
+      contributed_var <- variable_names$contributed_varnames[j]
+      contributed_vars_1year_block <-
+        variable_names_1year$contributed_varnames[(5*(j-1) + 1):(5*j)]
+      
+      if(is.na(obs[contributed_var, i])){
+        break
+      } else if(obs[contributed_var, i] == int_time){
+        obs[contributed_vars_1year_block, i] <- 1
+      } else {
+        last_full_slot <- floor(obs[contributed_var, i])
+        if(last_full_slot == 0){
+          obs[contributed_vars_1year_block[1], i] <- obs[contributed_var, i]
+        } else {
+          full_slots <-
+            contributed_vars_1year_block[1:last_full_slot]
+          obs[full_slots, i] <- 1
+          partial_slot <- last_full_slot + 1
+          obs[contributed_vars_1year_block[partial_slot], i] <-
+            (obs[contributed_var, i] - last_full_slot)
+        }
+      }
+    }
+  }
   
   #---- Dementia indicators (1-year bands) ----
-  for(i in 1:nrow(obs)){
+  for(i in 1:ncol(obs)){
     for(j in 2:(num_tests + 1)){
-      dem_var <- na.omit(variable_names$dem_varnames)[j]
+      dem_var <- variable_names$dem_varnames[j]
       dem_vars_1year_block <-
         variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
       contributed_vars_1year_block <-
         variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
-      if(is.na(obs[i, dem_var])){
+      if(is.na(obs[dem_var, i])){
         break
-      } else if(obs[i, dem_var] == 0){
-        obs[i, dem_vars_1year_block] <- 0
+      } else if(obs[dem_var, i] == 0){
+        obs[dem_vars_1year_block, i] <- 0
       } else{
-        obs[i, dem_vars_1year_block] <-
-          (obs[i, contributed_vars_1year_block] < 1)*1
+        obs[dem_vars_1year_block, i] <-
+          (obs[contributed_vars_1year_block, i] < 1)*1
       }
     }
   }
   
   #---- Values to return ----
-  return(obs)
+  return(t(obs))
 }
 
 #---- Data Generation ----
