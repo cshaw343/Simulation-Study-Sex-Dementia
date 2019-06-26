@@ -17,15 +17,3 @@ sub_recurse <- function(x){
   diffs[1] <- x[1]
   return(diffs)
 }
-
-#---- Descending vector function ----
-#Force the initial vector of dementia cutoffs in the slopes_dem_cut search to be descending 
-
-force_dec <- function(x){
-  for(i in 2:length(x)){
-    if(x[i] > x[i - 1]){
-      x[i-1] <- x[i]
-    }
-  }
-  return(x)
-}
