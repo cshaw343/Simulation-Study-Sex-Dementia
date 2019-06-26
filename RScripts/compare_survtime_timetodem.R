@@ -1,10 +1,9 @@
 compare_survtime_timetodem <- function(obs_matrix){
- obs_matrix[(obs_matrix$survtime < obs_matrix$timetodem), "dem"] <- 0
- obs_matrix[(obs_matrix$survtime < obs_matrix$timetodem), "dem_wave"] <- NA
- obs_matrix[(obs_matrix$survtime < obs_matrix$timetodem), 
-            variable_names$dem_varnames] <- 
-   obs_matrix[(obs_matrix$survtime < obs_matrix$timetodem), 
-              variable_names$dem_varnames]*0
- 
- return(obs_matrix)
+  indices = obs_matrix["survtime", ] < obs_matrix["timetodem", ]
+  obs_matrix["dem", indices] <- 0
+  obs_matrix["dem_wave", indices] <- NA
+  obs_matrix[variable_names$dem_varnames, indices] <- 
+    obs_matrix[variable_names$dem_varnames, indices]*0
+  
+  return(obs_matrix)
 }

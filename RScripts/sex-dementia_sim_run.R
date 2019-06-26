@@ -13,7 +13,11 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
+<<<<<<< HEAD
 data_gen() %>% saveRDS(here("Data", "dataset_A_onedemcut_20190624"))
+=======
+data_gen(num_obs) %>% saveRDS(here("Data", "dataset_A_onedemcut_20190623"))
+>>>>>>> ad123eed7ebb9aec63f6c103e99515b85ade0f56
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
