@@ -24,7 +24,7 @@ obs <- data_gen(num_obs) %>% as.data.frame()
 
 #---- Compute incidence rates ----
 male_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
-colnames(male_sim_inc_rates) <- na.omit(variable_names$interval_ages)
+colnames(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(male_sim_inc_rates) <- c("")
 
 for(slot in 1:num_tests){
@@ -62,11 +62,11 @@ num_males <- nrow(male_data)
 
 #---- Survival probabilities ----
 p_alive <- obs %>% 
-  dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+  dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_obs
 
 #---- Survival probabilities by sex ----
 p_alive_males <- male_data %>%
-  dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+  dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
 
