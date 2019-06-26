@@ -97,10 +97,10 @@ France_F <- read.table("Data/France_cohort_table_F", skip = 2,
   filter(Age %% 5 == 0)                 #Keep Ages in 5 year increments
 
 #---- Cohorts Available ----
-#All of them have 1910-1919, but only Netherlands and Denmark have 1920-1925
-table(Netherlands_total$Year)
-table(Denmark_total$Year)
-table(France_total$Year)
+# #All of them have 1910-1919, but only Netherlands and Denmark have 1920-1925
+# table(Netherlands_total$Year)
+# table(Denmark_total$Year)
+# table(France_total$Year)
 
 #---- Add Computations ----
 Netherlands_total %<>% group_by(Year) %>%
@@ -217,15 +217,18 @@ all_tables <- rbind(Netherlands_total, Netherlands_M, Netherlands_F,
 #---- Selected life table subsets ----
 #Add computations for cumulative survival conditional on survival to age 50
 all_life_netherlands <- Netherlands_total %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>% 
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) 
+all_life_netherlands %<>% 
   mutate("cum_surv_cond50" = lx/all_life_netherlands$lx[1])
 
 female_life_netherlands <- Netherlands_F %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>%
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) 
+female_life_netherlands %<>%
   mutate("cum_surv_cond50" = lx/female_life_netherlands$lx[1])
 
 male_life_netherlands <- Netherlands_M %>% 
-  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) %>%
+  filter(Year == "1920-1925" & Age %in% seq(50, 95, by = 5)) 
+male_life_netherlands %<>%
   mutate("cum_surv_cond50" = lx/male_life_netherlands$lx[1])
 
 #---- Hazard ratios ----
