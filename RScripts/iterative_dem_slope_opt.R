@@ -13,14 +13,12 @@ source(here("RScripts", "cognitive_function_model.R"))
 source(here("RScripts", "survival_times.R"))
 source(here("RScripts", "dementia_onset.R"))
 source(here("RScripts", "compare_survtime_timetodem.R"))
-
-#For survival re-optimization
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 
 #---- Objective Function ----
-dem_inc_rate_match <- function(PARAMETER, which_opt,
-                               batch_n, timepoint, 
-                               dem_inc_data, cp_survival,
+dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
+                               samp_size, timepoint, 
+                               dem_inc_data, cum_surv_cond50,
                                opt_cij_slopes, opt_cij_var1, opt_base_haz){
   
   #---- Plug in parameters to optimize for ----
@@ -34,19 +32,19 @@ dem_inc_rate_match <- function(PARAMETER, which_opt,
   }
   
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = batch_n, ncol = length(column_names)) %>% 
+  obs <- matrix(NA, nrow = samp_size, ncol = length(column_names)) %>% 
     as.data.frame() %>% set_colnames(column_names)
   
   #---- Generating IDs, sex, U ----
-  obs$id <- seq(from = 1, to = batch_n, by = 1)
-  obs$sex <- rbinom(batch_n, size = 1, prob = psex)
+  obs$id <- seq(from = 1, to = samp_size, by = 1)
+  obs$sex <- rbinom(samp_size, size = 1, prob = psex)
   obs$female <- 1 - obs$sex
-  obs$U <- rnorm(batch_n, mean = 0, sd = 1)
+  obs$U <- rnorm(samp_size, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
   ages = matrix(seq(50, 95, by = 5), nrow = 1)
-  ones = matrix(1, nrow = batch_n, ncol = 1)
+  ones = matrix(1, nrow = samp_size, ncol = 1)
   obs[, variable_names$age_varnames] <- ones %*% ages
   
   #---- Generating centered age data ----
@@ -69,7 +67,7 @@ dem_inc_rate_match <- function(PARAMETER, which_opt,
   
   #Generate random terms for each individual
   for(i in 1:(num_tests + 1)){
-    noise <- mvrnorm(n = batch_n, mu = rep(0, 2), 
+    noise <- mvrnorm(n = samp_size, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
     obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
   }
@@ -84,13 +82,13 @@ dem_inc_rate_match <- function(PARAMETER, which_opt,
   
   #Generating noise terms
   obs[, variable_names$eps_varnames] <- 
-    mvrnorm(n = batch_n, mu = rep(0, num_visits), Sigma = cij_cov_mat)
+    mvrnorm(n = samp_size, mu = rep(0, num_visits), Sigma = cij_cov_mat)
   
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
   compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
   obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
-  obs[, na.omit(variable_names$cij_slopeij_varnames)] <- compute_Cij$slopes
+  obs[, variable_names$cij_slopeij_varnames[1:num_tests]] <- compute_Cij$slopes
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
@@ -106,47 +104,52 @@ dem_inc_rate_match <- function(PARAMETER, which_opt,
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  obs[, na.omit(variable_names$rij_varnames)]<- 
-    replicate(num_tests, runif(batch_n, min = 0, max = 1))
+  obs[, variable_names$rij_varnames[1:num_tests]]<- 
+    replicate(num_tests, runif(samp_size, min = 0, max = 1))
+  
+  #---- Transpose the matrix for subsequent calculations ----
+  obs <- t(obs)
   
   #---- Survival optimization ----
   #Objective Function
-  survival_match <- function(LAMBDA, obs, cp_survival){
+  survival_match <- function(LAMBDA, obs, cum_surv_cond50){
     lambda <- opt_base_haz
     lambda[timepoint] <- LAMBDA
     survival_data <- survival(obs)
-    obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-    obs[, "survtime"] <- survival_data$survtimes
+    obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data$Sij
+    obs["survtime", ] <- survival_data$survtimes
     
     #---- Calculating death data for each individual ----
     #Indicator of 1 means the individual died in that interval
     #NAs mean the individual died in a prior interval
-    obs[, "death0"] <- 0
-    obs[, na.omit(variable_names$deathij_varnames)] <- 
-      (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+    obs["death0", ] <- 0
+    obs[variable_names$deathij_varnames[1:num_tests], ] <- 
+      (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
     
     #---- Survival Analysis ----
     female_data <- obs %>% filter(sex == 0)
     
     p_alive_females <- female_data %>%
-      dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
+      dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
       map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
     
-    return(abs(p_alive_females[timepoint] - cp_survival[timepoint]))
+    return(abs(p_alive_females[timepoint] - cum_surv_cond50[timepoint]))
   }
   
   #Replace lambda with optimized lambda value
   if(timepoint == 1){
     opt_base_haz[timepoint] <- optim(par = opt_base_haz[timepoint], 
                                      fn = survival_match, 
-                                     obs = obs, cp_survival = cp_survival, 
-                                     upper = opt_base_haz[timepoint], 
+                                     obs = obs, 
+                                     cum_surv_cond50 = cum_surv_cond50, 
+                                     upper = 2.75*opt_base_haz[timepoint], 
                                      lower = 0.8*opt_base_haz[timepoint], 
                                      method = "L-BFGS-B")$par
   } else {
     opt_base_haz[timepoint] <- optim(par = opt_base_haz[timepoint - 1], 
                                      fn = survival_match, 
-                                     obs = obs, cp_survival = cp_survival, 
+                                     obs = obs, 
+                                     cum_surv_cond50 = cum_surv_cond50, 
                                      upper = 2.75*opt_base_haz[timepoint - 1], 
                                      lower = opt_base_haz[timepoint - 1], 
                                      method = "L-BFGS-B")$par
@@ -156,74 +159,77 @@ dem_inc_rate_match <- function(PARAMETER, which_opt,
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
   survival_data <- survival(obs)
-  obs[, na.omit(variable_names$Sij_varnames)] <- survival_data$Sij
-  obs[, "survtime"] <- survival_data$survtimes
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data$Sij
+  obs["survtime", ] <- survival_data$survtimes
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  obs[, "death0"] <- 0
-  obs[, na.omit(variable_names$deathij_varnames)] <- 
-    (obs[, na.omit(variable_names$Sij_varnames)] < int_time)*1 
+  obs["death0", ] <- 0
+  obs[variable_names$deathij_varnames[1:num_tests], ] <- 
+    (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
   
   #---- Survival censoring matrix ----
-  censor <- (obs[, na.omit(variable_names$Sij_varnames)] == 5)*1
+  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
   censor[censor == 0] <- NA
-  censor %<>% cbind(1, .)
+  censor %<>% rbind(1, .)
   
-  shifted_censor <- cbind(1, censor[, 1:(ncol(censor) - 1)])
+  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
   
   #---- Censor Cij and dem data ----
-  obs[, variable_names$Cij_varnames] <- 
-    obs[, variable_names$Cij_varnames]*censor
+  obs[variable_names$Cij_varnames, ] <- 
+    obs[variable_names$Cij_varnames, ]*censor
   
-  obs[, variable_names$dem_varnames] <- 
-    obs[, variable_names$dem_varnames]*shifted_censor
+  obs[variable_names$dem_varnames, ] <- 
+    obs[variable_names$dem_varnames, ]*shifted_censor
   
   #---- Dementia indicators ----
-  for(i in 1:nrow(obs)){
-    dem_int <- min(which(obs[i, variable_names$dem_varnames] == 1))
+  for(i in 1:ncol(obs)){
+    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
     if(is.finite(dem_int)){
-      obs[i, "dem_wave"] <- (dem_int - 1)
-      first_censor <- min(which(is.na(obs[i, variable_names$dem_varnames])))
+      obs["dem_wave", i] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
       if(dem_int < 10 & is.finite(first_censor)){
-        obs[i, variable_names$dem_varnames[dem_int:(first_censor - 1)]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
       if(dem_int < 10 & !is.finite(first_censor)){
         last_1 <- length(variable_names$dem_varnames)
-        obs[i, variable_names$dem_varnames[dem_int:last_1]] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
       }
     } else {
-      obs[i, "dem_wave"] = NA
+      obs["dem_wave", i] = NA
     }
   }
   
   #---- Dementia calcs ----
-  obs[, "dem"] <- (1 - is.na(obs[, "dem_wave"])) #Dementia diagnosis indicator
-  obs[, "timetodem"] <- dem_onset(obs, dem_cuts) #Time to dementia diagnosis
+  obs["dem", ] <- (1 - is.na(obs["dem_wave", ])) #Dementia diagnosis indicator
+  obs["timetodem", ] <- dem_onset(obs, dem_cut) #Time to dementia diagnosis
   obs <- compare_survtime_timetodem(obs)
   
   #Time to dem_death
-  for(i in 1:nrow(obs)){
-    if(obs[i, "dem"] == 0){
-      obs[i, "timetodem_death"] <- obs[i, "survtime"]
+  for(i in 1:ncol(obs)){
+    if(obs["dem", i] == 0){
+      obs["timetodem_death", i] <- obs["survtime", i]
     } else {
-      obs[i, "timetodem_death"] <- min(obs[i, "timetodem"], obs[i, "survtime"])
+      obs["timetodem_death", i] <- min(obs["timetodem", i], obs["survtime", i])
     }
   }
   
   #---- Contributed time ----
-  for(i in 1:nrow(obs)){
+  for(i in 1:ncol(obs)){
     #5-year bands
-    last_full_slot <- floor(obs[i, "timetodem_death"]/5)
-    full_slots <- na.omit(variable_names$contributed_varnames)[1:last_full_slot]
-    obs[i, full_slots] <- 5
+    last_full_slot <- floor(obs["timetodem_death", i]/5)
+    full_slots <- variable_names$contributed_varnames[1:last_full_slot]
+    obs[full_slots, i] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
-      obs[i, na.omit(variable_names$contributed_varnames)[partial_slot]] <- 
-        obs[i, "timetodem_death"]%%5
+      obs[variable_names$contributed_varnames[partial_slot], i] <- 
+        obs["timetodem_death", i]%%5
     }
   }
+  
+  #---- Transpose the matrix ----
+  obs <- t(obs)
   
   #---- Dementia Incidence Analysis ----
   if(timepoint == 1){
@@ -257,7 +263,7 @@ timepoint = 5
 #The first values are inputs based on climbing to desired inc rate at age 70
 dem_inc_data <- c(0.03, 0.25, 1.00, 
                   head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1))
-cp_survival <- head(female_life_netherlands$CP[-1], -1)
+cum_surv_cond50 <- head(female_life_netherlands$CP[-1], -1)
 
 #---- Setup cluster ----
 #Setting up cluster for parallel optimization
@@ -297,9 +303,9 @@ for(time in timepoint:timepoint){
               optimParallel(par = -0.05, 
                             fn = dem_inc_rate_match,
                             which_opt = "slope",
-                            batch_n = 20000, timepoint = time, 
+                            samp_size = 20000, timepoint = time, 
                             dem_inc_data = dem_inc_data, 
-                            cp_survival = cp_survival, 
+                            cum_surv_cond50 = cum_surv_cond50, 
                             opt_cij_slopes = opt_cij_slopes, 
                             opt_cij_var1 = opt_cij_var1, 
                             opt_base_haz = opt_base_haz, 
@@ -346,9 +352,9 @@ for(time in timepoint:timepoint){
               optimParallel(par = opt_cij_var1[time], 
                             fn = dem_inc_rate_match,
                             which_opt = "variance",
-                            batch_n = 20000, timepoint = time, 
+                            samp_size = 20000, timepoint = time, 
                             dem_inc_data = dem_inc_data, 
-                            cp_survival = cp_survival, 
+                            cum_surv_cond50 = cum_surv_cond50, 
                             opt_cij_slopes = opt_cij_slopes, 
                             opt_cij_var1 = opt_cij_var1, 
                             opt_base_haz = opt_base_haz, 
@@ -367,7 +373,7 @@ cij_var1 <- opt_cij_var1
 
 #---- Survival Re-optimization ----
 #Objective Function
-survival_match <- function(LAMBDA, cp_survival, time){
+survival_match <- function(LAMBDA, cum_surv_cond50, time){
   obs <- data_gen()
   lambda <- opt_base_haz
   lambda[time] <- LAMBDA
@@ -389,7 +395,7 @@ survival_match <- function(LAMBDA, cp_survival, time){
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>%
     map_dbl(~sum(. == 0, na.rm = TRUE))/nrow(female_data)
 
-  return(abs(p_alive_females[time] - cp_survival[time]))
+  return(abs(p_alive_females[time] - cum_surv_cond50[time]))
 }
 
 #---- New cluster ----
@@ -426,7 +432,7 @@ for(time in timepoint:timepoint){
                           optimParallel(#par = 1.25*opt_base_haz[1],
                             par = 0.0035,
                             fn = survival_match,
-                            cp_survival = cp_survival,
+                            cum_surv_cond50 = cum_surv_cond50,
                             time = time,
                             #upper = 2*opt_base_haz[1],
                             upper = 0.0041,
@@ -439,7 +445,7 @@ for(time in timepoint:timepoint){
                           optimParallel(#par = 1.25*opt_base_haz[time - 1],
                                 par = 0.0052,
                                 fn = survival_match,
-                                cp_survival = cp_survival,
+                                cum_surv_cond50 = cum_surv_cond50,
                                 time = time,
                                 upper = 0.00893749,
                                 #upper = 2.75*opt_base_haz[time - 1],
