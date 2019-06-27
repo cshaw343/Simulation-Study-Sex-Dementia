@@ -4,7 +4,7 @@ if (!require("pacman"))
 
 p_load("future.apply", "parallel", "here", "magrittr")
 
-set.seed(20190623)
+set.seed(20190624)
 
 #---- Source Files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))          #The parameter file
@@ -54,7 +54,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_1000_20190623.csv"))
+                               "one_demcut_1000_20190624.csv"))
   
 
 
