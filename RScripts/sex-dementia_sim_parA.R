@@ -28,8 +28,8 @@ num_tests <- 9
 visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Prevalance of exposure (male) ----
-#Exposure = male gender
-psex <- 0.49
+#Exposure = female gender
+psex <- 0.51
 
 #---- Variances and correlations ----
 #Both slope and slope variance has placeholder values because of the covariance
@@ -57,7 +57,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #Need one value for each visit time, including baseline
 #First value is cognitive slope, the remaining values are changes in cognitive slopes
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
-#ie Cognitive slope for females age 50-70, change in cognitive slope for females age 70-85, etc...
+#ie Cognitive slope for females age 50-55, change in cognitive slope for females age 55-60, etc...
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 cij_slopes <- c(-0.0107143, -0.0397509, -0.0150409, 0, 0, -0.0392775, 
                 -0.0447787, -0.0196251, -0.0488933, 0)
@@ -67,7 +67,7 @@ b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age 
 b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 
 #---- Parameters for Sij (survival for person i at time j) ----
-#Effect of sex on log hazard of death; chosen using calc from euro_life_tables.R 
+#Effect of sex on log hazard of death; chosen using calc from life_table_calcs.R 
 g1 <- log(c(1.6160, 1.8973, 2.1307, 2.2726, 2.2225, 2.0917, 1.8494, 1.6147, 
             1.3909, 1.2596)) 
 g2 <- 0     #Effect of U on log hazard of death
