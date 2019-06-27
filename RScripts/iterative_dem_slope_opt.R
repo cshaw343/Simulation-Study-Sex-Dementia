@@ -378,7 +378,7 @@ cij_var1 <- opt_cij_var1
 
 #---- Survival Re-optimization ----
 #Objective Function
-survival_match <- function(LAMBDA, cum_surv_cond50, time){
+survival_match <- function(LAMBDA, cum_surv_cond50, num_obs, time){
   obs <- data_gen(num_obs) %>% t() %>% as.data.frame()
   lambda <- opt_base_haz
   lambda[time] <- LAMBDA
@@ -434,12 +434,12 @@ clusterExport(cl = cluster,
 #---- Baseline hazard optimization ----
 for(time in timepoint:timepoint){
   if (time == 1) {
-    base_haz <- replicate(1, 
+    base_haz <- replicate(10, 
                           optimParallel(#par = 1.25*opt_base_haz[1],
                             par = 0.006,
                             fn = survival_match,
                             cum_surv_cond50 = cum_surv_cond50,
-                            num_obs = 500000,
+                            num_obs = 40000,
                             time = time,
                             #upper = 2*opt_base_haz[1],
                             upper = 0.008,
@@ -448,12 +448,12 @@ for(time in timepoint:timepoint){
                             method = "L-BFGS-B", 
                             parallel = list(cl = cluster))$par)
   } else {
-    base_haz <- replicate(1, 
+    base_haz <- replicate(10, 
                           optimParallel(#par = 1.25*opt_base_haz[time - 1],
                                 par = 0.0052,
                                 fn = survival_match,
                                 cum_surv_cond50 = cum_surv_cond50,
-                                num_obs = 500000,
+                                num_obs = 40000,
                                 time = time,
                                 upper = 0.00893749,
                                 #upper = 2.75*opt_base_haz[time - 1],
