@@ -17,18 +17,18 @@ cog_func <- function(knots_ages, slopes, obs_matrix){
     z1_name <- paste0("z1_", (j - 1), "i")
     if(ages[j] <= knots_ages[1]){
       Cij[, j] = b00 + obs_matrix[, z0_name] + 
-        b01*obs_matrix[, "sex"] + b02*obs_matrix[, "age0_c50"] + 
+        b01*obs_matrix[, "female"] + b02*obs_matrix[, "age0_c50"] + 
         b03*obs_matrix[, "U"] + obs_matrix[, eps_name] +
         (extend_slopes[1] + obs_matrix[, z1_name] + 
-           b11*obs_matrix[, "sex"] + b12*obs_matrix[, "age0_c50"] + 
+           b11*obs_matrix[, "female"] + b12*obs_matrix[, "age0_c50"] + 
            b13*obs_matrix[, "U"])*t
     } else{
       Cij[, j] = b00 + obs_matrix[, z0_name] + 
-        b01*obs_matrix[, "sex"] + b02*obs_matrix[, "age0_c50"] + 
+        b01*obs_matrix[, "female"] + b02*obs_matrix[, "age0_c50"] + 
         b03*obs_matrix[, "U"] + obs_matrix[, eps_name] +
         sum(testXslope[1:(test_num - 1)]) +
         (sum(extend_slopes[1:test_num]) + obs_matrix[, z1_name] + 
-           b11*obs_matrix[, "sex"] +
+           b11*obs_matrix[, "female"] +
            b12*obs_matrix[, "age0_c50"] + b13*obs_matrix[, "U"])*t
     }
   }

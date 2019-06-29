@@ -11,9 +11,9 @@ survival <- function(obs_matrix){
       C_name <- variable_names$Cij_varnames[j]
       dem_name <- variable_names$dem_varnames[j]
       survtime = -log(obs_matrix[r_name, i])/
-        (lambda[j]*exp(g1[j]*obs_matrix["sex", i] + 
+        (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
                          g2*obs_matrix["U", i] + 
-                         g3*obs_matrix["sex", i]*obs_matrix["U", i] +
+                         g3*obs_matrix["female", i]*obs_matrix["U", i] +
                          g4*obs_matrix[cij_slope_name, i] + 
                          g5*obs_matrix[C_name, i] + 
                          g6[j]*obs_matrix[dem_name, i]

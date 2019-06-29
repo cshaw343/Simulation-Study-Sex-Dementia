@@ -21,10 +21,9 @@ data_gen <- function(num_obs){
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
     as.data.frame() %>% set_colnames(column_names)
   
-  #---- Generating IDs, sex, U ----
+  #---- Generating IDs, female, U ----
   obs$id <- seq(from = 1, to = num_obs, by = 1)
-  obs$sex <- rbinom(num_obs, size = 1, prob = pfemale)
-  obs$female <- 1 - obs$sex
+  obs$female <- rbinom(num_obs, size = 1, prob = pfemale)
   obs$U <- rnorm(num_obs, mean = 0, sd = 1)
   
   #---- Generating age data ----

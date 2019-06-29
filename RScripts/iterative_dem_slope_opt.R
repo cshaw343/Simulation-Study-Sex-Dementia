@@ -37,8 +37,7 @@ dem_inc_rate_match <- function(PARAMETER, which_opt, #"slope" or "variance"
   
   #---- Generating IDs, sex, U ----
   obs$id <- seq(from = 1, to = samp_size, by = 1)
-  obs$sex <- rbinom(samp_size, size = 1, prob = psex)
-  obs$female <- 1 - obs$sex
+  obs$female <- rbinom(samp_size, size = 1, prob = pfemale)
   obs$U <- rnorm(samp_size, mean = 0, sd = 1)
   
   #---- Restrict to male dataset ----
