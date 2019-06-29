@@ -7,7 +7,7 @@ p_load("here", "tidyverse", "MASS", "optimParallel")
 #---- Source files ----
 source(here("RScripts", "sex-dementia_sim_parA.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
-source(here("RScripts", "euro_life_tables.R"))
+source(here("RScripts", "life_table_calcs.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "cognitive_function_model.R"))
 source(here("RScripts", "survival_times.R"))
@@ -285,7 +285,7 @@ clusterEvalQ(cl = cluster, {
   #Source files
   source(here("RScripts", "sex-dementia_sim_parA.R"))
   source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
-  source(here("RScripts", "euro_life_tables.R"))
+  source(here("RScripts", "life_table_calcs.R"))
   source(here("RScripts", "variable_names.R"))
   source(here("RScripts", "cognitive_function_model.R"))
   source(here("RScripts", "survival_times.R"))
