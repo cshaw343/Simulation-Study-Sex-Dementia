@@ -334,7 +334,7 @@ clusterEvalQ(cl = cluster, {
   #Source files
   source(here("RScripts", "sex-dementia_sim_parA.R"))
   source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
-  source(here("RScripts", "euro_life_tables.R"))
+  source(here("RScripts", "life_table_calcs.R"))
   source(here("RScripts", "variable_names.R"))
   source(here("RScripts", "cognitive_function_model.R"))
   source(here("RScripts", "survival_times.R"))
@@ -415,7 +415,7 @@ clusterEvalQ(cl = cluster, {
   #Source files
   source(here("RScripts", "sex-dementia_sim_parA.R"))
   source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
-  source(here("RScripts", "euro_life_tables.R"))
+  source(here("RScripts", "life_table_calcs.R"))
   source(here("RScripts", "variable_names.R"))
   source(here("RScripts", "cognitive_function_model.R"))
   source(here("RScripts", "survival_times.R"))
@@ -435,15 +435,15 @@ for(time in timepoint:timepoint){
   if (time == 1) {
     base_haz <- replicate(10, 
                           optimParallel(#par = 1.25*opt_base_haz[1],
-                            par = 0.006,
+                            par = 0.0076,
                             fn = survival_match,
                             cum_surv_cond50 = cum_surv_cond50,
                             num_obs = 40000,
                             time = time,
                             #upper = 2*opt_base_haz[1],
-                            upper = 0.008,
+                            upper = 0.00775,
                             #lower = opt_base_haz[1],
-                            lower = 0.004,
+                            lower = 0.007,
                             method = "L-BFGS-B", 
                             parallel = list(cl = cluster))$par)
   } else {
