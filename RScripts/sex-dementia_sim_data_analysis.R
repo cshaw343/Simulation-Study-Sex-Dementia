@@ -19,8 +19,8 @@ sex_dem_sim <- function(){
   data <- data_gen()
   
   #---- Data by sex ----
-  female_data <- data %>% filter(sex == 0)
-  male_data <- data %>% filter(sex == 1)
+  female_data <- data %>% filter(female == 1)
+  male_data <- data %>% filter(female == 0)
   
   #---- Cohort size ----
   num_obs <- nrow(data)
