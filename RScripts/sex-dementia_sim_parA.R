@@ -68,8 +68,8 @@ b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex on log hazard of death; chosen using calc from life_table_calcs.R 
-g1 <- log(c(1.6160, 1.8973, 2.1307, 2.2726, 2.2225, 2.0917, 1.8494, 1.6147, 
-            1.3909, 1.2596)) 
+g1 <- log(c(0.5270786, 0.4693230, 0.4400211, 0.4499390, 0.4780844, 0.5407054, 
+            0.6193134, 0.7189676, 0.7939100)) 
 g2 <- 0     #Effect of U on log hazard of death
 g3 <- 0     #Effect of interaction between sex and U on log hazard of death
 g4 <- 0     #Effect of cognitive slope at time j on log hazard of death
