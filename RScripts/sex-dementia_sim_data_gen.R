@@ -23,7 +23,7 @@ data_gen <- function(num_obs){
   
   #---- Generating IDs, sex, U ----
   obs$id <- seq(from = 1, to = num_obs, by = 1)
-  obs$sex <- rbinom(num_obs, size = 1, prob = psex)
+  obs$sex <- rbinom(num_obs, size = 1, prob = pfemale)
   obs$female <- 1 - obs$sex
   obs$U <- rnorm(num_obs, mean = 0, sd = 1)
   

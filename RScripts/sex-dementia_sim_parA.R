@@ -29,7 +29,7 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 
 #---- Prevalance of exposure (male) ----
 #Exposure = female gender
-psex <- 0.51
+pfemale <- 0.51
 
 #---- Variances and correlations ----
 #Both slope and slope variance has placeholder values because of the covariance
