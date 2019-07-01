@@ -59,8 +59,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-55, change in cognitive slope for males age 55-60, etc...
 #Based on iterative_dem_slope_opt.R script
-cij_slopes <- c(-0.0107143, -0.0397509, -0.0150409, 0, 0, -0.0392775, 
-                -0.0447787, -0.0196251, -0.0488933, 0)
+cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0, 0)
                 
 b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
