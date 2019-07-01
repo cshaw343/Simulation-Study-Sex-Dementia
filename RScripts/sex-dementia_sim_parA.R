@@ -38,7 +38,7 @@ pfemale <- 0.51
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
 cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
-              rep(0.001, 3), rep(0.00119882, 6)) #Time-dependent variance of random cognitive slope
+              rep(0.001, 3), rep(0.0015, 3), 0.00165, rep(0.004, 2)) #Time-dependent variance of random cognitive slope
               
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
