@@ -47,8 +47,8 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 
 #---- Parameters for Cij ----
 #Cognitive function for person i at time j
-b00 <- 0      #Cognitive intercept for females
-b01 <- 0      #Effect of sex on cognitive intercept
+b00 <- 0      #Cognitive intercept for males
+b01 <- 0      #Effect of female on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 b03 <- 0      #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
@@ -57,12 +57,12 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #Need one value for each visit time, including baseline
 #First value is cognitive slope, the remaining values are changes in cognitive slopes
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
-#ie Cognitive slope for females age 50-55, change in cognitive slope for females age 55-60, etc...
-#Based on slopes_dem-cut_search.R script (results from 20190202)
+#ie Cognitive slope for females age 50-55, change in cognitive slope for males age 55-60, etc...
+#Based on iterative_dem_slope_opt.R script
 cij_slopes <- c(-0.0107143, -0.0397509, -0.0150409, 0, 0, -0.0392775, 
                 -0.0447787, -0.0196251, -0.0488933, 0)
                 
-b11 <- 0      #Effect of sex on cognitive slope
+b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
 b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 
@@ -72,7 +72,7 @@ b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 g1 <- log(c(0.5270786, 0.4693230, 0.4400211, 0.4499390, 0.4780844, 0.5407054, 
             0.6193134, 0.7189676, 0.7939100)) 
 g2 <- 0     #Effect of U on log hazard of death
-g3 <- 0     #Effect of interaction between sex and U on log hazard of death
+g3 <- 0     #Effect of interaction between female and U on log hazard of death
 g4 <- 0     #Effect of cognitive slope at time j on log hazard of death
 g5 <- 0     #Effect of cognitive function at time j on log hazard of death
 #Effect of prevalent dementia on log hazard of death
