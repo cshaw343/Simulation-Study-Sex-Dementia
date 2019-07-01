@@ -16,7 +16,7 @@ source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 sex_dem_sim <- function(){
   
   #---- Generate the data ----
-  data <- data_gen()
+  data <- data_gen(num_obs)
   
   #---- Data by sex ----
   female_data <- data %>% filter(female == 1)
