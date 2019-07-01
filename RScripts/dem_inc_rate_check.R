@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "here")
+p_load("tidyverse", "here", "magrittr", "MASS")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
@@ -19,7 +19,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
-num_obs = 200000
+num_obs = 500000
 obs <- data_gen(num_obs) %>% as.data.frame()
 
 #---- Compute incidence rates ----
@@ -55,10 +55,12 @@ for(slot in 1:num_tests){
 #---- Compute survival data ----
 #---- Data by sex ----
 male_data <- obs %>% filter(female == 0)
+female_data <- obs %>% filter(female == 1)
 
 #---- Cohort size ----
 num_obs <- nrow(obs)
 num_males <- nrow(male_data)
+num_females <- nrow(female_data)
 
 #---- Survival probabilities ----
 p_alive <- obs %>% 
@@ -70,3 +72,12 @@ p_alive_males <- male_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
 
+p_alive_females <- female_data %>%
+  dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
+  map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
+
+#---- Checking values ----
+dem_inc_data
+male_sim_inc_rates
+cum_surv_cond50
+p_alive_males
