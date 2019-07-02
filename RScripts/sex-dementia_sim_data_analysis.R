@@ -205,6 +205,9 @@ sex_dem_sim <- function(){
     as.vector(t(simulated_dementia_logIRRs_data))
   
   #---- Dementia incidence cases, rates, and PY by sex (1-year bands) ----
+  sim_rates_females_1year <- vector(length = num_tests*5) 
+  sim_rates_males_1year <- vector(length = num_tests*5) 
+  
   inc_cases_females_1year <- vector(length = num_tests*5)
   inc_cases_males_1year <- vector(length = num_tests*5)
 
@@ -235,14 +238,7 @@ sex_dem_sim <- function(){
     round(1000*(inc_cases_females_1year/PY_females_1year), 3)
 
 
-  #Computing male incidence cases and rates
-  inc_cases_males_1year <- vector(length = num_tests*5)
-  inc_cases_males_1year <- vector(length = num_tests*5)
-
-  PY_males_1year <- vector(length = num_tests*5)
-  PY_males_1year <- vector(length = num_tests*5)
-
-  #Computing female incidence cases, rates, PY
+  #Computing male incidence cases, rates, PY
   for(slot in 1:(num_tests*5)){
     if(slot == 1){
       dem_last_wave <- paste0("dem", (slot - 1))
@@ -266,7 +262,7 @@ sex_dem_sim <- function(){
     round(1000*(inc_cases_males_1year/PY_males_1year), 3)
 
   # #---- Dementia logIRRs (1-year bands) ----
-  # IRRs_1year <- sim_rates_females_1year/sim_rates_males_1year
+  IRRs_1year <- sim_rates_females_1year/sim_rates_males_1year
   # 
   # simulated_dementia_logIRRs_data_1yr <- matrix(nrow = num_tests*5, ncol = 5)
   # #Point estimate
