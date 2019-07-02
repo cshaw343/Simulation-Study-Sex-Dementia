@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 1000
+runs = 5
 
 #---- Number of observations ----
 #Multiples of 1000
@@ -37,8 +37,8 @@ pfemale <- 0.51
 
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
-cij_var1 <- c(0.001, #baseline measure (holding place and really doesn't matter)
-              rep(0.001, 3), rep(0.0015, 3), 0.00165, rep(0.004, 2)) #Time-dependent variance of random cognitive slope
+cij_var1 <- c(0.001, #Need this for the noise term for the baseline measure
+  rep(0.001, 3), rep(0.0015, 3), 0.00165, rep(0.004, 2)) #Time-dependent variance of random cognitive slope
               
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
@@ -59,7 +59,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-55, change in cognitive slope for males age 55-60, etc...
 #Based on iterative_dem_slope_opt.R script
-cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0, 0)
+cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0)
                 
 b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -79,7 +79,8 @@ g5 <- 0     #Effect of cognitive function at time j on log hazard of death
 g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))      
 
 #---- Baseline hazard of death for unexposed ----
-lambda <- c(rep(0.00312805, 4), 0.008, 0.013, 0.02, 0.0325, 0.065)
+lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275, 
+            0.2175)
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
