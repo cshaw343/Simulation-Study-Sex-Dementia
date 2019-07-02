@@ -13,7 +13,8 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
-data_gen(num_obs) %>% saveRDS(here("Data", "dataset_A_onedemcut_20190623"))
+data_gen(500000) %>% 
+  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190701"))
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
@@ -54,7 +55,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_1000_20190624.csv"))
+                               "one_demcut_10_20190701.csv"))
   
 
 
