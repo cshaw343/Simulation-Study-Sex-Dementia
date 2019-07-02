@@ -37,9 +37,13 @@ pfemale <- 0.51
 
 cij_var0 <- 0.2   #Variance of random cognitive intercept
 #Need one value for each visit, including baseline
+#For male matching
+#cij_var1 <- c(0.001, #Need this for the noise term for the baseline measure
+#              rep(0.001, 3), rep(0.0015, 3), 0.00165, rep(0.004, 2)) #Time-dependent variance of random cognitive slope
+
+#For total matching
 cij_var1 <- c(0.001, #Need this for the noise term for the baseline measure
-  rep(0.001, 3), rep(0.0015, 3), 0.00165, rep(0.004, 2)) #Time-dependent variance of random cognitive slope
-              
+              rep(0.001, 3), rep(0.0015, 6)) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -59,7 +63,13 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #These are: b10a, b10b - b10a, b10c - b10b, etc...
 #ie Cognitive slope for females age 50-55, change in cognitive slope for males age 55-60, etc...
 #Based on iterative_dem_slope_opt.R script
-cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0)
+
+#For male matching
+#cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0)
+
+#For total matching
+cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, -0.045, -0.05, -0.025, 
+                -0.055)
                 
 b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -79,8 +89,12 @@ g5 <- 0     #Effect of cognitive function at time j on log hazard of death
 g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))      
 
 #---- Baseline hazard of death for unexposed ----
-lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275, 
-            0.2175)
+#For male matching
+#lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275, 
+#            0.2175)
+
+#For total matching
+lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.063, 0.085, 0.12, 0.205)
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
