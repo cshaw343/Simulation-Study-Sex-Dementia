@@ -18,7 +18,7 @@ data_gen(500000) %>%
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
-batch_runs <- function(x){
+batch_runs <- function(){
   plan(multiprocess, 
        workers = (floor(0.5*detectCores())), 
        gc = TRUE)
