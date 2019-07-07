@@ -22,7 +22,7 @@ batch_runs <- function(){
   plan(multiprocess, 
        workers = (floor(0.5*detectCores())), 
        gc = TRUE)
-  sim_results <- future_replicate(5, sex_dem_sim()) %>% t() %>% 
+  sim_results <- future_replicate(5, sex_dem_sim(num_obs)) %>% t() %>% 
     as.data.frame()
   
   return(sim_results)

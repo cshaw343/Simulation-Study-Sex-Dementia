@@ -13,7 +13,7 @@ source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 
 #---- Simulation function ----
-sex_dem_sim <- function(){
+sex_dem_sim <- function(num_obs){
   
   #---- Generate the data ----
   data <- data_gen(num_obs) %>% as.data.frame()
