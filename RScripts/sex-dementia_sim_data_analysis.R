@@ -324,10 +324,15 @@ sex_dem_sim <- function(num_obs){
   for(i in 1:num_tests){
     PY_contributed_name <- paste0("contributed", i - 1, "-", i)
     dem_indicator_name <- paste0("dem", i - 1, "-", i)
-    cox_model <- coxph(Surv(data[, PY_contributed_name],
-                            data[, dem_indicator_name]) ~ data$female)
-    simulated_dementia_logHRs_model_data[i, 1:4] <-
-      c(summary(cox_model)$coefficients[, c(1, 3)], confint(cox_model))
+    if(sum(data[, dem_indicator_name], na.rm = TRUE) == 0){
+      next
+    } else{
+      cox_model <- coxph(Surv(data[, PY_contributed_name],
+                              data[, dem_indicator_name]) ~ data$female)
+      
+      simulated_dementia_logHRs_model_data[i, 1:4] <-
+        c(summary(cox_model)$coefficients[, c(1, 3)], confint(cox_model))
+    }
   }
 
   simulated_dementia_logHRs_model_data[, 5] <-
