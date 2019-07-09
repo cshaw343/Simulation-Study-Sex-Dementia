@@ -81,7 +81,7 @@ data_gen <- function(num_obs){
                          byrow = TRUE)
   
   obs[, variable_names$dem_varnames] <- 
-    (obs[, variable_names$Cij_varnames] < dem_cuts_mat)*1
+    (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
   
   obs %<>% filter(dem0 == 0)
   
@@ -94,6 +94,24 @@ data_gen <- function(num_obs){
   
   #---- Transpose the matrix for subsequent calculations ----
   obs = t(obs)
+  
+  #---- Dementia indicators ----
+  for(i in 1:ncol(obs)){
+    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
+    if(is.finite(dem_int)){
+      obs["dem_wave", i] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
+      if(dem_int < 10 & is.finite(first_censor)){
+        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+      if(dem_int < 10 & !is.finite(first_censor)){
+        last_1 <- length(variable_names$dem_varnames)
+        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+    } else {
+      obs["dem_wave", i] = NA
+    }
+  }
   
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
@@ -133,24 +151,6 @@ data_gen <- function(num_obs){
   
   obs[variable_names$dem_varnames, ] <- 
     obs[variable_names$dem_varnames, ]*shifted_censor
-  
-  #---- Dementia indicators ----
-  for(i in 1:ncol(obs)){
-    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
-    if(is.finite(dem_int)){
-      obs["dem_wave", i] <- (dem_int - 1)
-      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
-      if(dem_int < 10 & is.finite(first_censor)){
-        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-      if(dem_int < 10 & !is.finite(first_censor)){
-        last_1 <- length(variable_names$dem_varnames)
-        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-    } else {
-      obs["dem_wave", i] = NA
-    }
-  }
   
   #---- Dementia calcs ----
   obs["dem", ] <- (1 - is.na(obs["dem_wave", ])) #Dementia diagnosis indicator
