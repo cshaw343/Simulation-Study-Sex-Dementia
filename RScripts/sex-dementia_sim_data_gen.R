@@ -184,6 +184,18 @@ data_gen <- function(num_obs){
   obs["dem_alive", obs["dem_death", ] == 1] <- 1
   obs["dem_alive", is.na(obs["dem_alive", ])] <- 0
   
+  #---- Last Cij value ----
+  for(i in 1:ncol(obs)){
+    int_start = floor(obs["survtime", i]/5)
+    if(int_start == 9){
+      next
+    }
+    int_remain = obs["survtime", i] %% 5
+    last_intercept <- paste0("Ci", int_start)
+    last_slope <- paste0("cij_slope",int_start , "-", int_start + 1)
+    obs["last_Cij", i] = obs[last_intercept, i] + obs[last_slope, i]*int_remain
+  }
+  
   #---- Contributed time ----
   for(i in 1:ncol(obs)){
     #5-year bands
