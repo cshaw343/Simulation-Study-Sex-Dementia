@@ -12,6 +12,8 @@ options(warn = -1)    #Suppress warnings
 source(here("RScripts", "sex-dementia_sim_parA.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
+source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+source(here("RScripts", "life_table_calcs.R"))
 
 #---- Plug in newly optimized data ----
 cij_slopes <- opt_cij_slopes
