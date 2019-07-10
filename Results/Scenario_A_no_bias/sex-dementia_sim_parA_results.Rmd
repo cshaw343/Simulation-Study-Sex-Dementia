@@ -431,7 +431,7 @@ male_mean_plot <- tibble("Age" = seq(50, 95, by = 5), "variable" = "male",
 
 
 #Create all plot data (includes random sample of Cij)
-samp_Cij <- sample_n(Cij_check, 10) %>% 
+samp_Cij <- sample_n(Cij_check, 50) %>% 
   dplyr::select(-sex) %>% t() %>%
   cbind(., "Age" = seq(50, 95, by = 5)) %>% as.data.frame() %>% 
   melt(., id.vars = "Age") %>% rbind(., female_mean_plot) %>% 
