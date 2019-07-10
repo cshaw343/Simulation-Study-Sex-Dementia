@@ -55,7 +55,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_1000_uniform_timetodem_20190708.csv"))
+                               "one_demcut_1000_uniform_timetodem_20190710.csv"))
   
 
 
