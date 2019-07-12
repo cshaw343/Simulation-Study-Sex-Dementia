@@ -238,7 +238,7 @@ variable_names[nrow(variable_names),
 
 #---- Define column names for simulation dataset ----
 column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
-                  variable_names$agec_varnames, "z0", 
+                  variable_names$agec_varnames, "z0_i", 
                   variable_names$slope_noise_names, variable_names$eps_varnames, 
                   variable_names$Cij_varnames, 
                   variable_names$cij_slopeij_varnames[1:num_tests], 
