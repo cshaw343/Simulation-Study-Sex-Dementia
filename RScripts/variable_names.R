@@ -17,7 +17,6 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                          "c50" = rep("c50", num_tests + 1),
                          "age" = rep("age", num_tests + 1), 
                          "eps" = rep("eps", num_tests + 1),
-                         "z0" = rep("z0", num_tests + 1),
                          "z1" = rep("z1", num_tests + 1),
                          "i" = rep("i", num_tests + 1),
                          "delta" = rep("delta", num_tests + 1),
@@ -64,9 +63,7 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
   #Random noise labels
   unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
-  #Slope-int noise labels
-  unite("int_noise", c(z0, timepoints), sep = "_", remove = FALSE) %>%
-  unite("int_noise_names", c(int_noise, i), sep = "", remove = FALSE) %>%
+  #Slope noise labels
   unite("slope_noise", c(z1, timepoints), sep = "_", remove = FALSE) %>%
   unite("slope_noise_names", c(slope_noise, i), sep = "", remove = FALSE) %>%
   #Dementia labels
@@ -151,7 +148,7 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
         c(mean_U, at_risk, females, start_ages), sep = "_", remove = FALSE) %>%
   unite("mean_U_at_risk_males_varnames", 
         c(mean_U, at_risk, males, start_ages), sep = "_", remove = FALSE) %>%
-  dplyr::select("exo_var", "int_noise_names", "slope_noise_names", 
+  dplyr::select("exo_var", "slope_noise_names", 
                 "cij_slopeij_varnames", "rij_varnames", 
                 "deathij_varnames", "Sij_varnames", "contributed_varnames", 
                 "age_varnames", "agec_varnames", "eps_varnames", "Cij_varnames", 
@@ -241,7 +238,7 @@ variable_names[nrow(variable_names),
 
 #---- Define column names for simulation dataset ----
 column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
-                  variable_names$agec_varnames, variable_names$int_noise_names, 
+                  variable_names$agec_varnames, "z0", 
                   variable_names$slope_noise_names, variable_names$eps_varnames, 
                   variable_names$Cij_varnames, 
                   variable_names$cij_slopeij_varnames[1:num_tests], 
