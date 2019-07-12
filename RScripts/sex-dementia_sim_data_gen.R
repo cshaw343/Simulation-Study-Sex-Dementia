@@ -54,7 +54,11 @@ data_gen <- function(num_obs){
   for(i in 1:(num_tests + 1)){
     noise <- mvrnorm(n = num_obs, mu = rep(0, 2), 
                      Sigma = cij_slope_int_cov[[i]]) 
-    obs[, c(paste0("z0_", (i - 1), "i"), paste0("z1_", (i - 1), "i"))] <- noise
+    if(i == 1){
+      obs[, c("z0_i", paste0("z1_", (i - 1), "i"))] <- noise
+    } else{
+      obs[, paste0("z1_", (i - 1), "i")] <- noise[, 2]
+    }
   }
   
   #Generating noise term (unexplained variance in Cij) for each visit
