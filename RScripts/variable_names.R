@@ -62,7 +62,8 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
   #Centered age labels
   unite("agec_varnames", c(age_varnames, c50), sep = "_", remove = FALSE) %>% 
   #Random noise labels
-  unite("eps_varnames", c(eps, timepoints), sep = "", remove = FALSE) %>% 
+  unite("eps", c(eps, timepoints), sep = "", remove = FALSE) %>% 
+  unite("eps_varnames", c(eps, i), sep = "_", remove = FALSE) %>%
   #Slope noise labels
   unite("slope_noise", c(z1, timepoints), sep = "_", remove = FALSE) %>%
   unite("slope_noise_names", c(slope_noise, i), sep = "", remove = FALSE) %>%
