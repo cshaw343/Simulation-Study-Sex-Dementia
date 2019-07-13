@@ -7,6 +7,7 @@ cog_func <- function(knots_ages, slopes, obs_matrix){
   
   #Compute slope changes for all intervals based on knots and slope inputs
   extend_slopes <- c(slopes[1], rep(0, num_tests - 1))
+  ages = visit_times + 50
   for(k in 1:length(knots_ages)){
     extend_slopes[which(ages == knots_ages[k])] <- slopes[k + 1]
   }
