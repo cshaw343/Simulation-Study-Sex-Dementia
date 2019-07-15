@@ -14,7 +14,7 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 
 #---- Generating one cohort ----
 data_gen(500000) %>% 
-  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190710"))
+  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190711"))
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches

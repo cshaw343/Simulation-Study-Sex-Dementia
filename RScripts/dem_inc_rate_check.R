@@ -132,12 +132,16 @@ p_alive <- obs %>%
 p_alive_males <- male_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
-
+ 
 p_alive_females <- female_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
 
 #---- Checking values ----
+#Mean slopes in live people
+slopes_check <- colMeans(obs[, na.omit(variable_names$cij_slopeij_varnames)])
+slopes_check
+                                      
 #head(EURODEM_inc_rates$Male_All_Dementia_1000PY, -1)
 head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 all_sim_inc_rates
