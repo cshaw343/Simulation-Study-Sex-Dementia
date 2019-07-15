@@ -43,7 +43,7 @@ cij_var0 <- 0.2   #Variance of random cognitive intercept
 
 #For total matching
 cij_var1 <- c(0.001, #Need this for the noise term for the baseline measure
-              rep(0.001, 3), 0.0012, 0.0015, 0.0031, 0.006375, 0.01025, 0.0165) #Time-dependent variance of random cognitive slope
+              rep(0.001, 4), 0.059, 0.28, 0.95, 2.9, 10.5) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
@@ -68,7 +68,7 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0)
 
 #For total matching
-cij_slopes <- c(-0.0107143, 0, 0, -0.014, -0.007, -0.002, -0.007, -0.04, -0.08) 
+cij_slopes <- c(-0.005, 0, 0, 0, -0.025, -0.003, -0.008, -0.08, -0.16) 
                 
 b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
@@ -93,12 +93,12 @@ g6 <- log(c(rep(8, 3), 7.45, 6.29, 4.87, 4.41, 3.84, 3.13, 3.13))
 #            0.2175)
 
 #For total matching
-lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.063, 0.085, 0.12, 0.205)
+lambda <- c(0.0073, 0.0116, 0.018, 0.0273, 0.0415, 0.061, 0.085, 0.1225, 0.20)
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cut <- -4
+dem_cut <- -6
 # dem_cuts <- c(-2.98629, 
 #               -2.98629, -3.28948, -3.77503, -4.45, -4.975, -5.25, -6.225, 
 #               -6.8225, -7.05)
