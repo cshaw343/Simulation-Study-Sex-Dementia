@@ -149,9 +149,12 @@ data_gen <- function(num_obs){
   
   shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
   
-  #---- Censor Cij and dem data ----
+  #---- Censor Cij, slope, and dem data ----
   obs[variable_names$Cij_varnames, ] <- 
     obs[variable_names$Cij_varnames, ]*censor
+  
+  obs[variable_names$cij_slopeij_varnames[1:9], ] <- 
+    obs[variable_names$cij_slopeij_varnames[1:9], ]*censor[2:nrow(censor), ]
   
   obs[variable_names$dem_varnames, ] <- 
     obs[variable_names$dem_varnames, ]*shifted_censor
