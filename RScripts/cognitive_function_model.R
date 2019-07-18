@@ -28,7 +28,8 @@ cog_func <- function(knots_ages, slopes, obs_matrix){
     } else{
       z1_name <- variable_names$slope_noise_names[j]
       Cij[, j] = Cij[, (j - 1)] + 
-        (mean_slopes[(j - 1)] + obs_matrix[, z1_name] + b11*obs_matrix[, "female"] + 
+        (mean_slopes[(j - 1)] + obs_matrix[, z1_name] + 
+           b11*obs_matrix[, "female"] + 
            b12*obs_matrix[, "age0_c50"] + b13*obs_matrix[, "U"])*int_time + 
         obs_matrix[, eps_name]
     }
