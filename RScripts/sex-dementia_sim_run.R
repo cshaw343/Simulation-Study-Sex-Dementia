@@ -14,7 +14,7 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 
 #---- Generating one cohort ----
 data_gen(500000) %>% 
-  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190711"))
+  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190717"))
 
 #---- Running the simulation in parallel----
 #Function to run simulation in batches
@@ -55,7 +55,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_1000_20190707.csv"))
+                               "one_demcut_1000_20190717.csv"))
   
 
 
