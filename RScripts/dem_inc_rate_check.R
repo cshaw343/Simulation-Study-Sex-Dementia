@@ -138,12 +138,24 @@ p_alive_females <- female_data %>%
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
 
 #---- Checking values ----
-#Mean slopes in live people
-slopes_check <- colMeans(obs[, na.omit(variable_names$cij_slopeij_varnames)])
-slopes_check
-                                      
+# #Mean slopes in live people
+# slopes_check <- 
+#   colMeans(obs[, na.omit(variable_names$cij_slopeij_varnames)], na.rm = TRUE)
+# slopes_check
+
+Cij_check <- colMeans(obs[, variable_names$Cij_varnames], na.rm = TRUE)
+#Cij_check
+
 #head(EURODEM_inc_rates$Male_All_Dementia_1000PY, -1)
 head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 all_sim_inc_rates
 male_life_netherlands$cum_surv_cond50[-1]
 p_alive_males
+
+#Calculate observed slopes
+slopes_check <- vector(length = length(visit_times) - 1)
+
+for(i in 1:length(slopes_check)){
+  slopes_check[i] <- (Cij_check[i + 1] - Cij_check[i])/int_time
+}
+slopes_check
