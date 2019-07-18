@@ -56,7 +56,6 @@ for(i in output_column_names){
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
                                "one_demcut_1000_20190717.csv"))
-  
 
 
 
