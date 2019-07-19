@@ -22,9 +22,9 @@ data_gen <- function(num_obs){
     as.data.frame() %>% set_colnames(column_names)
   
   #---- Generating IDs, female, U ----
-  obs$id <- seq(from = 1, to = num_obs, by = 1)
-  obs$female <- rbinom(num_obs, size = 1, prob = pfemale)
-  obs$U <- rnorm(num_obs, mean = 0, sd = 1)
+  obs[, "id"] <- seq(from = 1, to = num_obs, by = 1)
+  obs[, "female"] <- rbinom(num_obs, size = 1, prob = pfemale)
+  obs[, "U"] <- rnorm(num_obs, mean = 0, sd = 1)
   
   #---- Generating age data ----
   #Creating ages at each timepoint j
@@ -76,8 +76,9 @@ data_gen <- function(num_obs){
   #Calculating Cij for each individual
   #Store Cij values and slope values for each assessment
   compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
-  obs[, variable_names$Cij_varnames] <- compute_Cij$Cij
-  obs[, variable_names$cij_slopeij_varnames[1:num_tests]] <- compute_Cij$slopes
+  obs[, variable_names$Cij_varnames] <- compute_Cij[["Cij"]]
+  obs[, variable_names$cij_slopeij_varnames[1:num_tests]] <- 
+    compute_Cij[["slopes"]]
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
@@ -120,8 +121,8 @@ data_gen <- function(num_obs){
   #---- Calculating Sij for each individual ----
   #Store Sij values and survival time
   survival_data <- survival(obs)
-  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data$Sij
-  obs["survtime", ] <- survival_data$survtimes
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data[["Sij"]]
+  obs["survtime", ] <- survival_data[["survtimes"]]
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
