@@ -16,9 +16,9 @@ dem_onset <- function(obs_matrix, dem_cut){
       #Regular linear interpolation
        slope <- paste("cij_slope", wave - 1, "-", wave, sep = "")
        int <- paste("Ci", wave - 1, sep = "")
-       m = as.double(obs_matrix[slope, i])
-       b = as.double(obs_matrix[int, i])
-      
+       m = obs_matrix[slope, i]
+       b = obs_matrix[int, i]
+       
        time = optimize(event_est, M = m, B = b, dem_cut = dem_cut,
                        interval = c(0, 5))$minimum
        timetodem[i] = (wave - 1)*int_time + time
