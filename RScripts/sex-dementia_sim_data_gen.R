@@ -153,8 +153,8 @@ data_gen <- function(num_obs){
   obs[variable_names$Cij_varnames, ] <- 
     obs[variable_names$Cij_varnames, ]*censor
   
-  obs[variable_names$cij_slopeij_varnames[1:9], ] <- 
-    obs[variable_names$cij_slopeij_varnames[1:9], ]*censor[2:nrow(censor), ]
+  # obs[variable_names$cij_slopeij_varnames[1:9], ] <- 
+  #   obs[variable_names$cij_slopeij_varnames[1:9], ]*shifted_censor[1:9, ]
   
   obs[variable_names$dem_varnames, ] <- 
     obs[variable_names$dem_varnames, ]*shifted_censor
