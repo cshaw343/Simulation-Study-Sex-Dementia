@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 1000
+runs = 100
 
 #---- Number of observations ----
 #Multiples of 1000
@@ -68,7 +68,8 @@ cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 #cij_slopes <- c(-0.0107143, -0.0397509, -0.0125, 0, 0, 0, -0.055, 0, 0)
 
 #For total matching
-cij_slopes <- c(rep(-0.005, 2), -0.003, -0.008, -0.0225, -0.03, -0.09, -0.275, -0.75) 
+cij_slopes <- c(rep(-0.005, 2), -0.003, -0.008, -0.0225, -0.03, -0.09, -0.275, 
+                -0.75) 
                 
 b11 <- 0      #Effect of female on cognitive slope
 b12 <- -0.005 #Effect of age on cognitive slope; Note: Everyone is the same age so there is no age effect
