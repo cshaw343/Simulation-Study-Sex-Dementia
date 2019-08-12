@@ -7,14 +7,14 @@ p_load("future.apply", "parallel", "here", "magrittr")
 set.seed(20190624)
 
 #---- Source Files ----
-source(here("RScripts", "sex-dementia_sim_parA.R"))          #The parameter file
+source(here("RScripts", "sex-dementia_sim_parA_onedemcut_uniform_timetodem.R"))          #The parameter file
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
 data_gen(500000) %>%
-  saveRDS(here("Data", "dataset_A_onedemcut_500000_20190717"))
+  saveRDS(here("Data", "dataset_A_onedemcut_uniform_timetodem_500000_20190812"))
 
 
 #---- Running the simulation in parallel----
@@ -56,7 +56,7 @@ for(i in output_column_names){
 }
 
 write_csv(results_matrix, here("Results", "Scenario_A_no_bias", 
-                               "one_demcut_1000_uniform_timetodem_20190719.csv"))
+                               "one_demcut_uniform_timetodem_1000_20190812.csv"))
 
 
 
