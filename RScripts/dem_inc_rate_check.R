@@ -9,7 +9,7 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here("RScripts", "sex-dementia_sim_parA.R"))
+source(here("RScripts", "sex-dementia_sim_parA_onedemcut_uniform_timetodem.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
@@ -21,7 +21,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
-num_obs = 100000
+num_obs = 500000
 obs <- data_gen(num_obs) %>% as.data.frame()
 
 #---- Data by sex ----
