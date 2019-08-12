@@ -21,7 +21,7 @@ cij_var1 <- opt_cij_var1
 lambda <- opt_base_haz
 
 #---- Generate the data ----
-num_obs = 500000
+num_obs = 100000
 obs <- data_gen(num_obs) %>% as.data.frame()
 
 #---- Data by sex ----
