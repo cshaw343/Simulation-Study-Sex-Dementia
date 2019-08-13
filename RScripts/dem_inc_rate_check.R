@@ -9,7 +9,8 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here("RScripts", "sex-dementia_sim_parA_onedemcut_uniform_timetodem.R"))
+source(here("RScripts", 
+            "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
