@@ -94,7 +94,7 @@ g6 <- log(c(rep(1, 10)))
 #            0.2175)
 
 #For total matching
-lambda <- c(0.0073, 0.0116, 0.018, 0.0273, 0.0415, 0.061, 0.085, 0.1225, 0.20)
+lambda <- c(0.0073, 0.0116, 0.018, 0.028, 0.042, 0.061, 0.085, 0.1225, 0.20)
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
