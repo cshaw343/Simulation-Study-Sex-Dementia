@@ -7,7 +7,8 @@ p_load("future.apply", "parallel", "here", "magrittr")
 set.seed(20190624)
 
 #---- Source Files ----
-source(here("RScripts", "sex-dementia_sim_parA_onedemcut_uniform_timetodem.R"))          #The parameter file
+source(here("RScripts", 
+            "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))          #The parameter file
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
