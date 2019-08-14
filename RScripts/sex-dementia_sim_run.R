@@ -16,7 +16,7 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 #---- Generating one cohort ----
 data_gen(500000) %>%
   saveRDS(here(
-    "Data", "dataset_A_onedemcut_uniform_timetodem_nodemkill_500000_20190813"))
+    "Data", "dataset_A_onedemcut_uniform_timetodem_nodemkill_500000_20190814"))
 
 
 #---- Running the simulation in parallel----
@@ -59,7 +59,7 @@ for(i in output_column_names){
 
 write_csv(results_matrix, 
           here("Results", "Scenario_A_no_bias", 
-               "one_demcut_uniform_timetodem_nodemkill_1000_20190813.csv"))
+               "one_demcut_uniform_timetodem_nodemkill_1000_20190814.csv"))
 
 
 
