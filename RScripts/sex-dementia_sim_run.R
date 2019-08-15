@@ -8,7 +8,7 @@ set.seed(20190624)
 
 #---- Source Files ----
 source(here("RScripts", 
-            "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))          #The parameter file
+            "sex-dementia_sim_parA_onedemcut_nodemkill.R"))          #The parameter file
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
@@ -16,7 +16,7 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 #---- Generating one cohort ----
 data_gen(500000) %>%
   saveRDS(here(
-    "Data", "dataset_A_onedemcut_uniform_timetodem_nodemkill_500000_20190814"))
+    "Data", "dataset_A_onedemcut_nodemkill_500000_20190814"))
 
 
 #---- Running the simulation in parallel----
@@ -59,7 +59,7 @@ for(i in output_column_names){
 
 write_csv(results_matrix, 
           here("Results", "Scenario_A_no_bias", 
-               "one_demcut_uniform_timetodem_nodemkill_1000_20190814.csv"))
+               "one_demcut_nodemkill_1000_20190814.csv"))
 
 
 
