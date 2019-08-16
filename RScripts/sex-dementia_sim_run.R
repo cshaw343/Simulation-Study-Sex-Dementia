@@ -62,7 +62,7 @@ clusterEvalQ(cl, {
 sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(100000)}) %>% 
   t() %>% as.data.frame() %>% 
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 "one_demcut_nodemkill_15_20190814.csv"))
+                 "one_demcut_nodemkill_1000_20190815.csv"))
 #stop the cluster
 stopCluster(cl)
 
