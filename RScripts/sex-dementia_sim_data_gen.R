@@ -16,7 +16,7 @@ source(here("RScripts", "dementia_onset.R"))
 source(here("RScripts", "compare_survtime_timetodem.R"))
 
 #---- The small batch data generation function ----
-data_gen <- function(num_obs){
+small_batch_gen <- function(num_obs){
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
     as.data.frame() %>% set_colnames(column_names)
@@ -264,6 +264,22 @@ data_gen <- function(num_obs){
   }
   
   #---- Values to return ----
-  return(t(obs))
+  return(obs)
+}
+
+data_gen <- function(num_obs){
+  batch_size = 1000
+  
+  if(num_obs%%batch_size != 0){
+    stop(paste("Number of runs must be a multiple of ", batch_size, "."))
+  }
+  
+  data <- replicate(num_obs/1000, small_batch_gen(batch_size))
+  data <- apply(data, 1, function(x) t(x))
+  data <- matrix(unlist(data), ncol = length(column_names), byrow = FALSE) %>%
+    as.data.frame() %>% set_colnames(column_names)
+  data[, 1] <- seq(from = 1, to = nrow(data), by = 1)
+  
+  return(data)
 }
 
