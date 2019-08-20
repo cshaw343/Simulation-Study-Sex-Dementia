@@ -43,7 +43,7 @@ cij_var0 <- 0.2   #Variance of random cognitive intercept
 
 #For total matching
 cij_var1 <- c(0.001, #Need this for the noise term for the baseline measure
-              rep(0.001, 3), 0.009, 0.08, 0.3, 0.950, 2.05, 6) #Time-dependent variance of random cognitive slope
+              rep(0.001, 3), 0.009, 0.08, 0.3, 0.950, 2.1, 5.025) #Time-dependent variance of random cognitive slope
 cij_cov <- 0.01   #Covariance of random intercept and random slope
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
