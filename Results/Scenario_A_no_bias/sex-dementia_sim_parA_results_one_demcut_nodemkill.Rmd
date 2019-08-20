@@ -84,7 +84,7 @@ dataset <-
 #Data Analyses
 sim_results <- 
   read_csv(here("Results", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_1000_20190814.csv")) %>% 
+                "one_demcut_nodemkill_1000_20190815.csv")) %>% 
   na.omit()
 
 mean_sim_results <- colMeans(sim_results)
