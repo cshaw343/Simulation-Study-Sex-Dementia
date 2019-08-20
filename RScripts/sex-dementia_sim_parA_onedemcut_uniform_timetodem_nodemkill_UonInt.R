@@ -54,7 +54,8 @@ cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be 
 b00 <- 0      #Cognitive intercept for males
 b01 <- 0      #Effect of female on cognitive intercept
 b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
-b03 <- -0.06  #Effect of U (unmeasured/underlying variable) on cognitive intercept
+b03 <- 0
+#b03 <- -0.06  #Effect of U (unmeasured/underlying variable) on cognitive intercept
 
 cij_knots <- seq(55, 90, by = 5) #Specify which ages to place knots
 
