@@ -7,8 +7,9 @@ p_load("parallel", "here", "magrittr")
 set.seed(20190624)
 
 #---- Source Files ----
-source(here("RScripts", 
-            "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))  #The parameter file
+source(
+  here("RScripts", 
+       "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
@@ -16,7 +17,8 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 #---- Generating one cohort ----
 data_gen(500000) %>%
   saveRDS(here(
-    "Data", "dataset_A_onedemcut_uniform_timetodem_nodemkill_500000_20190819"))
+    "Data", 
+    "dataset_A_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190820"))
 
 
 #---- Running the simulation in parallel----
@@ -52,8 +54,9 @@ clusterEvalQ(cl, {
   
   p_load("here", "magrittr")
   
-  source(here("RScripts", 
-              "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))  #The parameter file
+  source(
+    here("RScripts", 
+         "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
   source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
   source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
   source(here("RScripts", "misc_custom_functions.R"))           #Other functions needed
@@ -61,8 +64,9 @@ clusterEvalQ(cl, {
 
 sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(100000)}) %>% 
   t() %>% as.data.frame() %>% 
-  write_csv(here("Results", "Scenario_A_no_bias", 
-                 "one_demcut_uniform_timetodem_nodemkill_1000_20190819.csv"))
+  write_csv(
+    here("Results", "Scenario_A_no_bias", 
+         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190820.csv"))
 
 #stop the cluster
 stopCluster(cl)
