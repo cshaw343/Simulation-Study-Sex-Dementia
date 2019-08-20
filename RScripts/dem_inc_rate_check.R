@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", 
-  "sex-dementia_sim_parA_onedemcut_nodemkill.R"))
+  "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
