@@ -8,7 +8,7 @@ set.seed(20190624)
 
 #---- Source Files ----
 source(here("RScripts", 
-            "sex-dementia_sim_parA_onedemcut_nodemkill.R"))  #The parameter file
+            "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))  #The parameter file
 source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
@@ -53,7 +53,7 @@ clusterEvalQ(cl, {
   p_load("here", "magrittr")
   
   source(here("RScripts", 
-              "sex-dementia_sim_parA_onedemcut_nodemkill.R"))  #The parameter file
+              "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill.R"))  #The parameter file
   source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
   source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
   source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
@@ -62,7 +62,7 @@ clusterEvalQ(cl, {
 sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(100000)}) %>% 
   t() %>% as.data.frame() %>% 
   write_csv(here("Results", "Scenario_A_no_bias", 
-                 "one_demcut_nodemkill_1000_20190815.csv"))
+                 "one_demcut_uniform_timetodem_nodemkill_1000_20190816.csv"))
 #stop the cluster
 stopCluster(cl)
 
