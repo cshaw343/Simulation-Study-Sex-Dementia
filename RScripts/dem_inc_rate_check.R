@@ -159,4 +159,5 @@ for(i in 2:ncol(slopes_check)){
   slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
 }
 
-slopes_check
+slopes_check 
+colMeans(slopes_check)
