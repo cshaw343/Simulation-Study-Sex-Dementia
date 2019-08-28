@@ -55,5 +55,6 @@ Results/Scenario_A_no_bias/uniform*
 Results/Scenario_A_no_bias/one_demcut*
 Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut.Rmd
 Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut_all_match.Rmd
+RScripts/test*
 #Trash folder
 To Delete/*
