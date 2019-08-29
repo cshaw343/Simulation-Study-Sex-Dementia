@@ -10,7 +10,7 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "sex-dementia_sim_data_gen.R"))
+source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
 
 #---- Simulation function ----
 sex_dem_sim <- function(num_obs){
