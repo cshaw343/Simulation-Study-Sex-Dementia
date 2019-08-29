@@ -13,10 +13,10 @@ survival <- function(obs_matrix){
       survtime = -log(obs_matrix[r_name, i])/
         (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
                          g2*obs_matrix["U", i] + 
-                         g3*obs_matrix["female", i]*obs_matrix["U", i] +
-                         g4*obs_matrix[cij_slope_name, i] + 
-                         g5*obs_matrix[C_name, i] + 
-                         g6[j]*obs_matrix[dem_name, i]
+                         g3*obs_matrix["female", i]*obs_matrix["U", i] 
+                         # + g4*obs_matrix[cij_slope_name, i] + 
+                         #g5*obs_matrix[C_name, i] + 
+                         #g6[j]*obs_matrix[dem_name, i]
                          ))
       
       survtimes[j] <- as.numeric(survtime)
