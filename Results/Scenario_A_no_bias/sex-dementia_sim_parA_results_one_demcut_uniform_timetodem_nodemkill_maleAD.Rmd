@@ -1,6 +1,6 @@
 ---
 title: "Simulation Scenario A:  No bias anticipated"
-subtitle: "One dementia cut point; uniform time to dementia; Effect of U on Cognitive Intercept"
+subtitle: "One dementia cut point; uniform time to dementia; matching male AD in EURODEM"
 output: 
   bookdown::html_document2:
     fig_caption: TRUE
@@ -41,7 +41,7 @@ source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "life_table_calcs.R"))
 source(
   here("RScripts", 
-       "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
+       "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_maleAD.R"))
 source(here("RScripts", "variable_names.R"))
 source(here("RScripts", "misc_custom_functions.R"))
 ```
@@ -80,14 +80,14 @@ france_F <- read_csv(here("Data", "france_cohort_F_calcs"),
 dataset <- 
   readRDS(here(
     "Data", 
-    "dataset_A_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190820")) %>% 
+    "dataset_A_onedemcut_uniform_timetodem_nodemkill_maleAD_500000_20190820")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <- 
   read_csv(
     here("Results", "Scenario_A_no_bias", 
-         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190820.csv")) %>% 
+         "one_demcut_uniform_timetodem_nodemkill_maleAD_1000_20190820.csv")) %>% 
   na.omit()
 
 mean_sim_results <- colMeans(sim_results)
@@ -118,7 +118,7 @@ knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG_UonInt.png"))
 ```
 <br>
 
-In this scenario, sex influences survival while U influences the rate of cognitive change and dementia incidence.  The dotted line from U to survival represents the fact that in this causal structure, U does not influence survival; but the effects of U on survival will be added in future scenarios consistent with collider bias.
+In this scenario, sex influences survival while U influences an individual's cognitive intercept (at age 50) as well as their rate of cognitive change and dementia incidence.  The dotted line from U to survival represents the fact that in this causal structure, U does not influence survival; but the effects of U on survival will be added in future scenarios consistent with collider bias.
 
 <br>
 
