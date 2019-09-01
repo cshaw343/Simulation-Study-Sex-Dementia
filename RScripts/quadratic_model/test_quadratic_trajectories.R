@@ -147,6 +147,7 @@ ggplot(all_obs, aes(centered_age, Cij)) + geom_point() +
 #---- Correlations and covariances in quadratic trajectories ----
 obs <- data_gen(100000)
 
+#Mean model
 all_obs <- obs %>% 
   dplyr::select(variable_names$Cij_varnames) %>% 
   set_colnames(seq(0, 45, by = 5)) %>% 
@@ -156,5 +157,27 @@ all_obs <- obs %>%
 
 fit_mean_quad <- lm(Cij ~ centered_age + centered_age2, data = all_obs)
 
+#Individual trajectories
+Cij_data <- obs %>% sample_n(5000) %>% 
+  dplyr::select(variable_names$Cij_varnames) %>% 
+  t() %>% as.data.frame() %>% mutate("centered_age" = seq(0, 45, by = 5), 
+                                     "centered_age2" = centered_age^2)
+
+quad_coeff <- as.data.frame(matrix(nrow = 3, ncol = 5000)) %>% 
+  set_rownames(c("a0", "a1", "a2"))
 
 
+for(i in 1:ncol(quad_coeff)){
+  quad_coeff[, i] <- lm(Cij_data[, i] ~ centered_age + centered_age2, 
+       data = Cij_data)$coefficients
+}
+
+quad_coeff %<>% t() %>% as.data.frame()
+
+var(quad_coeff$a0)
+var(quad_coeff$a1, na.rm = TRUE)
+var(quad_coeff$a2, na.rm = TRUE)
+
+cov(quad_coeff$a0, quad_coeff$a1, use = "complete.obs")
+cov(quad_coeff$a0, quad_coeff$a2, use = "complete.obs")
+cov(quad_coeff$a1, quad_coeff$a2, use = "complete.obs")
