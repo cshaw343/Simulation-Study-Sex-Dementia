@@ -72,10 +72,6 @@ g1 <- log(c(0.5270786, 0.4693230, 0.4400211, 0.4499390, 0.4780844, 0.5407054,
 
 g2 <- 0     #Effect of U on log hazard of death
 g3 <- 0     #Effect of interaction between female and U on log hazard of death
-g4 <- 0     #Effect of cognitive slope at time j on log hazard of death
-g5 <- 0     #Effect of cognitive function at time j on log hazard of death
-
-g6 <- log(c(rep(1, 10))) #Effect of prevalent dementia on log hazard of death     
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
