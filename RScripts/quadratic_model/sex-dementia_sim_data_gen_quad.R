@@ -9,15 +9,15 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "cognitive_function_model.R"))
-source(here("RScripts", "survival_times.R"))
+source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+#source(here("RScripts", "cognitive_function_model.R"))
+#source(here("RScripts", "survival_times.R"))
 
 #---- The small batch data generation function ----
 small_batch_gen <- function(num_obs){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = num_obs, ncol = (length(column_names) + 3)) %>% 
-    as.data.frame() %>% set_colnames(c(column_names, "a0", "a1", "a2"))
+  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
+    as.data.frame() %>% set_colnames(column_names)
   
   #---- Generating IDs, female, U ----
   obs[, "id"] <- seq(from = 1, to = num_obs, by = 1)
@@ -36,10 +36,9 @@ small_batch_gen <- function(num_obs){
     obs[, variable_names$age_varnames] - mean(age0)
   
   #---- Generating "true" cognitive function Cij ----
-  #Refer to Manuscript/manuscript_equations.pdf for equation
   
-  #Generating random terms for slope and intercept
-  #Covariance matrices for random slope and intercept terms
+  #Generating random terms for quadratic model
+  #Defining the covariance matrix
   cij_slope_int_cov <- lapply(1:(num_tests + 1), 
                               function(x) matrix(NA, nrow = 2, ncol = 2))
   for(i in 1:(num_tests + 1)){
