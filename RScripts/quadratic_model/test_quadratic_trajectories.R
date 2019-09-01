@@ -144,7 +144,17 @@ ggplot(all_obs, aes(centered_age, Cij)) + geom_point() +
   stat_smooth(method = "lm", formula = y ~ x + I(x^2), size = 1, se = FALSE) + 
   theme_minimal()
 
-test_mean_model <- lm(Cij ~ centered_age + centered_age2, data = all_obs)
+#---- Correlations and covariances in quadratic trajectories ----
+obs <- data_gen(100000)
+
+all_obs <- obs %>% 
+  dplyr::select(variable_names$Cij_varnames) %>% 
+  set_colnames(seq(0, 45, by = 5)) %>% 
+  gather(key = "centered_age", value = "Cij") %>%
+  mutate_at("centered_age", as.numeric) %>% 
+  mutate("centered_age2" = centered_age^2)
+
+fit_mean_quad <- lm(Cij ~ centered_age + centered_age2, data = all_obs)
 
 
 
