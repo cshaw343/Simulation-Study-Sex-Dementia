@@ -10,10 +10,10 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "cognitive_function_model.R"))
-source(here("RScripts", "survival_times.R"))
-source(here("RScripts", "dementia_onset.R"))
-source(here("RScripts", "compare_survtime_timetodem.R"))
+source(here("RScripts", "linear_model", "cognitive_function_model.R"))
+source(here("RScripts", "linear_model", "survival_times.R"))
+source(here("RScripts", "linear_model", "dementia_onset.R"))
+source(here("RScripts", "linear_model", "compare_survtime_timetodem.R"))
 
 #---- The small batch data generation function ----
 small_batch_gen <- function(num_obs){
