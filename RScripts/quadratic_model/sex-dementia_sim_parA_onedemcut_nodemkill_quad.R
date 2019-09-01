@@ -32,13 +32,14 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 pfemale <- 0.51
 
 #---- Variances and correlations ----
-cij_var0 <- 0.2   #Variance of random cognitive intercept
-cij_var1 <- 0.2   #Variance of random linear term
-cij_var2 <- 0.2   #Variance of random quadratic term
+#Calculated based on the work in test_quadratic_trajectories.R
+cij_var0 <- 0.85    #Variance of random cognitive intercept
+cij_var1 <- 0.09    #Variance of random linear term
+cij_var2 <- 0.001   #Variance of random quadratic term (use tiny value b/c calcs give 0)
 
-cij_cov01 <- 0.01   #Covariance between random intercept and random linear term
-cij_cov12 <- 0.01   #Covariance between random linear and random quadratic term
-cij_cov02 <- 0.01   #Covariance between random intercept and random quadratic term
+cij_cov01 <- -0.1     #Covariance between random intercept and random linear term
+cij_cov12 <- -0.003   #Covariance between random linear and random quadratic term
+cij_cov02 <- 0.001    #Covariance between random intercept and random quadratic term (use tiny value b/c calcs give 0)
 
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 
