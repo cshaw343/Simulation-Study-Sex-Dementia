@@ -221,9 +221,10 @@ variable_names[nrow(variable_names),
                  "mean_U_at_risk_males_varnames")] <- NA
 
 #---- Define column names for simulation dataset ----
-column_names <- c(na.omit(variable_names$exo_var), variable_names$age_varnames, 
-                  variable_names$agec_varnames, "z_0i", "z_1i", "z_2i", 
-                  "eps_ij",variable_names$Cij_varnames, "last_Cij",
+column_names <- c(na.omit(variable_names$exo_var), 
+                  variable_names$age_varnames, variable_names$agec_varnames, 
+                  "z_0i", "z_1i", "z_2i", "eps_ij", 
+                  "a0", "a1", "a2", variable_names$Cij_varnames, "last_Cij",
                   variable_names$rij_varnames[1:num_tests], 
                   variable_names$Sij_varnames[1:num_tests], 
                   "death0", variable_names$deathij_varnames[1:num_tests], 
