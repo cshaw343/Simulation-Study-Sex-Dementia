@@ -36,11 +36,13 @@ cij_var0 <- 0.2   #Variance of random cognitive intercept
 cij_var1 <- 0.2   #Variance of random linear term
 cij_var2 <- 0.2   #Variance of random quadratic term
 
-cij_cov <- 0.01   #Covariance of random intercept and random slope
+cij_cov01 <- 0.01   #Covariance between random intercept and random linear term
+cij_cov12 <- 0.01   #Covariance between random linear and random quadratic term
+cij_cov02 <- 0.01   #Covariance between random intercept and random quadratic term
 
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
-cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
 
+#cij_r1 <- 0.3     #Correlation between noise terms for Cij; this may need to be adjusted
 #cij_var4 <- 0.19     #Variance of measurement error of Cij
 
 #---- Parameters for Cij ----
@@ -66,26 +68,23 @@ b23 <- -0.05  #Effect of U on cognitive quadratic term
 #chosen using calc from life_table_calcs.R 
 g1 <- log(c(0.5270786, 0.4693230, 0.4400211, 0.4499390, 0.4780844, 0.5407054, 
             0.6193134, 0.7189676, 0.7939100)) 
+
 g2 <- 0     #Effect of U on log hazard of death
 g3 <- 0     #Effect of interaction between female and U on log hazard of death
 g4 <- 0     #Effect of cognitive slope at time j on log hazard of death
 g5 <- 0     #Effect of cognitive function at time j on log hazard of death
-#Effect of prevalent dementia on log hazard of death
-#From Kaiser dataset for now
-g6 <- log(c(rep(1, 10)))      
+
+g6 <- log(c(rep(1, 10))) #Effect of prevalent dementia on log hazard of death     
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
-#lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275, 
-#            0.2175)
+lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275,
+           0.2175)
 
-#For total matching
-lambda <- c(0.0073, 0.0116, 0.018, 0.028, 0.045, 0.07, 0.1, 0.15, 0.27)
+# #For total matching
+# lambda <- c(0.0073, 0.0116, 0.018, 0.028, 0.045, 0.07, 0.1, 0.15, 0.27)
 
 #---- Dementia Cut Point ----
-#Need one value for each visit time, including baseline
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 dem_cut <- -6.4
-# dem_cuts <- c(-2.98629, 
-#               -2.98629, -3.28948, -3.77503, -4.45, -4.975, -5.25, -6.225, 
-#               -6.8225, -7.05)
+
