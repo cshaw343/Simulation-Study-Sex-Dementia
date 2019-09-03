@@ -48,21 +48,21 @@ cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at
 
 #---- Parameters for Cij ----
 #Cognitive function for person i at time j
-b00 <- -0.18  #Cognitive intercept for males (taken from quad fit to linear model)
+b00 <- 0      #Cognitive intercept for males (taken from quad fit to linear model)
 b01 <- 0      #Effect of female on cognitive intercept
-b02 <- -0.05  #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
+b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
 b10 <- 0.05   #Cognitive linear term for males (taken from quad fit to linear model)                
 b11 <- 0      #Effect of female on cognitive linear term
-b12 <- -0.005 #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
+b12 <- 0      #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0      #Effect of U on cognitive linear term 
 
 b20 <- -0.003 #Cognitive quadratic term for males (taken from quad fit to linear model)
 b21 <- 0      #Effect of female on cognitive quadratic term
-b22 <- -0.001 #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
-b23 <- -0.05  #Effect of U on cognitive quadratic term
+b22 <- 0      #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
+b23 <- 0  #Effect of U on cognitive quadratic term
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
