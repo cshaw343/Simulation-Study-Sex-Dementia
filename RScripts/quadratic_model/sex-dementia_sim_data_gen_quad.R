@@ -22,8 +22,8 @@ source(here("RScripts", "quadratic_model", "compare_survtime_timetodem_quad.R"))
 #---- The small batch data generation function ----
 data_gen <- function(num_obs){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
-    as.data.frame() %>% set_colnames(column_names)
+  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) 
+  colnames(obs) <- column_names
   
   #---- Generating IDs, female, U ----
   obs[, "id"] <- seq(from = 1, to = num_obs, by = 1)
@@ -62,15 +62,8 @@ data_gen <- function(num_obs){
   #Calculating Cij at each time point for each individual
   obs[, variable_names$Cij_varnames] <- compute_Cij(obs)
   
-  #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
-                         ncol = length(variable_names$Cij_varnames), 
-                         byrow = TRUE)
-  
-  obs[, variable_names$dem_varnames] <- 
-    (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
-  
-  obs %<>% filter(dem0 == 0)
+  #---- Check for dementia at baseline ----
+  obs <- obs[obs[, "Ci0"] > dem_cut, ]
   
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
@@ -82,11 +75,10 @@ data_gen <- function(num_obs){
   #---- Transpose the matrix for subsequent calculations ----
   obs = t(obs)
   
-  #---- Calculating Sij for each individual ----
-  #Store Sij values and survival time
-  survival_data <- survival(obs)
-  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data[["Sij"]]
-  obs["survtime", ] <- survival_data[["survtimes"]]
+  #---- Calculating Sij and survival times for each individual ----
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival(obs)
+  obs["survtime", ] <- colSums(obs[variable_names$Sij_varnames[1:num_tests], ], 
+                               na.rm = TRUE)
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
@@ -100,11 +92,41 @@ data_gen <- function(num_obs){
   
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
-  #---- Dementia wave ----
+  #---- Survival censoring matrix ----
+  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
+  censor[censor == 0] <- NA
+  censor %<>% rbind(1, .)
+  
+  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
+  
+  #---- Censor Cij and dem data ----
+  obs[variable_names$Cij_varnames, ] <- 
+    obs[variable_names$Cij_varnames, ]*censor
+  
+  obs[variable_names$dem_varnames, ] <- 
+    obs[variable_names$dem_varnames, ]*shifted_censor
+  
+  #---- Dementia indicators ----
+  # dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
+  #                        ncol = length(variable_names$Cij_varnames), 
+  #                        byrow = TRUE)
+  # 
+  # obs[, variable_names$dem_varnames] <- 
+  #   (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
+  
+  
   for(i in 1:ncol(obs)){
     dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
     if(is.finite(dem_int)){
       obs["dem_wave", i] <- (dem_int - 1)
+      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
+      if(dem_int < 10 & is.finite(first_censor)){
+        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
+      if(dem_int < 10 & !is.finite(first_censor)){
+        last_1 <- length(variable_names$dem_varnames)
+        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
+      }
     } else {
       obs["dem_wave", i] = NA
     }
@@ -145,20 +167,6 @@ data_gen <- function(num_obs){
   obs["ageatdem_death", ] <- obs["age0", ] + obs["timetodem_death", ]
   obs["dem_alive", obs["dem_death", ] == 1] <- 1
   obs["dem_alive", is.na(obs["dem_alive", ])] <- 0
-  
-  #---- Survival censoring matrix ----
-  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
-  censor[censor == 0] <- NA
-  censor %<>% rbind(1, .)
-  
-  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
-  
-  #---- Censor Cij and dem data ----
-  obs[variable_names$Cij_varnames, ] <- 
-    obs[variable_names$Cij_varnames, ]*censor
-  
-  obs[variable_names$dem_varnames, ] <- 
-    obs[variable_names$dem_varnames, ]*shifted_censor
   
   #---- Contributed time ----
   for(i in 1:ncol(obs)){
