@@ -27,27 +27,38 @@ vignettes/*.pdf
 # Meeting files
 Meetings/*
 #Simulation results
+
 Data/test_sim_results*
 Data/dataset*
 Results/Scenario_A_no_bias/sim_results*
 Results/Scenario_A_no_bias/one_demcut*
 #Debugging files
+
 RScripts/debugging*
+
 #DAGs
 RScripts/DAGs/sex*
+
 #Plots
 Plots/*
+
 #Search results and other data files
 Data/*
+
 #Markdown .html files
-Results/Scenario_A_no_bias/*.html
+Results/linear_model/Scenario_A_no_bias/*.html
+Results/quadratic_model/Scenario_A_no_bias/*.html
+
 #Simulation results
-Results/Scenario_A_no_bias/test_sim_results_20190312.csv
-Results/Scenario_A_no_bias/sim_results*
-Results/Scenario_A_no_bias/unform_timetodem*
-Results/Scenario_B/*.csv
+Results/linear_model/Scenario_A_no_bias/test_sim_results_20190312.csv
+Results/linear_model/Scenario_A_no_bias/sim_results*
+Results/linear_model/Scenario_A_no_bias/unform_timetodem*
+Results/quadratic_model/Scenario_A_no_bias/*.csv
+Results/linear_model/Scenario_B/*.csv
+
 #Scratch Code
 RScripts/scratch*
+
 #Test methods
 RScripts/logit_transform_Cij.R
 RScripts/simple_probabilistic_method.R
@@ -55,6 +66,8 @@ Results/Scenario_A_no_bias/uniform*
 Results/Scenario_A_no_bias/one_demcut*
 Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut.Rmd
 Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut_all_match.Rmd
-RScripts/test*
+RScripts/linear_model/test*.R
+RScripts/quadratic_model/test*.R
+
 #Trash folder
 To Delete/*
