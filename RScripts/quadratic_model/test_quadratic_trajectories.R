@@ -133,6 +133,9 @@ ggplot(plot_data_full, aes(centered_age, Cij, color = id)) +
   theme_minimal()
 
 #---- Mean quadratic trajectory ----
+#Use data_gen from linear_model
+obs <- data_gen(100000)
+
 all_obs <- obs %>% sample_n(size = 100000) %>% 
   dplyr::select(variable_names$Cij_varnames) %>% 
   set_colnames(seq(0, 45, by = 5)) %>% 
@@ -145,8 +148,6 @@ ggplot(all_obs, aes(centered_age, Cij)) + geom_point() +
   theme_minimal()
 
 #---- Correlations and covariances in quadratic trajectories ----
-obs <- data_gen(100000)
-
 #Mean model
 all_obs <- obs %>% 
   dplyr::select(variable_names$Cij_varnames) %>% 
