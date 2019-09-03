@@ -2,6 +2,7 @@
 dem_onset <- function(obs_matrix, dem_cut){
   
   timetodem <- vector(length = ncol(obs_matrix))
+  
   for(i in 1:ncol(obs_matrix)){
     if(is.na(obs_matrix["dem_wave", i])){
       timetodem[i] = as.double(obs_matrix["survtime", i])
