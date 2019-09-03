@@ -72,6 +72,8 @@ data_gen <- function(num_obs){
   obs[, variable_names$rij_varnames[1:num_tests]]<- 
     replicate(num_tests, runif(num_obs, min = 0, max = 1))
   
+  obs[, "death0"] <- 0
+  
   #---- Transpose the matrix for subsequent calculations ----
   obs = t(obs)
   
@@ -83,7 +85,6 @@ data_gen <- function(num_obs){
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  obs["death0", ] <- 0
   obs[variable_names$deathij_varnames[1:num_tests], ] <- 
     (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
   
