@@ -14,10 +14,11 @@ dem_onset <- function(obs_matrix, dem_cut){
         abs(obs["a0", i] + obs["a1", i]*x + obs["a2", i]*x^2 - dem_cut)
       }
       
-      obs["timetodem", i] <- 
+      timetodem[i] <- 
         optimize(quad_function, lower = 5*(wave - 1), upper = 5*(wave))$minimum
     }
   }
+  
   return(timetodem)
 }
 
