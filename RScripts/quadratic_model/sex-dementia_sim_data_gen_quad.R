@@ -207,5 +207,5 @@ data_gen <- function(num_obs){
   }
   
   #---- Values to return ----
-  return(t(obs))
+  return(as.data.frame(t(obs)))
 }
