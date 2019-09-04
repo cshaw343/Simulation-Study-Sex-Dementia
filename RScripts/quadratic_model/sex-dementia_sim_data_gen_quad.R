@@ -70,8 +70,8 @@ data_gen <- function(num_obs){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  obs[, variable_names$rij_varnames[1:num_tests]]<- 
-    replicate(num_tests, runif(num_obs, min = 0, max = 1))
+  obs[, variable_names$rij_varnames[1:num_tests]] <- 
+    replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
   
   obs[, "death0"] <- 0
   
