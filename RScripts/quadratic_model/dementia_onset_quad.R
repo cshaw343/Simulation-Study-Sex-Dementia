@@ -11,7 +11,8 @@ dem_onset <- function(obs_matrix, dem_cut){
       
       #Function we are trying to find the root of
       quad_function <- function(x){
-        abs(obs["a0", i] + obs["a1", i]*x + obs["a2", i]*x^2 - dem_cut)
+        abs(obs_matrix["a0", i] + obs_matrix["a1", i]*x + 
+              obs_matrix["a2", i]*x^2 - dem_cut)
       }
       
       timetodem[i] <- 
