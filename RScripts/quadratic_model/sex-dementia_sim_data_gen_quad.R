@@ -15,6 +15,7 @@ source(here("RScripts", "quadratic_model", "calc_coeff.R"))
 source(here("RScripts", "quadratic_model", "compute_Cij.R"))
 source(here("RScripts", "quadratic_model", "last_Cij.R"))
 source(here("RScripts", "quadratic_model", "survival_times_quad.R"))
+source(here("RScripts", "quadratic_model", "survival_censor.R"))
 source(here("RScripts", "quadratic_model", "dementia_onset_quad.R"))
 source(here("RScripts", "quadratic_model", "compare_survtime_timetodem_quad.R"))
 
@@ -93,69 +94,46 @@ data_gen <- function(num_obs){
   
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
-  #---- Survival censoring matrix ----
-  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
-  censor[censor == 0] <- NA
-  censor %<>% rbind(1, .)
-  
-  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
-  
-  #---- Censor Cij and dem data ----
-  obs[variable_names$Cij_varnames, ] <- 
-    obs[variable_names$Cij_varnames, ]*censor
-  
-  obs[variable_names$dem_varnames, ] <- 
-    obs[variable_names$dem_varnames, ]*shifted_censor
-  
   #---- Dementia indicators ----
-  # dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
-  #                        ncol = length(variable_names$Cij_varnames), 
-  #                        byrow = TRUE)
-  # 
-  # obs[, variable_names$dem_varnames] <- 
-  #   (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
-  
-  
+  max_dem <- length(variable_names$dem_varnames)
   for(i in 1:ncol(obs)){
-    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
-    if(is.finite(dem_int)){
-      obs["dem_wave", i] <- (dem_int - 1)
-      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
-      if(dem_int < 10 & is.finite(first_censor)){
-        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-      if(dem_int < 10 & !is.finite(first_censor)){
-        last_1 <- length(variable_names$dem_varnames)
-        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-    } else {
-      obs["dem_wave", i] = NA
+    below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
+    if(is.finite(below_dem)){
+      obs[variable_names$dem_varnames[1:(below_dem - 1)], i] <- 0
+      obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
+      obs["dem_wave", i] <- (below_dem - 1)
+      obs["dem", i] <- 1
+    } else{
+      obs[variable_names$dem_varnames[1:max_dem], i] <- 0
+      obs["dem", i] <- 0
     }
   }
-  
+
   #---- Dementia calculations ----
   obs["timetodem", ] <- dem_onset(obs, dem_cut)
-  obs["dem", ] <- (1 - is.na(obs["dem_wave", ])) #Dementia diagnosis indicator
   obs <- compare_survtime_timetodem(obs)
   obs["ageatdem", ] <- obs["age0", ] + obs["timetodem", ] #Age at dementia diagnosis
+
+  #---- Censor Cij and dem data ----
+  obs <- survival_censor(obs)
   
   #---- Last Cij value ----
   obs["last_Cij", ] <- last_Cij(obs)
   
   #Dementia status at death
   for(i in 1:ncol(obs)){
-    if(obs["dem", i] == 1 & obs["timetodem", i] <= obs["survtime", i]){
-      obs["dem_death", i] <- 1
-    } else if(obs["study_death", i] == 1 & 
-              (obs["dem", i] == 0 | (obs["dem", i] == 1 & 
-                                     obs["timetodem", i] > 
+     if(obs["dem", i] == 1 & obs["timetodem", i] <= obs["survtime", i]){
+       obs["dem_death", i] <- 1
+     } else if(obs["study_death", i] == 1 &
+               (obs["dem", i] == 0 | (obs["dem", i] == 1 &
+                                      obs["timetodem", i] >
                                      obs["survtime", i]))){
       obs["dem_death", i] <- 2
     } else {
       obs["dem_death", i] <- 0
     }
   }
-  
+
   #Time to dem_death
   for(i in 1:ncol(obs)){
     if(obs["dem", i] == 0){
@@ -177,7 +155,7 @@ data_gen <- function(num_obs){
     obs[full_slots, i] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
-      obs[variable_names$contributed_varnames[partial_slot], i] <- 
+      obs[variable_names$contributed_varnames[partial_slot], i] <-
         obs["timetodem_death", i]%%5
     }
   }
