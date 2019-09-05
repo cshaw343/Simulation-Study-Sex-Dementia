@@ -80,7 +80,7 @@ pre_survival_data_gen <- function(num_obs){
   return(obs)
 }
 
-survival_temp <- function(obs_matrix, lambda){
+survival_temp <- function(obs_matrix, lambda, g1){
   #Calculate survival times for each interval
   Sij <- matrix(ncol = ncol(obs_matrix), nrow = (length(visit_times) - 1))
   for(i in 1:ncol(obs_matrix)){
@@ -132,7 +132,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
         optimise(survivors, interval = c(0, 1), obs = sim_data_unexposed, 
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
-                           lambda = opt_lambdas))
+                           lambda = opt_lambdas, g1 = g1))
       sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
       sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
@@ -144,7 +144,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
                  interval = c(opt_lambdas[j - 1], 2.75*opt_lambdas[j - 1]), 
                  obs = sim_data_unexposed, cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
-                             lambda = opt_lambdas))
+                             lambda = opt_lambdas), g1 = g1)
       sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
       sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
     }
@@ -175,10 +175,10 @@ opt_g1s <- function(sim_data_exposed, cp50_exposed){
   for(j in 1:length(opt_g1s)){
     if(j == 1){
       opt_g1s[j:length(opt_g1s)] = 
-        optimise(survivors, interval = c(0, 1), obs = sim_data_exposed, 
+        optimise(survivors, interval = c(-1, 0), obs = sim_data_exposed, 
                  cp = cp50_exposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
-                             lambda = opt_g1s))
+                             g1 = opt_g1s))
       sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
