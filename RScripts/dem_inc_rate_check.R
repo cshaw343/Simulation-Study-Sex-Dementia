@@ -10,22 +10,30 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here(
-  "RScripts", 
-  "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_maleAD.R"))
-source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "sex-dementia_sim_data_gen.R"))
+  "RScripts", "quadratic_model",
+  "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "life_table_calcs.R"))
 
 #---- Plug in newly optimized data ----
-cij_slopes <- opt_cij_slopes
-cij_var1 <- opt_cij_var1
+# #linear splines model
+# cij_slopes <- opt_cij_slopes
+# cij_var1 <- opt_cij_var1
+
+#Quadratic model
+b10 <- opt_linear_term 
+b20 <- opt_quadratic_term
+cij_var1 <- opt_linear_var
+cij_var2 <- opt_quadratic_var
+
 lambda <- opt_base_haz
 g1 <- opt_mort_hr
 
 #---- Generate the data ----
 num_obs = 500000
-obs <- data_gen(num_obs) %>% as.data.frame()
+obs <- data_gen(num_obs)
 
 #---- Data by sex ----
 male_data <- obs %>% filter(female == 0)
@@ -141,8 +149,8 @@ p_alive_females <- female_data %>%
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
 
 #---- Checking values ----
-head(EURODEM_inc_rates$Male_AD_1000PY, -1)
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
+head(EURODEM_inc_rates$Male_AD_1000PY, -1)
 male_sim_inc_rates
 
 male_life_netherlands$cum_surv_cond50[-1]
@@ -151,18 +159,19 @@ p_alive_males
 female_life_netherlands$cum_surv_cond50[-1]
 p_alive_females
 
-#Calculate observed slopes
-Cij_check <- obs %>% group_by(female) %>% 
-  dplyr::select(c("female", variable_names$Cij_varnames)) %>% 
-  summarise_all(mean, na.rm = TRUE)
+# #Linear splines model
+# #Calculate observed slopes
+# Cij_check <- obs %>% group_by(female) %>% 
+#   dplyr::select(c("female", variable_names$Cij_varnames)) %>% 
+#   summarise_all(mean, na.rm = TRUE)
+# 
+# slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
+# colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
+# slopes_check[, "female"] = Cij_check$female
+# 
+# for(i in 2:ncol(slopes_check)){
+#   slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
+# }
 
-slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
-colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
-slopes_check[, "female"] = Cij_check$female
-
-for(i in 2:ncol(slopes_check)){
-  slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
-}
-
-slopes_check 
-colMeans(slopes_check)
+# slopes_check 
+# colMeans(slopes_check)
