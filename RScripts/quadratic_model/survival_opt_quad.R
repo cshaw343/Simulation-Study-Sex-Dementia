@@ -17,7 +17,7 @@ options(warnings = -1)
 source(here(
   "RScripts", "quadratic_model",
   "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
-source(here("RScripts", "euro_life_tables.R"))
+source(here("RScripts", "life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
 source(here("RScripts", "quadratic_model", "calc_coeff.R"))
@@ -77,81 +77,137 @@ pre_survival_data_gen <- function(num_obs){
   
   obs[, "death0"] <- 0
   
-  #---- Transpose the matrix for subsequent calculations ----
-  obs = t(obs)
-  
   return(obs)
 }
 
+survival_temp <- function(obs_matrix, lambda){
+  #Calculate survival times for each interval
+  Sij <- matrix(ncol = ncol(obs_matrix), nrow = (length(visit_times) - 1))
+  for(i in 1:ncol(obs_matrix)){
+    survtimes <- matrix(NA, nrow = (length(visit_times) - 1), ncol = 1)
+    for(j in 1:length(survtimes)){
+      r_name <- variable_names$rij_varnames[j]
+      
+      survtime = -log(obs_matrix[r_name, i])/
+        (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
+                         g2*obs_matrix["U", i] + 
+                         g3*obs_matrix["female", i]*obs_matrix["U", i]))
+      
+      survtimes[j] <- as.numeric(survtime)
+      if(survtime < 5){
+        break
+      }
+    }
+    Sij[, i] <- survtimes
+  }
+  Sij[Sij > 5] <- 5
+  return(Sij)
+}
+
+
 #---- Search for Baseline Hazard ----
 #Function for finding lambdas
-lambdas <- function(sim_data, cp50_unexposed){
+opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
   
   #Function we are trying to optimize
   survivors <- function(L, obs, cp){
-    time_left = -log(obs[rij])/(L*exp(g1*obs[, "sex"] + g2*obs[, agec] + 
-                                        g3*obs[, "U"] + 
-                                        g4*obs[, "sex"]*obs[, agec] + 
-                                        g5*obs[, slope] + g6*obs[, C]))
-    alive <- (time_left > 5) * 1
-    return(abs(mean(alive) - cp))
+    survtime = -log(sim_data_unexposed[, variable_names$rij_varnames[j]])/
+      (L*
+         exp(g1[j]*sim_data_unexposed[, "female"] + 
+               g2*sim_data_unexposed[, "U"] + 
+               g3*sim_data_unexposed[, "female"]*sim_data_unexposed[, "U"]))
+    
+    alive <- (survtime >= 5) * 1
+    return(abs(mean(alive) - cp50_unexposed[j]))
   }
   
-  #Create dataframes to return
-  cp_alive <- vector(length = num_tests)
-  lambdas <- vector(length = num_tests)
-  Sij <- vector(length = num_tests)
+  #Create vectors to return
+  sim_cp50_unexposed <- vector(length = num_tests)
+  opt_lambdas <- vector(length = num_tests)
+  
   #Begin search
-  for(j in 1:length(lambdas)){
-    test_num = j - 1
-    rij <- variable_names$rij_varnames[j]
-    agec <- variable_names$agec_varnames[j]
-    slope <- variable_names$cij_slopeij_varnames[j]
-    C <- paste("Ci", test_num, sep = "")
-    life_prob = as.double(cp[j + 1, "CP"])
+  for(j in 1:length(opt_lambdas)){
     if(j == 1){
-      lambdas[j] = optimise(survivors, interval = c(0, 1), 
-                            obs = sim_data, cp = life_prob)$minimum
-      Sij <- survival(obs = sim_data, lambda = lambdas)
-      alive_now <- (Sij[[j]] > 5)*1
-      sim_data %<>% cbind(., "alive" = (Sij[[j]] > 5)*1)
-      cp_alive[j] = mean(alive_now)
+      opt_lambdas[j:length(opt_lambdas)] = 
+        optimise(survivors, interval = c(0, 1), obs = sim_data_unexposed, 
+                 cp = cp50_unexposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
+                           lambda = opt_lambdas))
+      sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
+      colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
+      sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
     } else {
-      sim_data %<>% filter(alive == 1)
-      lambdas[j] = optimise(survivors, 
-                            interval = c(lambdas[j - 1], 2.75*lambdas[j - 1]), 
-                            obs = sim_data, cp = life_prob)$minimum
-      Sij <- survival(obs = sim_data, lambda = lambdas)
-      alive_now <- (Sij[[j]] > 5)*1
-      sim_data %<>% mutate("alive" = alive_now)
-      cp_alive[j] = mean(alive_now)
+      sim_data_unexposed <- 
+        sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ] 
+      opt_lambdas[j:length(opt_lambdas)] = 
+        optimise(survivors, 
+                 interval = c(opt_lambdas[j - 1], 2.75*opt_lambdas[j - 1]), 
+                 obs = sim_data_unexposed, cp = cp50_unexposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
+                             lambda = opt_lambdas))
+      sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
+      sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
     }
   }
-  return(list("lambdas" = lambdas, "cp_alive" = cp_alive))
+  return(list("opt_lambdas" = opt_lambdas, 
+              "sim_cp50_unexposed" = sim_cp50_unexposed))
 }
 
 #---- Search for effect of "female" on baseline hazard ----
-g1s <- function(sim_data, cp50_exposed){
+opt_g1s <- function(sim_data_exposed, cp50_exposed){
+  #Function we are trying to optimize
+  survivors <- function(G1, obs, cp, opt_lambdas){
+    survtime = -log(sim_data_exposed[, variable_names$rij_varnames[j]])/
+      (opt_lambdas[j]*
+         exp(G1*sim_data_exposed[, "female"] + 
+               g2*sim_data_exposed[, "U"] + 
+               g3*sim_data_exposed[, "female"]*sim_data_exposed[, "U"]))
+    
+    alive <- (survtime >= 5) * 1
+    return(abs(mean(alive) - cp50_exposed[j]))
+  }
   
+  #Create vectors to return
+  sim_cp50_exposed <- vector(length = num_tests)
+  opt_g1s <- vector(length = num_tests)
+  
+  #Begin search
+  for(j in 1:length(opt_g1s)){
+    if(j == 1){
+      opt_g1s[j:length(opt_g1s)] = 
+        optimise(survivors, interval = c(0, 1), obs = sim_data_exposed, 
+                 cp = cp50_exposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
+                             lambda = opt_g1s))
+      sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
+      colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
+      sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
+    } else {
+      sim_data_exposed <- 
+        sim_data_exposed[sim_data_exposed[, "alive_now"] == 1, ] 
+      opt_g1s[j:length(opt_g1s)] = 
+        optimise(survivors, 
+                 interval = c(opt_g1s[j - 1], 2.75*opt_g1s[j - 1]), 
+                 obs = sim_data_exposed, cp = cp50_exposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
+                             lambda = opt_g1s))
+      sim_data_exposed[, "alive_now"] <- (Sij[, j] >= 5)*1
+      sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
+    }
+  }
+  return(list("opt_g1s" = opt_g1s, 
+              "sim_cp50_exposed" = sim_cp50_exposed))
 }
+  
+#---- Doing the optimization ----
+sim_data <- pre_survival_data_gen(500000)
 
-#---- Averaging over baseline hazard searches----
-find_lambda <- function(unexposed, life_table){
-  simdata <- data_gen() %>% filter(sex == unexposed)
-  search <- lambdas(sim_data = simdata, cp = life_table)
-  return(search)
-}
+cp50_unexposed <- male_life_netherlands$cum_surv_cond50[-1]
+cp50_exposed <- female_life_netherlands$cum_surv_cond50[-1]
 
-#---- Check conditional probabilities using baseline hazards ----
-#Make sure to rerun parameter file with desired baseline hazards before running 
-#actual simulation
-lambda_searches <- 
-  replicate(35, find_lambda(unexposed = 0, 
-                            life_table = female_life_netherlands))
+sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
+sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
 
-avg_lambdas <- as_tibble(do.call(rbind, lambda_searches["lambdas", ])) %>%
-  colMeans()
-avg_cps <- as_tibble(do.call(rbind, lambda_searches["cp_alive", ])) %>%
-  colMeans()
+optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)
 
 
