@@ -33,7 +33,7 @@ dem_rates <- function(PARAMETERS, dem_rates){
   dem_cut <- PARAMETERS[9]  #dementia cut point
   
   #---- Create a blank dataset ----
-  num_obs = 100
+  num_obs = 100000
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) 
   colnames(obs) <- column_names
   
@@ -221,10 +221,14 @@ clusterExport(cl = cluster,
 #---- Doing the optimization ----
 optim_dem <- optimParallel(par = parameter_start, 
                            fn = dem_rates, dem_rates = maleAD_rates,
-                           lower = c(0, 0.05, 0.001, -0.3, -0.1, 0.001,
-                                     0.05, -0.003, -6.4),
-                           upper = c(2, 1, 0.05, -0.01, -0.001, 0.1,
-                                     0.05, -0.003, -6.4),
+                           lower = c(parameter_start[1], parameter_start[2], 
+                                     parameter_start[3], parameter_start[4], 
+                                     parameter_start[5], parameter_start[6],
+                                     0.01, -0.02, -6.4),
+                           upper = c(parameter_start[1], parameter_start[2], 
+                                     parameter_start[3], parameter_start[4], 
+                                     parameter_start[5], parameter_start[6],
+                                     0.1, -0.001, -4.5),
                            method = "L-BFGS-B", 
                            parallel = list(cl = cluster))
 
