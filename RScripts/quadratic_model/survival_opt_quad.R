@@ -81,7 +81,7 @@ pre_survival_data_gen <- function(num_obs){
   return(obs)
 }
 
-survival_temp <- function(obs_matrix, lambda, g1){
+survival_temp <- function(obs_matrix, lambda, opt_log_g1 = g1){
   #Calculate survival times for each interval
   Sij <- matrix(ncol = ncol(obs_matrix), nrow = (length(visit_times) - 1))
   for(i in 1:ncol(obs_matrix)){
@@ -90,7 +90,7 @@ survival_temp <- function(obs_matrix, lambda, g1){
       r_name <- variable_names$rij_varnames[j]
       
       survtime = -log(obs_matrix[r_name, i])/
-        (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
+        (lambda[j]*exp(opt_log_g1[j]*obs_matrix["female", i] + 
                          g2*obs_matrix["U", i] + 
                          g3*obs_matrix["female", i]*obs_matrix["U", i]))
       
@@ -127,16 +127,18 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
   opt_lambdas <- vector(length = num_tests)
   
   #Begin search
+  num_unexposed = nrow(sim_data_unexposed)
   for(j in 1:length(opt_lambdas)){
     if(j == 1){
       opt_lambdas[j:length(opt_lambdas)] = 
         optimise(survivors, interval = c(0, 1), obs = sim_data_unexposed, 
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
-                             lambda = opt_lambdas, g1 = g1))
+                             lambda = opt_lambdas))
       sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
-      sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
+      sim_cp50_unexposed[j] = 
+        sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
     } else {
       sim_data_unexposed <- 
         sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ] 
@@ -145,9 +147,10 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
                  interval = c(opt_lambdas[j - 1], 2.75*opt_lambdas[j - 1]), 
                  obs = sim_data_unexposed, cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
-                             lambda = opt_lambdas), g1 = g1)
+                             lambda = opt_lambdas))
       sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
-      sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
+      sim_cp50_unexposed[j] = 
+        sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
     }
   }
   return(list("opt_lambdas" = opt_lambdas, 
@@ -173,6 +176,7 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
   opt_log_g1s <- vector(length = num_tests)
   
   #Begin search
+  num_exposed = nrow(sim_data_exposed)
   for(j in 1:length(opt_log_g1s)){
     if(j == 1){
       opt_log_g1s[j:length(opt_log_g1s)] = 
@@ -181,10 +185,10 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
                  opt_lambdas = optim_lambda$opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
                              lambda = optim_lambda$opt_lambdas,
-                             g1 = opt_log_g1s))
+                             opt_log_g1 = opt_log_g1s))
       sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
-      sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
+      sim_cp50_exposed[j] = sum(sim_data_exposed[, "alive_now"]/num_exposed)
     } else {
       sim_data_exposed <- 
         sim_data_exposed[sim_data_exposed[, "alive_now"] == 1, ] 
@@ -195,9 +199,9 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
                  opt_lambdas = optim_lambda$opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
                              lambda = optim_lambda$opt_lambdas,
-                             g1 = opt_log_g1s))
+                             opt_log_g1 = opt_log_g1s))
       sim_data_exposed[, "alive_now"] <- (Sij[, j] >= 5)*1
-      sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
+      sim_cp50_exposed[j] = sum(sim_data_exposed[, "alive_now"]/num_exposed)
     }
   }
   return(list("opt_log_g1s" = opt_log_g1s, 
