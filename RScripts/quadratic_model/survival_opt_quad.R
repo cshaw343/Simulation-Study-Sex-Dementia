@@ -144,7 +144,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
         sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ] 
       opt_lambdas[j:length(opt_lambdas)] = 
         optimise(survivors, 
-                 interval = c(opt_lambdas[j - 1], 2.75*opt_lambdas[j - 1]), 
+                 interval = c(opt_lambdas[j - 1], 1.56*opt_lambdas[j - 1]), 
                  obs = sim_data_unexposed, cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
                              lambda = opt_lambdas))
@@ -194,7 +194,7 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
         sim_data_exposed[sim_data_exposed[, "alive_now"] == 1, ] 
       opt_log_g1s[j:length(opt_log_g1s)] = 
         optimise(survivors, 
-                 interval = c(-1, 0), 
+                 interval = c(-1, -0.3), 
                  obs = sim_data_exposed, cp = cp50_exposed, 
                  opt_lambdas = optim_lambda$opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
@@ -218,6 +218,6 @@ sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
 sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
 
 optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)
-optim_g1s <- opt_g1s(sim_data_exposed, cp50_exposed)
+optim_g1s <- opt_log_g1s(sim_data_exposed, cp50_exposed)
 
 
