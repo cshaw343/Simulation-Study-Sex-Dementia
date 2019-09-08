@@ -10,55 +10,64 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here(
-  "RScripts", 
-  "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
-source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "sex-dementia_sim_data_gen.R"))
+  "RScripts", "quadratic_model",
+  "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "life_table_calcs.R"))
 
 #---- Plug in newly optimized data ----
-cij_slopes <- opt_cij_slopes
-cij_var1 <- opt_cij_var1
+# #linear splines model
+# cij_slopes <- opt_cij_slopes
+# cij_var1 <- opt_cij_var1
+
+#Quadratic model
+b10 <- opt_linear_term 
+b20 <- opt_quadratic_term
+cij_var1 <- opt_linear_var
+cij_var2 <- opt_quadratic_var
+
 lambda <- opt_base_haz
+g1 <- opt_mort_hr
 
 #---- Generate the data ----
 num_obs = 500000
-obs <- data_gen(num_obs) %>% as.data.frame()
+obs <- data_gen(num_obs)
 
 #---- Data by sex ----
 male_data <- obs %>% filter(female == 0)
 female_data <- obs %>% filter(female == 1)
 
 #---- Compute incidence rates ----
-all_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
-colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
-rownames(all_sim_inc_rates) <- c("")
-
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- obs %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  all_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                                na.rm = TRUE)/
-                                              sum(PY_data[, contributed])), 3)
-}
+# all_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
+# colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
+# rownames(all_sim_inc_rates) <- c("")
+# 
+# for(slot in 1:num_tests){
+#   if(slot == 1){
+#     dem_last_wave <- paste0("dem", (slot - 1))
+#     dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+#     death_last_wave <- paste0("death", (slot - 1))
+#     death_this_wave <- paste0("death", (slot - 1), "-", slot)
+#     contributed <- paste0("contributed", (slot - 1), "-", slot)
+#   } else {
+#     dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+#     dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+#     death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
+#     death_this_wave <- paste0("death", (slot - 1), "-", slot)
+#     contributed <- paste0("contributed", (slot - 1), "-", slot)
+#   }
+#   PY_data <- obs %>% 
+#     dplyr::select(death_last_wave, death_this_wave, 
+#                   dem_last_wave, dem_this_wave, contributed) %>% 
+#     filter(!! as.name(death_last_wave) == 0 & 
+#              !! as.name(dem_last_wave) == 0) 
+#   
+#   all_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
+#                                                 na.rm = TRUE)/
+#                                               sum(PY_data[, contributed])), 3)
+# }
 
 male_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
 colnames(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
@@ -140,24 +149,29 @@ p_alive_females <- female_data %>%
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
 
 #---- Checking values ----
-#head(EURODEM_inc_rates$Male_All_Dementia_1000PY, -1)
-head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
-all_sim_inc_rates
+#head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
+head(EURODEM_inc_rates$Male_AD_1000PY, -1)
+male_sim_inc_rates
+
 male_life_netherlands$cum_surv_cond50[-1]
 p_alive_males
 
-#Calculate observed slopes
-Cij_check <- obs %>% group_by(female) %>% 
-  dplyr::select(c("female", variable_names$Cij_varnames)) %>% 
-  summarise_all(mean, na.rm = TRUE)
+female_life_netherlands$cum_surv_cond50[-1]
+p_alive_females
 
-slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
-colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
-slopes_check[, "female"] = Cij_check$female
+# #Linear splines model
+# #Calculate observed slopes
+# Cij_check <- obs %>% group_by(female) %>% 
+#   dplyr::select(c("female", variable_names$Cij_varnames)) %>% 
+#   summarise_all(mean, na.rm = TRUE)
+# 
+# slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
+# colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
+# slopes_check[, "female"] = Cij_check$female
+# 
+# for(i in 2:ncol(slopes_check)){
+#   slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
+# }
 
-for(i in 2:ncol(slopes_check)){
-  slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
-}
-
-slopes_check 
-colMeans(slopes_check)
+# slopes_check 
+# colMeans(slopes_check)

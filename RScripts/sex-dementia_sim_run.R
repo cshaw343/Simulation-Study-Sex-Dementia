@@ -9,8 +9,8 @@ set.seed(20190624)
 #---- Source Files ----
 source(
   here("RScripts", 
-       "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
-source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
+       "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
+source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
@@ -56,17 +56,17 @@ clusterEvalQ(cl, {
   
   source(
     here("RScripts", 
-         "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
-  source(here("RScripts", "sex-dementia_sim_data_gen.R"))      #The data generation script
+         "sex-dementia_sim_parA_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
+  source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
   source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
-  source(here("RScripts", "misc_custom_functions.R"))           #Other functions needed
+  source(here("RScripts", "misc_custom_functions.R"))  
 })
 
-sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(100000)}) %>% 
+sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>% 
   t() %>% as.data.frame() %>% 
   write_csv(
-    here("Results", "Scenario_C", 
-         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190824.csv"))
+    here("Results", "Scenario_A_no_bias", 
+         "one_demcut_uniform_timetodem_nodemkill_UonInt_100_quad_test.csv"))
 
 #stop the cluster
 stopCluster(cl)
