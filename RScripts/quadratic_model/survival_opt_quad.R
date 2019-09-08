@@ -1,5 +1,6 @@
 #***************************************************************
-# Performs a search for baseline hazards 
+# Performs a search for baseline hazards and 
+# log(g1) (affect of female sex on survival)
 # Reference data found in euro_life_tables.R 
 # (using Netherlands data)
 #***************************************************************
@@ -132,7 +133,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
         optimise(survivors, interval = c(0, 1), obs = sim_data_unexposed, 
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
-                           lambda = opt_lambdas, g1 = g1))
+                             lambda = opt_lambdas, g1 = g1))
       sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
       sim_cp50_unexposed[j] = mean(sim_data_unexposed[, "alive_now"])
@@ -154,12 +155,12 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
 }
 
 #---- Search for effect of "female" on baseline hazard ----
-opt_g1s <- function(sim_data_exposed, cp50_exposed){
+opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
   #Function we are trying to optimize
-  survivors <- function(G1, obs, cp, opt_lambdas){
+  survivors <- function(LOG_G1, obs, cp, opt_lambdas){
     survtime = -log(sim_data_exposed[, variable_names$rij_varnames[j]])/
       (opt_lambdas[j]*
-         exp(G1*sim_data_exposed[, "female"] + 
+         exp(LOG_G1*sim_data_exposed[, "female"] + 
                g2*sim_data_exposed[, "U"] + 
                g3*sim_data_exposed[, "female"]*sim_data_exposed[, "U"]))
     
@@ -169,33 +170,37 @@ opt_g1s <- function(sim_data_exposed, cp50_exposed){
   
   #Create vectors to return
   sim_cp50_exposed <- vector(length = num_tests)
-  opt_g1s <- vector(length = num_tests)
+  opt_log_g1s <- vector(length = num_tests)
   
   #Begin search
-  for(j in 1:length(opt_g1s)){
+  for(j in 1:length(opt_log_g1s)){
     if(j == 1){
-      opt_g1s[j:length(opt_g1s)] = 
+      opt_log_g1s[j:length(opt_log_g1s)] = 
         optimise(survivors, interval = c(-1, 0), obs = sim_data_exposed, 
-                 cp = cp50_exposed)$minimum
-      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
-                             g1 = opt_g1s))
+                 cp = cp50_exposed, 
+                 opt_lambdas = optim_lambda$opt_lambdas)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
+                             lambda = optim_lambda$opt_lambdas,
+                             g1 = opt_log_g1s))
       sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
     } else {
       sim_data_exposed <- 
         sim_data_exposed[sim_data_exposed[, "alive_now"] == 1, ] 
-      opt_g1s[j:length(opt_g1s)] = 
+      opt_log_g1s[j:length(opt_log_g1s)] = 
         optimise(survivors, 
-                 interval = c(opt_g1s[j - 1], 2.75*opt_g1s[j - 1]), 
-                 obs = sim_data_exposed, cp = cp50_exposed)$minimum
+                 interval = c(-1, 0), 
+                 obs = sim_data_exposed, cp = cp50_exposed, 
+                 opt_lambdas = optim_lambda$opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
-                             lambda = opt_g1s))
+                             lambda = optim_lambda$opt_lambdas,
+                             g1 = opt_log_g1s))
       sim_data_exposed[, "alive_now"] <- (Sij[, j] >= 5)*1
       sim_cp50_exposed[j] = mean(sim_data_exposed[, "alive_now"])
     }
   }
-  return(list("opt_g1s" = opt_g1s, 
+  return(list("opt_log_g1s" = opt_log_g1s, 
               "sim_cp50_exposed" = sim_cp50_exposed))
 }
   
@@ -209,5 +214,6 @@ sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
 sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
 
 optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)
+optim_g1s <- opt_g1s(sim_data_exposed, cp50_exposed)
 
 
