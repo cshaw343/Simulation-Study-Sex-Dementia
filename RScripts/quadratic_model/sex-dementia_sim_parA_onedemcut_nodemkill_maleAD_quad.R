@@ -62,21 +62,21 @@ b13 <- 0      #Effect of U on cognitive linear term
 b20 <- -0.003 #Cognitive quadratic term for males (taken from quad fit to linear model)
 b21 <- 0      #Effect of female on cognitive quadratic term
 b22 <- 0      #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
-b23 <- 0  #Effect of U on cognitive quadratic term
+b23 <- 0      #Effect of U on cognitive quadratic term
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.5270786, 0.4693230, 0.4400211, 0.4499390, 0.4780844, 0.5407054, 
-            0.6193134, 0.7189676, 0.7939100)) 
+g1 <- log(c(0.5252, 0.4677, 0.4333, 0.4497, 0.4719, 0.5479, 0.6201, 0.7146, 
+            0.7920)) 
 
 g2 <- 0     #Effect of U on log hazard of death
 g3 <- 0     #Effect of interaction between female and U on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
-lambda <- c(0.0073, 0.01175, 0.018, 0.02875, 0.0425, 0.06, 0.089, 0.1275,
-           0.2175)
+lambda <- c(0.0073, 0.0116, 0.0187, 0.0285, 0.0446, 0.0672, 0.1007, 0.1522, 
+            0.2550)
 
 # #For total matching
 # lambda <- c(0.0073, 0.0116, 0.018, 0.028, 0.045, 0.07, 0.1, 0.15, 0.27)
