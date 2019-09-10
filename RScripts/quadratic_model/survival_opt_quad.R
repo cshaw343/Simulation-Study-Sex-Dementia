@@ -18,7 +18,7 @@ options(warnings = -1)
 source(here(
   "RScripts", "quadratic_model",
   "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
-source(here("RScripts", "life_table_calcs.R"))
+source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
 source(here("RScripts", "quadratic_model", "calc_coeff.R"))
