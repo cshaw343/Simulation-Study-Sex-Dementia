@@ -213,8 +213,8 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
 #---- Doing the optimization ----
 sim_data <- pre_survival_data_gen(500000)
 
-cp50_unexposed <- male_life_netherlands$cum_surv_cond50[-1]
-cp50_exposed <- female_life_netherlands$cum_surv_cond50[-1]
+cp50_unexposed <- male_life_US$cum_surv_cond50[-1]
+cp50_exposed <- female_life_US$cum_surv_cond50[-1]
 
 sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
 sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
