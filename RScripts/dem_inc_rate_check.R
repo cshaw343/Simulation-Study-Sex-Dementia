@@ -14,7 +14,7 @@ source(here(
   "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
-source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 
 #---- Plug in newly optimized data ----
@@ -150,7 +150,7 @@ p_alive_females <- female_data %>%
 
 #---- Checking values ----
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
-head(EURODEM_inc_rates$Male_AD_1000PY, -1)
+head(ACT_inc_rates$Male_AD_1000PY, -1)
 male_sim_inc_rates
 
 male_life_US$cum_surv_cond50[-1]
