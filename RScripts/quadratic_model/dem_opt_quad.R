@@ -16,7 +16,7 @@ source(here("RScripts", "dementia_incidence_ACT.R"))
 
 #---- Function we want to optimize ----
 # We literally have to optimize the entire data generation function, 
-#but we will remove irrelevant calculations
+# but we will remove irrelevant calculations
 
 dem_rates <- function(PARAMETERS, dem_rates){
   cij_var0 <- PARAMETERS[1]    #Variance of random cognitive intercept
@@ -33,7 +33,7 @@ dem_rates <- function(PARAMETERS, dem_rates){
   dem_cut <- PARAMETERS[9]  #dementia cut point
   
   #---- Create a blank dataset ----
-  num_obs = 100000
+  num_obs = 100
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) 
   colnames(obs) <- column_names
   
@@ -224,11 +224,11 @@ optim_dem <- optimParallel(par = parameter_start,
                            lower = c(parameter_start[1], parameter_start[2], 
                                      parameter_start[3], parameter_start[4], 
                                      parameter_start[5], parameter_start[6],
-                                     0.01, -0.02, -6.4),
+                                     0.01, -0.02, -10),
                            upper = c(parameter_start[1], parameter_start[2], 
                                      parameter_start[3], parameter_start[4], 
                                      parameter_start[5], parameter_start[6],
-                                     0.1, -0.001, -4.5),
+                                     0.1, -0.001, -6.4),
                            method = "L-BFGS-B", 
                            parallel = list(cl = cluster))
 
