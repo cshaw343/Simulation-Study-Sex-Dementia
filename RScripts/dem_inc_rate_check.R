@@ -15,7 +15,7 @@ source(here(
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
-source(here("RScripts", "life_table_calcs.R"))
+source(here("RScripts", "US_life_table_calcs.R"))
 
 #---- Plug in newly optimized data ----
 # #linear splines model
@@ -153,10 +153,10 @@ p_alive_females <- female_data %>%
 head(EURODEM_inc_rates$Male_AD_1000PY, -1)
 male_sim_inc_rates
 
-male_life_netherlands$cum_surv_cond50[-1]
+male_life_US$cum_surv_cond50[-1]
 p_alive_males
 
-female_life_netherlands$cum_surv_cond50[-1]
+female_life_US$cum_surv_cond50[-1]
 p_alive_females
 
 # #Linear splines model
