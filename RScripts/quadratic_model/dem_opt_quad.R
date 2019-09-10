@@ -12,7 +12,7 @@ p_load("here", "parallel", "optimParallel")
 source(here(
   "RScripts", "quadratic_model",
   "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
-source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+source(here("RScripts", "dementia_incidence_ACT.R"))
 
 #---- Function we want to optimize ----
 # We literally have to optimize the entire data generation function, 
@@ -209,7 +209,7 @@ clusterEvalQ(cl = cluster, {
 })
 
 #---- Setting up and exporting variables ----
-maleAD_rates <- head(EURODEM_inc_rates$Male_AD_1000PY, -1)
+maleAD_rates <- head(ACT_inc_rates$Male_AD_1000PY, -1)
 parameter_start <- c(cij_var0, cij_var1, cij_var2, 
                      cij_cov01, cij_cov12, cij_cov02, 
                      b10, b20, dem_cut)
