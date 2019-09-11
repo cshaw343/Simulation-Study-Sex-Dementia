@@ -27,6 +27,7 @@ b10 <- opt_linear_term
 b20 <- opt_quadratic_term
 cij_var1 <- opt_linear_var
 cij_var2 <- opt_quadratic_var
+dem_cut <- opt_dem_cut
 
 #---- Generate the data ----
 num_obs = 500000
@@ -147,7 +148,7 @@ p_alive_females <- female_data %>%
 
 #---- Checking values ----
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
-head(ACT_inc_rates$Male_AD_1000PY, -1)
+head(ACT_inc_rates$Male_AD_1000PY)
 male_sim_inc_rates
 
 male_life_US$cum_surv_cond50[-1]
