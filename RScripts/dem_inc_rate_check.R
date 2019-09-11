@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "here", "magrittr", "MASS")
+p_load("tidyverse", "here", "magrittr", "MASS", "matrixcalc", "Matrix")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
@@ -23,8 +23,20 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
+
+quad_coeff_cov_test <- matrix(c(cij_var0, cij_cov01, cij_cov02, 
+                                cij_cov01, cij_var1, cij_cov12, 
+                                cij_cov02, cij_cov12, cij_var2), 
+                              nrow = 3, byrow = TRUE)
+
+if(!is.positive.definite(quad_coeff_cov_test)){
+  quad_coeff_cov_test <- 
+    as.matrix(nearPD(quad_coeff_cov_test, corr = FALSE, keepDiag = FALSE)$mat)
+}
+
 b10 <- opt_linear_term 
 b20 <- opt_quadratic_term
+cij_var0 <- opt_baseline_var
 cij_var1 <- opt_linear_var
 cij_var2 <- opt_quadratic_var
 dem_cut <- opt_dem_cut
