@@ -28,9 +28,6 @@ b20 <- opt_quadratic_term
 cij_var1 <- opt_linear_var
 cij_var2 <- opt_quadratic_var
 
-lambda <- opt_base_haz
-g1 <- opt_mort_hr
-
 #---- Generate the data ----
 num_obs = 500000
 obs <- data_gen(num_obs)
