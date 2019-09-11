@@ -50,11 +50,6 @@ data_gen <- function(num_obs){
                              cij_cov02, cij_cov12, cij_var2), 
                            nrow = 3, byrow = TRUE)
   
-  if(!is.positive.definite(quad_coeff_cov)){
-    quad_coeff_cov <- 
-      as.matrix(nearPD(quad_coeff_cov, corr = FALSE, keepDiag = FALSE)$mat)
-  }
-  
   #Generate random terms for each individual
   obs[, c("z_0i", "z_1i", "z_2i")] <- 
     mvrnorm(n = num_obs, mu = rep(0, 3), Sigma = quad_coeff_cov) 
