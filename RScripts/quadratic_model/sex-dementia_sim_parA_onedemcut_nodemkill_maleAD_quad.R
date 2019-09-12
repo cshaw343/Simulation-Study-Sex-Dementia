@@ -33,7 +33,7 @@ pfemale <- 0.51
 
 #---- Variances and correlations ----
 #Calculated based on the work in test_quadratic_trajectories.R
-cij_var0 <- 1       #Variance of random cognitive intercept
+cij_var0 <- 0.001   #Variance of random cognitive intercept
 cij_var1 <- 0.09    #Variance of random linear term
 cij_var2 <- 0.001   #Variance of random quadratic term (use tiny value b/c calcs give 0)
 
@@ -54,10 +54,10 @@ b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same 
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.01   #Cognitive linear term for males (taken from quad fit to linear model)                
-b11 <- 0      #Effect of female on cognitive linear term
-b12 <- 0      #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
-b13 <- 0      #Effect of U on cognitive linear term 
+b10 <- 0.025   #Cognitive linear term for males (taken from quad fit to linear model)                
+b11 <- 0       #Effect of female on cognitive linear term
+b12 <- 0       #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
+b13 <- 0       #Effect of U on cognitive linear term 
 
 b20 <- -0.001 #Cognitive quadratic term for males (taken from quad fit to linear model)
 b21 <- 0      #Effect of female on cognitive quadratic term
