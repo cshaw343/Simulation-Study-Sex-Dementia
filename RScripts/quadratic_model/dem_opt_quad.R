@@ -6,7 +6,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "parallel", "optimParallel")
+p_load("here", "parallel", "optimParallel", "matrixcalc", "Matrix")
 
 #---- Source scripts ----
 source(here(
