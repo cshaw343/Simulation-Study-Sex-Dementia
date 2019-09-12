@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("MASS", "here")
+p_load("MASS", "here", "matrixcalc", "Matrix")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
@@ -49,6 +49,10 @@ data_gen <- function(num_obs){
                              cij_cov01, cij_var1, cij_cov12, 
                              cij_cov02, cij_cov12, cij_var2), 
                            nrow = 3, byrow = TRUE)
+  
+  if(!is.positive.definite(quad_coeff_cov)){
+    quad_coeff_cov <- nearPD(quad_coeff_cov)
+  }
   
   #Generate random terms for each individual
   obs[, c("z_0i", "z_1i", "z_2i")] <- 
