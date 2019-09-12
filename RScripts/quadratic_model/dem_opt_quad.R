@@ -61,6 +61,10 @@ dem_rates <- function(PARAMETERS, dem_rates){
                              cij_cov02, cij_cov12, cij_var2), 
                            nrow = 3, byrow = TRUE)
   
+  if(!is.positive.definite(quad_coeff_cov)){
+    quad_coeff_cov <- nearPD(quad_coeff_cov)
+  }
+  
   #Generate random terms for each individual
   obs[, c("z_0i", "z_1i", "z_2i")] <- 
     mvrnorm(n = num_obs, mu = rep(0, 3), Sigma = quad_coeff_cov) 
@@ -187,7 +191,7 @@ clusterEvalQ(cl = cluster, {
   if (!require("pacman")) 
     install.packages("pacman", repos='http://cran.us.r-project.org')
   
-  p_load("here", "MASS")
+  p_load("here", "MASS", "matrixcalc", "Matrix")
   
   #Suppress warnings
   options(warnings = -1)
@@ -212,7 +216,7 @@ clusterEvalQ(cl = cluster, {
 maleAD_rates <- head(ACT_inc_rates$Male_AD_1000PY, -1)
 parameter_start <- c(cij_var0, cij_var1, cij_var2, 
                      cij_cov01, cij_cov12, cij_cov02, 
-                     b10, b20, -8.5)
+                     b10, b20, dem_cut)
 
 clusterExport(cl = cluster,
               varlist = c("maleAD_rates", "parameter_start"),
@@ -223,16 +227,8 @@ start <- Sys.time()
 
 optim_dem <- optimParallel(par = parameter_start, 
                            fn = dem_rates, dem_rates = maleAD_rates,
-                           lower = c(parameter_start[1], parameter_start[2], 
-                                     parameter_start[3], parameter_start[4],
-                                     parameter_start[5], parameter_start[6], 
-                                     0.01, -0.005, 
-                                     -12),
-                           upper = c(parameter_start[1], parameter_start[2], 
-                                     parameter_start[3], parameter_start[4],
-                                     parameter_start[5], parameter_start[6], 
-                                     0.05, -0.001, 
-                                     -6.4),
+                           lower = c(0.001, 0.001, 0.001, -5, -5, 0, -2, -12),
+                           upper = c(0.1, 5, 5, 0, 0, 10, 0, -4),
                            # lower = c(0.5, 0.01, 0.001, -0.2, -0.01, 0.01,
                            #           0.01, -0.02, -10),
                            # upper = c(1, 0.2, 0.01, -0.001, -0.001, 0.1,
