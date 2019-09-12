@@ -27,11 +27,11 @@ opt_linear_term <- 4
 opt_quadratic_term <- -0.12
 opt_baseline_var <- 0.05
 opt_linear_var <- 0.11
-opt_quadratic_var <- 1
+opt_quadratic_var <- 0.5
 opt_cij_cov01 <- -0.07
 opt_cij_cov02 <- 0.002
 opt_cij_cov12 <- -0.003
-opt_dem_cut <- -6
+opt_dem_cut <- -6.5
 
 
 quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02, 
