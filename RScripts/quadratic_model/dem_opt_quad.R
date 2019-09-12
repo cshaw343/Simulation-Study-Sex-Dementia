@@ -62,7 +62,7 @@ dem_rates <- function(PARAMETERS, dem_rates){
                            nrow = 3, byrow = TRUE)
   
   if(!is.positive.definite(quad_coeff_cov)){
-    quad_coeff_cov <- nearPD(quad_coeff_cov)
+    quad_coeff_cov <- as.matrix(nearPD(quad_coeff_cov)$mat)
   }
   
   #Generate random terms for each individual
@@ -227,8 +227,14 @@ start <- Sys.time()
 
 optim_dem <- optimParallel(par = parameter_start, 
                            fn = dem_rates, dem_rates = maleAD_rates,
-                           lower = c(0.001, 0.001, 0.001, -5, -5, 0, -2, -12),
-                           upper = c(0.1, 5, 5, 0, 0, 10, 0, -4),
+                           lower = c(0.001, 0.001, 0.001, 
+                                     -5, -5, 0,
+                                     0, -2, 
+                                     -12),
+                           upper = c(0.1, 5, 5, 
+                                     0, 0, 5,
+                                     10, 0, 
+                                     -4),
                            # lower = c(0.5, 0.01, 0.001, -0.2, -0.01, 0.01,
                            #           0.01, -0.02, -10),
                            # upper = c(1, 0.2, 0.01, -0.001, -0.001, 0.1,
