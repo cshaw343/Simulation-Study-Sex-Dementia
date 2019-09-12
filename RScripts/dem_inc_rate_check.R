@@ -23,22 +23,48 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
+opt_linear_term <- 4
+opt_quadratic_term <- -0.12
+opt_baseline_var <- 0.05
+opt_linear_var <- 0.11
+opt_quadratic_var <- 1
+opt_cij_cov01 <- -0.07
+opt_cij_cov02 <- 0.002
+opt_cij_cov12 <- -0.003
+opt_dem_cut <- -6
 
-quad_coeff_cov_test <- matrix(c(cij_var0, cij_cov01, cij_cov02, 
-                                cij_cov01, cij_var1, cij_cov12, 
-                                cij_cov02, cij_cov12, cij_var2), 
+
+quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02, 
+                                opt_cij_cov01, opt_linear_var, opt_cij_cov12, 
+                                opt_cij_cov02, opt_cij_cov12, 
+                                opt_quadratic_var), 
                               nrow = 3, byrow = TRUE)
 
 if(!is.positive.definite(quad_coeff_cov_test)){
   quad_coeff_cov_test <- 
     as.matrix(nearPD(quad_coeff_cov_test, corr = FALSE, keepDiag = FALSE)$mat)
+  
+  opt_baseline_var <- quad_coeff_cov_test[1, 1]
+  opt_linear_var <- quad_coeff_cov_test[2, 2]
+  opt_quadratic_var <- quad_coeff_cov_test[3, 3]
+  opt_cij_cov01 <- quad_coeff_cov_test[1, 2]
+  opt_cij_cov02 <- quad_coeff_cov_test[1, 3]
+  opt_cij_cov12 <- quad_coeff_cov_test[2, 3]
+  
+  message("covariance parameters have changed:")
+  
+  quad_coeff_cov_test
 }
+
 
 b10 <- opt_linear_term 
 b20 <- opt_quadratic_term
 cij_var0 <- opt_baseline_var
 cij_var1 <- opt_linear_var
 cij_var2 <- opt_quadratic_var
+cij_cov01 <- opt_cij_cov01
+cij_cov02 <- opt_cij_cov02
+cij_cov12 <- opt_cij_cov12
 dem_cut <- opt_dem_cut
 
 #---- Generate the data ----
