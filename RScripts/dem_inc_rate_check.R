@@ -17,23 +17,23 @@ source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 
-#---- Plug in newly optimized data ----
+#---- Set values ----
 # #linear splines model
 # cij_slopes <- opt_cij_slopes
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 4
-opt_quadratic_term <- -0.12
+opt_linear_term <- 0.1
+opt_quadratic_term <- -0.00725
 opt_baseline_var <- 0.05
-opt_linear_var <- 0.11
-opt_quadratic_var <- 0.5
-opt_cij_cov01 <- -0.07
-opt_cij_cov02 <- 0.002
-opt_cij_cov12 <- -0.003
+opt_linear_var <- 0.00009
+opt_quadratic_var <- 0.000005
+opt_cij_cov01 <- 0
+opt_cij_cov02 <- 0.0001
+opt_cij_cov12 <- -0.000001
 opt_dem_cut <- -6.5
 
-
+#---- Check PD matrix ----
 quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02, 
                                 opt_cij_cov01, opt_linear_var, opt_cij_cov12, 
                                 opt_cij_cov02, opt_cij_cov12, 
@@ -183,6 +183,67 @@ p_alive_males <- male_data %>%
 p_alive_females <- female_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
+
+#---- Visualize Cij data ----
+Cij_check <- obs %>% 
+  dplyr::select("female", variable_names$Cij_varnames)
+
+#Getting mean Cij by sex
+female_meanCij<- Cij_check %>% filter(female == 1) %>% colMeans(., na.rm = TRUE)
+male_mean_Cij <- Cij_check %>% filter(female == 0) %>% colMeans(., na.rm = TRUE)
+
+#Checking the mean slopes by sex
+slopes_check <- obs %>% dplyr::select(female, contains("slope"))
+female_slopes_check <- slopes_check %>% filter(female == 1) %>% colMeans()
+male_slopes_check <- slopes_check %>% filter(female == 0) %>% colMeans()
+
+female_mean_plot <- tibble("Age" = c(seq(50, 95, by = 5)), 
+                           "variable" = "Women", 
+                           "value" = female_meanCij[-1])
+
+male_mean_plot <- tibble("Age" = seq(50, 95, by = 5), 
+                         "variable" = "Men", 
+                         "value" = male_mean_Cij[-1])
+
+Cij_plot_data <- obs %>% 
+  dplyr::select("id", "female", variable_names$Cij_varnames, "survtime", 
+                "last_Cij") %>% sample_n(100) %>% 
+  mutate("Age" = survtime + 50) %>% 
+  dplyr::select(-c(survtime, female)) %>% 
+  set_colnames(c("id", variable_names$Cij_varnames, "Cij", "Age")) 
+
+
+#Plot data
+samp_Cij <- Cij_plot_data[, c("id", variable_names$Cij_varnames)] %>%
+  set_colnames(c("id", seq(50, 95, by = 5))) %>% 
+  gather(as.character(seq(50, 95, by = 5)), key = "Age", value = "Cij") %>% 
+  mutate_at("Age", as.numeric) %>% 
+  rbind(., Cij_plot_data[, c("id", "Age", "Cij")]) %>% 
+  set_colnames(c("variable", "Age", "value")) %>% 
+  rbind(., female_mean_plot) %>% 
+  rbind(., male_mean_plot)
+
+#---- Plot a sample of Cij ----
+#Creating a plot with random sample in the background
+ggplot(samp_Cij, aes(Age, value)) + 
+  geom_line(data = 
+              subset(samp_Cij, variable != "Women" & variable != "Men"), 
+            aes(group = variable), color = "gray") +
+  geom_line(data = subset(samp_Cij, variable == "Women"), 
+            aes(color = variable), size = 1.25) + 
+  geom_line(data = subset(samp_Cij, variable == "Men"), 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  geom_hline(yintercept = dem_cut, size = 1.25) + 
+  labs(y = "Cognitive Function", 
+       x = "Age", 
+       color = "Mean Cognitive \n Function") + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  ggtitle("Mean Cognitive Trajectories") +
+  theme_minimal() +  
+  #theme(text = element_text(size = 28)) + 
+  coord_cartesian(ylim = c(-10, 10)) + 
+  geom_hline(yintercept = dem_cut) + 
+  guides(color = guide_legend(reverse = TRUE))
 
 #---- Checking values ----
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
