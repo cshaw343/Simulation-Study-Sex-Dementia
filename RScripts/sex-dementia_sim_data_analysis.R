@@ -8,10 +8,6 @@ options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
-#---- Source files ----
-source(here("RScripts", "variable_names.R"))
-source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
-
 #---- Simulation function ----
 sex_dem_sim <- function(num_obs){
   
