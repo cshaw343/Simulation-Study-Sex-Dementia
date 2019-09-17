@@ -10,6 +10,7 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here("RScripts", "linear_model", "variable_names.R"))
+source(here("RScripts", "linear_model", "create_ages.R"))
 source(here("RScripts", "linear_model", "cognitive_function_model.R"))
 source(here("RScripts", "linear_model", "survival_times.R"))
 source(here("RScripts", "linear_model", "dementia_onset.R"))
@@ -29,8 +30,7 @@ small_batch_gen <- function(num_obs){
   #---- Generating age data ----
   #Creating ages at each timepoint j
   ages = matrix(seq(50, 95, by = 5), nrow = 1)
-  ones = matrix(1, nrow = num_obs, ncol = 1)
-  obs[, variable_names$age_varnames] <- ones %*% ages
+  obs[, variable_names$age_varnames] <- create_ages(ages, num_obs)
   
   #---- Generating centered age data ----
   #Creating baseline-mean-centered ages at each timepoint j
