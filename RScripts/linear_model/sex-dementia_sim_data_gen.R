@@ -45,18 +45,17 @@ small_batch_gen <- function(num_obs){
   obs <- gen_random_effects(obs, cij_var0, cij_var1, cij_cov, cij_var3)
   
   #Calculating Cij for each individual
-  #Store Cij values and slope values for each assessment
-  compute_Cij <- cog_func(cij_knots, cij_slopes, obs)
-  obs[, variable_names$Cij_varnames] <- compute_Cij[["Cij"]]
+  obs[, variable_names$Cij_varnames] <- cog_func(cij_knots, cij_slopes, obs)
+  
+  #Check for dementia at baseline
+  obs <- obs[obs[, "Ci0"] > dem_cut, ]
   
   #Calculate observed slopes
-  slopes <- matrix(NA, nrow = nrow(obs_matrix), ncol= (length(visit_times) - 1))
-  
-  for(i in 1:ncol(slopes)){
-    slopes[, i] <- (Cij[, i + 1] - Cij[, i])/int_time
+  for(i in 1:9){
+    obs[, variable_names$cij_slopeij_varnames[i]] <- 
+      (obs[, variable_names$Cij_varnames[i + 1]] - 
+         obs[, variable_names$Cij_varnames[i]])/int_time
   }
-  obs[, variable_names$cij_slopeij_varnames[1:num_tests]] <- 
-    compute_Cij[["slopes"]]
   
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
