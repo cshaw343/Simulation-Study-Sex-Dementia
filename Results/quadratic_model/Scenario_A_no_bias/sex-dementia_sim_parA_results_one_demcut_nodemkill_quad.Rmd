@@ -90,7 +90,7 @@ age_labels <- tibble("Age" = c("Age ", rep("", (num_tests - 1))),
 <br>
 
 ```{r DAG, fig.align="center", out.width="75%"}
-knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG_UonInt.png"))
+knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG_UonInt_only.png"))
 ```
 <br>
 
