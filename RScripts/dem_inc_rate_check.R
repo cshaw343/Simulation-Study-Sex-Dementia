@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "linear_model",
-  "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
+  "sex-dementia_sim_parB_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
 source(here("RScripts", "linear_model", "variable_names.R"))
 source(here("RScripts", "linear_model", "sex-dementia_sim_data_gen.R"))
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
@@ -254,8 +254,8 @@ ggplot(samp_Cij, aes(Age, value)) +
 head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 all_sim_inc_rates
 #head(ACT_inc_rates$Male_AD_1000PY)
-male_sim_inc_rates
-female_sim_inc_rates
+# male_sim_inc_rates
+# female_sim_inc_rates
 
 male_life_netherlands$cum_surv_cond50
 #male_life_US$cum_surv_cond50[-1]
