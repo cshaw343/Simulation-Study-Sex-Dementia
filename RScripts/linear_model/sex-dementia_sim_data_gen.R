@@ -66,90 +66,65 @@ small_batch_gen <- function(num_obs){
   #---- Transpose the matrix for subsequent calculations ----
   obs = t(obs)
 
-  #---- Dementia indicators ----
-  
-  #---- Create a competing risk outcome ----
-  dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
-                         ncol = length(variable_names$Cij_varnames), 
-                         byrow = TRUE)
-  
-  obs[, variable_names$dem_varnames] <- 
-    (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
-  
-  
-  for(i in 1:ncol(obs)){
-    dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
-    if(is.finite(dem_int)){
-      obs["dem_wave", i] <- (dem_int - 1)
-      first_censor <- min(which(is.na(obs[variable_names$dem_varnames, i])))
-      if(dem_int < 10 & is.finite(first_censor)){
-        obs[variable_names$dem_varnames[dem_int:(first_censor - 1)], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-      if(dem_int < 10 & !is.finite(first_censor)){
-        last_1 <- length(variable_names$dem_varnames)
-        obs[variable_names$dem_varnames[dem_int:last_1], i] <- 1 #Changes dementia indicator to 1 after dementia diagnosis
-      }
-    } else {
-      obs["dem_wave", i] = NA
-    }
-  }
-  
-  #---- Generate survival time for each person ----
-  #Refer to Manuscript/manuscript_equations.pdf for equation
-  #Store Sij values and survival time
-  survival_data <- survival(obs)
-  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data[["Sij"]]
-  obs["survtime", ] <- survival_data[["survtimes"]]
+  #---- Calculating Sij and survival times for each individual ----
+  obs[variable_names$Sij_varnames[1:num_tests], ] <- survival(obs)
+  obs["survtime", ] <- colSums(obs[variable_names$Sij_varnames[1:num_tests], ], 
+                               na.rm = TRUE)
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
   #NAs mean the individual died in a prior interval
-  obs["death0", ] <- 0
   obs[variable_names$deathij_varnames[1:num_tests], ] <- 
     (obs[variable_names$Sij_varnames[1:num_tests], ] < int_time)*1 
   
   obs["study_death", ] <- 
     colSums(obs[variable_names$deathij_varnames[1:num_tests], ], na.rm = TRUE) #Study death indicator
-
+  
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
-  # #---- Standardize Cij values ----
-  # std_Cij <- obs %>% dplyr::select(variable_names$Cij_varnames) %>%
-  #   map_df(~(. - mean(., na.rm = TRUE))/sd(., na.rm = TRUE)) %>%
-  #   set_colnames(variable_names$std_Cij_varnames)
-  # 
-  # obs %<>% bind_cols(., std_Cij)
+  #---- Dementia indicators ----
+  max_dem <- length(variable_names$dem_varnames)
+  for(i in 1:ncol(obs)){
+    below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
+    if(is.finite(below_dem)){
+      obs[variable_names$dem_varnames[1:(below_dem - 1)], i] <- 0
+      obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
+      obs["dem_wave", i] <- (below_dem - 1)
+      obs["dem", i] <- 1
+    } else{
+      obs[variable_names$dem_varnames[1:max_dem], i] <- 0
+      obs["dem", i] <- 0
+    }
+  }
   
-  #---- Survival censoring matrix ----
-  censor <- (obs[variable_names$Sij_varnames[1:num_tests], ] == 5)*1
-  censor[censor == 0] <- NA
-  censor %<>% rbind(1, .)
-  
-  shifted_censor <- rbind(1, censor[1:(nrow(censor) - 1), ])
-  
-  #---- Censor Cij, slope, and dem data ----
-  obs[variable_names$Cij_varnames, ] <- 
-    obs[variable_names$Cij_varnames, ]*censor
-  
-  # obs[variable_names$cij_slopeij_varnames[1:9], ] <- 
-  #   obs[variable_names$cij_slopeij_varnames[1:9], ]*shifted_censor[1:9, ]
-  
-  obs[variable_names$dem_varnames, ] <- 
-    obs[variable_names$dem_varnames, ]*shifted_censor
-  
-  #---- Dementia calcs ----
-  obs["dem", ] <- (1 - is.na(obs["dem_wave", ])) #Dementia diagnosis indicator
-  obs["timetodem", ] <- dem_onset(obs, dem_cut) #Time to dementia diagnosis
+  #---- Dementia calculations ----
+  obs["timetodem", ] <- dem_onset(obs, dem_cut)
   obs <- compare_survtime_timetodem(obs)
   obs["ageatdem", ] <- obs["age0", ] + obs["timetodem", ] #Age at dementia diagnosis
+  
+  #---- Censor Cij and dem data ----
+  obs <- survival_censor(obs)
+  
+  #---- Last Cij value ----
+  for(i in 1:ncol(obs)){
+    int_start = floor(obs["survtime", i]/5)
+    if(int_start == 9){
+      next
+    }
+    int_remain = obs["survtime", i] %% 5
+    last_intercept <- paste0("Ci", int_start)
+    last_slope <- paste0("cij_slope",int_start , "-", int_start + 1)
+    obs["last_Cij", i] = obs[last_intercept, i] + obs[last_slope, i]*int_remain
+  }
   
   #Dementia status at death
   for(i in 1:ncol(obs)){
     if(obs["dem", i] == 1 & obs["timetodem", i] <= obs["survtime", i]){
       obs["dem_death", i] <- 1
-    } else if(obs["study_death", i] == 1 & 
-              (obs["dem", i] == 0 | (obs["dem", i] == 1 & 
-               obs["timetodem", i] > obs["survtime", i]))){
+    } else if(obs["study_death", i] == 1 &
+              (obs["dem", i] == 0 | (obs["dem", i] == 1 &
+                                     obs["timetodem", i] >
+                                     obs["survtime", i]))){
       obs["dem_death", i] <- 2
     } else {
       obs["dem_death", i] <- 0
@@ -169,18 +144,6 @@ small_batch_gen <- function(num_obs){
   obs["dem_alive", obs["dem_death", ] == 1] <- 1
   obs["dem_alive", is.na(obs["dem_alive", ])] <- 0
   
-  #---- Last Cij value ----
-  for(i in 1:ncol(obs)){
-    int_start = floor(obs["survtime", i]/5)
-    if(int_start == 9){
-      next
-    }
-    int_remain = obs["survtime", i] %% 5
-    last_intercept <- paste0("Ci", int_start)
-    last_slope <- paste0("cij_slope",int_start , "-", int_start + 1)
-    obs["last_Cij", i] = obs[last_intercept, i] + obs[last_slope, i]*int_remain
-  }
-  
   #---- Contributed time ----
   for(i in 1:ncol(obs)){
     #5-year bands
@@ -189,7 +152,7 @@ small_batch_gen <- function(num_obs){
     obs[full_slots, i] <- 5
     if(last_full_slot != 9){
       partial_slot <- last_full_slot + 1
-      obs[variable_names$contributed_varnames[partial_slot], i] <- 
+      obs[variable_names$contributed_varnames[partial_slot], i] <-
         obs["timetodem_death", i]%%5
     }
   }
@@ -241,22 +204,22 @@ small_batch_gen <- function(num_obs){
   }
   
   #---- Values to return ----
-  return(obs)
+  return(as.data.frame(t(obs)))
 }
 
-data_gen <- function(num_obs){
-  batch_size = 1000
-  
-  if(num_obs%%batch_size != 0){
-    stop(paste("Number of runs must be a multiple of ", batch_size, "."))
-  }
-  
-  data <- replicate(num_obs/1000, small_batch_gen(batch_size))
-  data <- apply(data, 1, function(x) t(x))
-  data <- matrix(unlist(data), ncol = length(column_names), byrow = FALSE) %>%
-    as.data.frame() %>% set_colnames(column_names)
-  data[, 1] <- seq(from = 1, to = nrow(data), by = 1)
-  
-  return(data)
-}
+# data_gen <- function(num_obs){
+#   batch_size = 1000
+#   
+#   if(num_obs%%batch_size != 0){
+#     stop(paste("Number of runs must be a multiple of ", batch_size, "."))
+#   }
+#   
+#   data <- replicate(num_obs/1000, small_batch_gen(batch_size))
+#   data <- apply(data, 1, function(x) t(x))
+#   data <- matrix(unlist(data), ncol = length(column_names), byrow = FALSE) %>%
+#     as.data.frame() %>% set_colnames(column_names)
+#   data[, 1] <- seq(from = 1, to = nrow(data), by = 1)
+#   
+#   return(data)
+# }
 
