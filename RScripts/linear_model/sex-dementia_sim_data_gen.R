@@ -9,7 +9,7 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here("RScripts", "variable_names.R"))
+source(here("RScripts", "linear_model", "variable_names.R"))
 source(here("RScripts", "linear_model", "cognitive_function_model.R"))
 source(here("RScripts", "linear_model", "survival_times.R"))
 source(here("RScripts", "linear_model", "dementia_onset.R"))
@@ -18,8 +18,8 @@ source(here("RScripts", "linear_model", "compare_survtime_timetodem.R"))
 #---- The small batch data generation function ----
 small_batch_gen <- function(num_obs){
   #---- Create a blank dataset ----
-  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) %>% 
-    as.data.frame() %>% set_colnames(column_names)
+  obs <- matrix(NA, nrow = num_obs, ncol = length(column_names))
+  colnames(obs) <- column_names
   
   #---- Generating IDs, female, U ----
   obs[, "id"] <- seq(from = 1, to = num_obs, by = 1)
