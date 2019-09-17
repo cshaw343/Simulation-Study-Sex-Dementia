@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "linear_model",
-  "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
+  "sex-dementia_sim_parB_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
 source(here("RScripts", "life_table_calcs.R"))
 source(here("RScripts", "linear_model", "variable_names.R"))
 source(here("RScripts", "linear_model", "create_ages.R"))
