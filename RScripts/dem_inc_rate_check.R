@@ -10,62 +10,62 @@ options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
 source(here(
-  "RScripts", "quadratic_model",
-  "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
-source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
-source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
-source(here("RScripts", "dementia_incidence_ACT.R"))
-source(here("RScripts", "US_life_table_calcs.R"))
+  "RScripts", "linear_model",
+  "sex-dementia_sim_parC_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
+source(here("RScripts", "linear_model", "variable_names.R"))
+source(here("RScripts", "linear_model", "sex-dementia_sim_data_gen.R"))
+source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
+source(here("RScripts", "life_table_calcs.R"))
 
 #---- Set values ----
-# #linear splines model
-# cij_slopes <- opt_cij_slopes
-# cij_var1 <- opt_cij_var1
+#linear splines model
+cij_slopes <- opt_cij_slopes
+cij_var1 <- opt_cij_var1
 
-#Quadratic model
-opt_linear_term <- 0.1
-opt_quadratic_term <- -0.00725
-opt_baseline_var <- 0.05
-opt_linear_var <- 0.00009
-opt_quadratic_var <- 0.000005
-opt_cij_cov01 <- 0
-opt_cij_cov02 <- 0.0001
-opt_cij_cov12 <- -0.000001
-opt_dem_cut <- -6.5
-
-#---- Check PD matrix ----
-quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02, 
-                                opt_cij_cov01, opt_linear_var, opt_cij_cov12, 
-                                opt_cij_cov02, opt_cij_cov12, 
-                                opt_quadratic_var), 
-                              nrow = 3, byrow = TRUE)
-
-if(!is.positive.definite(quad_coeff_cov_test)){
-  quad_coeff_cov_test <- 
-    as.matrix(nearPD(quad_coeff_cov_test, corr = FALSE, keepDiag = FALSE)$mat)
-  
-  opt_baseline_var <- quad_coeff_cov_test[1, 1]
-  opt_linear_var <- quad_coeff_cov_test[2, 2]
-  opt_quadratic_var <- quad_coeff_cov_test[3, 3]
-  opt_cij_cov01 <- quad_coeff_cov_test[1, 2]
-  opt_cij_cov02 <- quad_coeff_cov_test[1, 3]
-  opt_cij_cov12 <- quad_coeff_cov_test[2, 3]
-  
-  message("covariance parameters have changed:")
-  
-  quad_coeff_cov_test
-}
-
-
-b10 <- opt_linear_term 
-b20 <- opt_quadratic_term
-cij_var0 <- opt_baseline_var
-cij_var1 <- opt_linear_var
-cij_var2 <- opt_quadratic_var
-cij_cov01 <- opt_cij_cov01
-cij_cov02 <- opt_cij_cov02
-cij_cov12 <- opt_cij_cov12
-dem_cut <- opt_dem_cut
+# #Quadratic model
+# opt_linear_term <- 0.09
+# opt_quadratic_term <- -0.007
+# opt_baseline_var <- 0.05
+# opt_linear_var <- 0.0001
+# opt_quadratic_var <- 0.000005
+# opt_cij_cov01 <- 0
+# opt_cij_cov02 <- 0.0001
+# opt_cij_cov12 <- -0.000001
+# opt_dem_cut <- -5.5
+# 
+# #---- Check PD matrix ----
+# quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02, 
+#                                 opt_cij_cov01, opt_linear_var, opt_cij_cov12, 
+#                                 opt_cij_cov02, opt_cij_cov12, 
+#                                 opt_quadratic_var), 
+#                               nrow = 3, byrow = TRUE)
+# 
+# if(!is.positive.definite(quad_coeff_cov_test)){
+#   quad_coeff_cov_test <- 
+#     as.matrix(nearPD(quad_coeff_cov_test, corr = FALSE, keepDiag = FALSE)$mat)
+#   
+#   opt_baseline_var <- quad_coeff_cov_test[1, 1]
+#   opt_linear_var <- quad_coeff_cov_test[2, 2]
+#   opt_quadratic_var <- quad_coeff_cov_test[3, 3]
+#   opt_cij_cov01 <- quad_coeff_cov_test[1, 2]
+#   opt_cij_cov02 <- quad_coeff_cov_test[1, 3]
+#   opt_cij_cov12 <- quad_coeff_cov_test[2, 3]
+#   
+#   message("covariance parameters have changed:")
+#   
+#   quad_coeff_cov_test
+# }
+# 
+# 
+# b10 <- opt_linear_term 
+# b20 <- opt_quadratic_term
+# cij_var0 <- opt_baseline_var
+# cij_var1 <- opt_linear_var
+# cij_var2 <- opt_quadratic_var
+# cij_cov01 <- opt_cij_cov01
+# cij_cov02 <- opt_cij_cov02
+# cij_cov12 <- opt_cij_cov12
+# dem_cut <- opt_dem_cut
 
 #---- Generate the data ----
 num_obs = 500000
@@ -76,34 +76,34 @@ male_data <- obs %>% filter(female == 0)
 female_data <- obs %>% filter(female == 1)
 
 #---- Compute incidence rates ----
-# all_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
-# colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
-# rownames(all_sim_inc_rates) <- c("")
-# 
-# for(slot in 1:num_tests){
-#   if(slot == 1){
-#     dem_last_wave <- paste0("dem", (slot - 1))
-#     dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-#     death_last_wave <- paste0("death", (slot - 1))
-#     death_this_wave <- paste0("death", (slot - 1), "-", slot)
-#     contributed <- paste0("contributed", (slot - 1), "-", slot)
-#   } else {
-#     dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-#     dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-#     death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-#     death_this_wave <- paste0("death", (slot - 1), "-", slot)
-#     contributed <- paste0("contributed", (slot - 1), "-", slot)
-#   }
-#   PY_data <- obs %>% 
-#     dplyr::select(death_last_wave, death_this_wave, 
-#                   dem_last_wave, dem_this_wave, contributed) %>% 
-#     filter(!! as.name(death_last_wave) == 0 & 
-#              !! as.name(dem_last_wave) == 0) 
-#   
-#   all_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-#                                                 na.rm = TRUE)/
-#                                               sum(PY_data[, contributed])), 3)
-# }
+all_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
+colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
+rownames(all_sim_inc_rates) <- c("")
+
+for(slot in 1:num_tests){
+  if(slot == 1){
+    dem_last_wave <- paste0("dem", (slot - 1))
+    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+    death_last_wave <- paste0("death", (slot - 1))
+    death_this_wave <- paste0("death", (slot - 1), "-", slot)
+    contributed <- paste0("contributed", (slot - 1), "-", slot)
+  } else {
+    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
+    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
+    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
+    death_this_wave <- paste0("death", (slot - 1), "-", slot)
+    contributed <- paste0("contributed", (slot - 1), "-", slot)
+  }
+  PY_data <- obs %>%
+    dplyr::select(death_last_wave, death_this_wave,
+                  dem_last_wave, dem_this_wave, contributed) %>%
+    filter(!! as.name(death_last_wave) == 0 &
+             !! as.name(dem_last_wave) == 0)
+
+  all_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave],
+                                                na.rm = TRUE)/
+                                              sum(PY_data[, contributed])), 3)
+}
 
 male_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
 colnames(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
@@ -188,14 +188,18 @@ p_alive_females <- female_data %>%
 Cij_check <- obs %>% 
   dplyr::select("female", variable_names$Cij_varnames)
 
-#Getting mean Cij by sex
-female_meanCij<- Cij_check %>% filter(female == 1) %>% colMeans(., na.rm = TRUE)
-male_mean_Cij <- Cij_check %>% filter(female == 0) %>% colMeans(., na.rm = TRUE)
+#Getting Cij by sex
+female_Cij <- Cij_check %>% filter(female == 1) 
+male_Cij <- Cij_check %>% filter(female == 0)
 
-#Checking the mean slopes by sex
-slopes_check <- obs %>% dplyr::select(female, contains("slope"))
-female_slopes_check <- slopes_check %>% filter(female == 1) %>% colMeans()
-male_slopes_check <- slopes_check %>% filter(female == 0) %>% colMeans()
+#Getting mean Cij by sex
+female_meanCij<- female_Cij %>% colMeans(., na.rm = TRUE)
+male_mean_Cij <- male_Cij %>% colMeans(., na.rm = TRUE)
+
+# #Checking the mean slopes by sex
+# slopes_check <- obs %>% dplyr::select(female, contains("slope"))
+# female_slopes_check <- slopes_check %>% filter(female == 1) %>% colMeans()
+# male_slopes_check <- slopes_check %>% filter(female == 0) %>% colMeans()
 
 female_mean_plot <- tibble("Age" = c(seq(50, 95, by = 5)), 
                            "variable" = "Women", 
@@ -229,10 +233,11 @@ ggplot(samp_Cij, aes(Age, value)) +
   geom_line(data = 
               subset(samp_Cij, variable != "Women" & variable != "Men"), 
             aes(group = variable), color = "gray") +
-  geom_line(data = subset(samp_Cij, variable == "Women"), 
-            aes(color = variable), size = 1.25) + 
-  geom_line(data = subset(samp_Cij, variable == "Men"), 
-            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  geom_line(data = subset(samp_Cij, variable == "Women"),
+            aes(color = variable), size = 1.25) +
+  geom_line(data = subset(samp_Cij, variable == "Men"),
+            aes(color = variable), size = 1.25, alpha = 0.6) +
+  #geom_point(data = ) +
   geom_hline(yintercept = dem_cut, size = 1.25) + 
   labs(y = "Cognitive Function", 
        x = "Age", 
@@ -246,29 +251,33 @@ ggplot(samp_Cij, aes(Age, value)) +
   guides(color = guide_legend(reverse = TRUE))
 
 #---- Checking values ----
-#head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
-head(ACT_inc_rates$Male_AD_1000PY)
+head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
+all_sim_inc_rates
+#head(ACT_inc_rates$Male_AD_1000PY)
 male_sim_inc_rates
+female_sim_inc_rates
 
-male_life_US$cum_surv_cond50[-1]
+male_life_netherlands$cum_surv_cond50
+#male_life_US$cum_surv_cond50[-1]
 p_alive_males
 
-female_life_US$cum_surv_cond50[-1]
+female_life_netherlands$cum_surv_cond50
+#female_life_US$cum_surv_cond50[-1]
 p_alive_females
 
-# #Linear splines model
-# #Calculate observed slopes
-# Cij_check <- obs %>% group_by(female) %>% 
-#   dplyr::select(c("female", variable_names$Cij_varnames)) %>% 
-#   summarise_all(mean, na.rm = TRUE)
-# 
-# slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
-# colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
-# slopes_check[, "female"] = Cij_check$female
-# 
-# for(i in 2:ncol(slopes_check)){
-#   slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
-# }
+#Linear splines model
+#Calculate observed slopes
+Cij_check <- obs %>% group_by(female) %>%
+  dplyr::select(c("female", variable_names$Cij_varnames)) %>%
+  summarise_all(mean, na.rm = TRUE)
 
-# slopes_check 
-# colMeans(slopes_check)
+slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
+colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
+slopes_check[, "female"] = Cij_check$female
+
+for(i in 2:ncol(slopes_check)){
+  slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
+}
+
+slopes_check
+colMeans(slopes_check)
