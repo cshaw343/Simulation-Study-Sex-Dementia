@@ -57,6 +57,17 @@ small_batch_gen <- function(num_obs){
          obs[, variable_names$Cij_varnames[i]])/int_time
   }
   
+  #---- Generating uniform random variables per interval for Sij ----
+  obs[, variable_names$rij_varnames[1:num_tests]] <- 
+    replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
+  
+  obs[, "death0"] <- 0
+  
+  #---- Transpose the matrix for subsequent calculations ----
+  obs = t(obs)
+
+  #---- Dementia indicators ----
+  
   #---- Create a competing risk outcome ----
   dem_cuts_mat <- matrix(dem_cut, nrow = nrow(obs), 
                          ncol = length(variable_names$Cij_varnames), 
@@ -65,19 +76,7 @@ small_batch_gen <- function(num_obs){
   obs[, variable_names$dem_varnames] <- 
     (obs[, variable_names$Cij_varnames] <= dem_cuts_mat)*1
   
-  obs %<>% filter(dem0 == 0)
   
-  #---- Generate survival time for each person ----
-  #Refer to Manuscript/manuscript_equations.pdf for equation
-  
-  #---- Generating uniform random variables per interval for Sij ----
-  obs[, variable_names$rij_varnames[1:num_tests]]<- 
-    replicate(num_tests, runif(num_obs, min = 0, max = 1))
-  
-  #---- Transpose the matrix for subsequent calculations ----
-  obs = t(obs)
-  
-  #---- Dementia indicators ----
   for(i in 1:ncol(obs)){
     dem_int <- min(which(obs[variable_names$dem_varnames, i] == 1))
     if(is.finite(dem_int)){
@@ -95,7 +94,8 @@ small_batch_gen <- function(num_obs){
     }
   }
   
-  #---- Calculating Sij for each individual ----
+  #---- Generate survival time for each person ----
+  #Refer to Manuscript/manuscript_equations.pdf for equation
   #Store Sij values and survival time
   survival_data <- survival(obs)
   obs[variable_names$Sij_varnames[1:num_tests], ] <- survival_data[["Sij"]]
