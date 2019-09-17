@@ -77,9 +77,9 @@ b13 <- -0.05  #Effect of U on cognitive slope (currently age constant)
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.5297, 0.4678, 0.4126, 0.4181, 0.4228, 0.4577, 0.4997, 0.5558, 
-            0.6744)) 
-g2 <- -log(2)  #Effect of U on log hazard of death
+g1 <- log(c(0.5259, 0.4719, 0.4254, 0.4187, 0.4293, 0.4634, 0.4988, 0.5532, 
+            0.6696)) 
+g2 <- log(2)  #Effect of U on log hazard of death
 g3 <- 0       #Effect of interaction between female and U on log hazard of death
 g4 <- 0       #Effect of cognitive slope at time j on log hazard of death
 g5 <- 0       #Effect of cognitive function at time j on log hazard of death
@@ -93,8 +93,8 @@ g6 <- log(c(rep(1, 10)))
 #            0.2175)
 
 #For total matching
-lambda <- c(0.0058, 0.0094, 0.0159, 0.0260, 0.0437, 0.0752, 0.1321, 0.2445, 
-            0.4887)
+lambda <- c(0.0058, 0.0093, 0.0158, 0.0257, 0.0439, 0.0748, 0.1326, 0.2476, 
+            0.4952)
 
 #---- Dementia Cut Point ----
 #Need one value for each visit time, including baseline
