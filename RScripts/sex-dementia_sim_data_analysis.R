@@ -12,7 +12,7 @@ options(warn = -1)    #Suppress warnings
 sex_dem_sim <- function(num_obs){
   
   #---- Generate the data ----
-  data <- data_gen(num_obs) %>% as.data.frame()
+  data <- data_gen(num_obs)
   
   #---- Data by sex ----
   female_data <- data %>% filter(female == 1)
