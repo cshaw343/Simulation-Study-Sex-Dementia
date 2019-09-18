@@ -44,6 +44,9 @@ ACT_inc_rates <- tibble("Low_Age" = seq(65, 90, by = 5),
                             "Female_AD_1000PY" = 
                               1000*F_AD/F_Person_Years, 
                             "Male_AD_1000PY" = 
-                              1000*M_AD/M_Person_Years)
+                              1000*M_AD/M_Person_Years) %>% 
+  mutate("Female_AD_IR" = F_AD/F_Person_Years, 
+         "Male_AD_IR" = M_AD/M_Person_Years, 
+         "AD_IRR_F:M" = Female_AD_IR/Male_AD_IR)
   
   
