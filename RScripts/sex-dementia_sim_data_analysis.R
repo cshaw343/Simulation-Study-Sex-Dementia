@@ -210,13 +210,13 @@ sex_dem_sim <- function(num_obs){
   PY_females_1year <- vector(length = num_tests*5)
   PY_males_1year <- vector(length = num_tests*5)
   
-  correct_female_PY <- 
-    colSums(female_data[, variable_names_1year$contributed_varnames], 
-            na.rm = TRUE)
-  
-  correct_male_PY <- 
-    colSums(male_data[, variable_names_1year$contributed_varnames], 
-            na.rm = TRUE)
+  # correct_female_PY <- 
+  #   colSums(female_data[, variable_names_1year$contributed_varnames], 
+  #           na.rm = TRUE)
+  # 
+  # correct_male_PY <- 
+  #   colSums(male_data[, variable_names_1year$contributed_varnames], 
+  #           na.rm = TRUE)
 
   #Computing female incidence cases, rates, PY
   for(slot in 1:(num_tests*5)){
@@ -436,18 +436,18 @@ sex_dem_sim <- function(num_obs){
   return(results_vec)
 }
 
-#---- Scratch code ----
-annual_deaths_female <- 
-  as.factor(floor(female_data[, "survtime"]) + 50)
-plot(table(annual_deaths_female), xlim = c(80, 90))
-
-
-annual_deaths_male <- 
-  as.factor(floor(male_data[, "survtime"]) + 50)
-plot(table(annual_deaths_male))
-
-#---- Check PY calculations ----
-PY_matrix
+# #---- Scratch code ----
+# annual_deaths_female <- 
+#   as.factor(floor(female_data[, "survtime"]) + 50)
+# plot(table(annual_deaths_female), xlim = c(80, 90))
+# 
+# 
+# annual_deaths_male <- 
+#   as.factor(floor(male_data[, "survtime"]) + 50)
+# plot(table(annual_deaths_male))
+# 
+# #---- Check PY calculations ----
+# PY_matrix
 
 
 
