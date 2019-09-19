@@ -6,9 +6,7 @@ last_Cij <- function(obs){
       survtime <- obs["survtime", i]
       last_Cij[i] <- 
         obs["a0", i] + obs["a1", i]*survtime + obs["a2", i]*survtime^2
-    } else{
-      last_Cij[i] <- NA
-    }
+    } 
   }
   
   return(last_Cij)
