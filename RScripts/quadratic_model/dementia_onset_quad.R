@@ -16,7 +16,7 @@ dem_onset <- function(obs_matrix, dem_cut){
       }
       
       timetodem[i] <- 
-        optimize(quad_function, lower = 5*(wave - 1), upper = 5*(wave))$minimum
+        optimize(quad_function, lower = 5*(wave - 1), upper = 5*wave)$minimum
     }
   }
   
