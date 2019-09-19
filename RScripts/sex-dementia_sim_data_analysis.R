@@ -110,7 +110,7 @@ sex_dem_sim <- function(num_obs){
     }
     PY_data <- data %>% 
       dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(dem_last_wave) == 0) 
+      filter(!! as.name(dem_last_wave) != 1) 
     
     sim_rates[slot] = 
       round(1000*(sum(PY_data[, dem_this_wave], na.rm = TRUE)/
@@ -232,7 +232,7 @@ sex_dem_sim <- function(num_obs){
     
     PY_data <- female_data %>% 
       dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! dem_last_wave != 1)
+      filter(!! as.name(dem_last_wave) != 1)
 
     inc_cases_females_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
 
@@ -254,9 +254,10 @@ sex_dem_sim <- function(num_obs){
       dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
       contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
     }
+    
     PY_data <- male_data %>%
-      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>%
-      filter(!! dem_last_wave != 1)
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! as.name(dem_last_wave) != 1)
 
     inc_cases_males_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
 
