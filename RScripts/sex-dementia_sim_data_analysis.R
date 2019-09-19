@@ -70,7 +70,7 @@ sex_dem_sim <- function(num_obs){
     }
     at_risk <- female_data %>% 
       dplyr::select(death_last_wave, dem_last_wave, U) %>% 
-      filter(!! as.name(death_last_wave) == 0 & !! as.name(dem_last_wave) == 0) 
+      filter(!! as.name(death_last_wave) != 1 & !! as.name(dem_last_wave) != 1) 
     
     at_risk_females[slot] = nrow(at_risk)
     mean_U_at_risk_females[slot] <- mean(at_risk$U)
@@ -87,8 +87,8 @@ sex_dem_sim <- function(num_obs){
     }
     at_risk <- male_data %>% 
       dplyr::select(death_last_wave, dem_last_wave, U) %>% 
-      filter(!! as.name(death_last_wave) == 0 & 
-               !! as.name(dem_last_wave) == 0) 
+      filter(!! as.name(death_last_wave) != 1 & 
+               !! as.name(dem_last_wave) != 1) 
     
     at_risk_males[slot] = nrow(at_risk)
     mean_U_at_risk_males[slot] <- mean(at_risk$U)
@@ -140,7 +140,7 @@ sex_dem_sim <- function(num_obs){
     }
     PY_data <- female_data %>% 
       dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(dem_last_wave) == 0) 
+      filter(!! as.name(dem_last_wave) != 1) 
     
     inc_cases_females[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
@@ -164,7 +164,7 @@ sex_dem_sim <- function(num_obs){
     }
     PY_data <- male_data %>% 
       dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
-      filter(!! as.name(dem_last_wave) == 0)
+      filter(!! as.name(dem_last_wave) != 1)
     
     inc_cases_males[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
     
@@ -209,6 +209,14 @@ sex_dem_sim <- function(num_obs){
 
   PY_females_1year <- vector(length = num_tests*5)
   PY_males_1year <- vector(length = num_tests*5)
+  
+  correct_female_PY <- 
+    colSums(female_data[, variable_names_1year$contributed_varnames], 
+            na.rm = TRUE)
+  
+  correct_male_PY <- 
+    colSums(male_data[, variable_names_1year$contributed_varnames], 
+            na.rm = TRUE)
 
   #Computing female incidence cases, rates, PY
   for(slot in 1:(num_tests*5)){
@@ -221,9 +229,10 @@ sex_dem_sim <- function(num_obs){
       dem_this_wave <- paste0("dem", ((slot - 1) + 50), "-", (slot + 50))
       contributed <- paste0("contributed", ((slot - 1) + 50), "-", (slot + 50))
     }
-    PY_data <- female_data %>%
-      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>%
-      filter(!! as.name(dem_last_wave) == 0)
+    
+    PY_data <- female_data %>% 
+      dplyr::select(dem_last_wave, dem_this_wave, contributed) %>% 
+      filter(!! dem_last_wave != 1)
 
     inc_cases_females_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
 
@@ -247,7 +256,7 @@ sex_dem_sim <- function(num_obs){
     }
     PY_data <- male_data %>%
       dplyr::select(dem_last_wave, dem_this_wave, contributed) %>%
-      filter(!! as.name(dem_last_wave) == 0)
+      filter(!! dem_last_wave != 1)
 
     inc_cases_males_1year[slot] = sum(PY_data[, dem_this_wave], na.rm = TRUE)
 
@@ -425,6 +434,19 @@ sex_dem_sim <- function(num_obs){
   #---- Return ----
   return(results_vec)
 }
+
+#---- Scratch code ----
+annual_deaths_female <- 
+  as.factor(floor(female_data[, "survtime"]) + 50)
+plot(table(annual_deaths_female), xlim = c(80, 90))
+
+
+annual_deaths_male <- 
+  as.factor(floor(male_data[, "survtime"]) + 50)
+plot(table(annual_deaths_male))
+
+#---- Check PY calculations ----
+PY_matrix
 
 
 
