@@ -17,9 +17,9 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
-data_gen(500000) %>%
-  saveRDS(here("Data", "linear_model", 
-               "dataset_B_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190917"))
+# data_gen(500000) %>%
+#   saveRDS(here("Data", "linear_model", 
+#                "dataset_B_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190917"))
 
 #---- Running the simulation in parallel----
 # #Function to run simulation in batches
@@ -69,7 +69,7 @@ sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>%
   t() %>% as.data.frame() %>% 
   write_csv(
     here("Results", "linear_model", "Scenario_B", 
-         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190917.csv"))
+         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190918.csv"))
 
 #stop the cluster
 stopCluster(cl)
