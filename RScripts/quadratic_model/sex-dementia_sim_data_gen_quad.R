@@ -191,15 +191,17 @@ data_gen <- function(num_obs){
   for(i in 1:ncol(obs)){
     for(j in 2:(num_tests + 1)){
       dem_var <- variable_names$dem_varnames[j]
-      dem_vars_1year_block <-
-        variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-      contributed_vars_1year_block <-
-        variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
       if(is.na(obs[dem_var, i])){
         break
       } else if(obs[dem_var, i] == 0){
+        dem_vars_1year_block <-
+          variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
         obs[dem_vars_1year_block, i] <- 0
       } else{
+        dem_vars_1year_block <-
+          variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
+        contributed_vars_1year_block <-
+          variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
         obs[dem_vars_1year_block, i] <-
           (obs[contributed_vars_1year_block, i] < 1)*1
       }
