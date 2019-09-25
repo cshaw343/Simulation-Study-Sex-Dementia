@@ -82,6 +82,9 @@ lambda <- c(0.0142, 0.0202, 0.0289, 0.0436, 0.0676, 0.1001, 0.1532, 0.2300,
 # #For total matching
 # lambda <- c(0.0073, 0.0116, 0.018, 0.028, 0.045, 0.07, 0.1, 0.15, 0.27)
 
+#---- Baseline hazard of random dementia ----
+lambda_dj <- 0.004
+
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
 dem_cut <- -6.5
