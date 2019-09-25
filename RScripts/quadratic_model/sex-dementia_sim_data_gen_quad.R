@@ -131,9 +131,9 @@ data_gen <- function(num_obs){
   
   #Based on random time to dementia model
   for(i in 1:ncol(obs)){
-    random_dem <- min(which(
-      obs[variable_names$random_timetodem_varnames[1:num_tests], i] < 
-        obs[variable_names$Sij_varnames[1:num_tests], i]))
+    random_dem <- 3 + min(which(
+      obs[variable_names$random_timetodem_varnames[4:num_tests], i] < 
+        obs[variable_names$Sij_varnames[4:num_tests], i]))
     if(is.finite(random_dem)){
       obs["dem_random", i] <- 1
       obs["dem", i] <- 1
