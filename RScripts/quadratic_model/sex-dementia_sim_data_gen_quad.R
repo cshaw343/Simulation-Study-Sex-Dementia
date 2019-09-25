@@ -15,6 +15,7 @@ source(here("RScripts", "quadratic_model", "calc_coeff.R"))
 source(here("RScripts", "quadratic_model", "compute_Cij.R"))
 source(here("RScripts", "quadratic_model", "last_Cij.R"))
 source(here("RScripts", "quadratic_model", "survival_times_quad.R"))
+source(here("RScripts", "quadratic_model", "random_timetodem_quad.R"))
 source(here("RScripts", "quadratic_model", "survival_censor.R"))
 source(here("RScripts", "quadratic_model", "dementia_onset_quad.R"))
 source(here("RScripts", "quadratic_model", "compare_survtime_timetodem_quad.R"))
@@ -73,8 +74,12 @@ data_gen <- function(num_obs){
   #---- Generate survival time for each person ----
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
-  #---- Generating uniform random variables per interval for Sij ----
+  #---- Generating uniform random variables ----
+  #For Sij and random time to dementia models
+  
   obs[, variable_names$r1ij_varnames[1:num_tests]] <- 
+    replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
+  obs[, variable_names$r2ij_varnames[1:num_tests]] <- 
     replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
   
   obs[, "death0"] <- 0
@@ -86,6 +91,10 @@ data_gen <- function(num_obs){
   obs[variable_names$Sij_varnames[1:num_tests], ] <- survival(obs)
   obs["survtime", ] <- colSums(obs[variable_names$Sij_varnames[1:num_tests], ], 
                                na.rm = TRUE)
+  
+  #---- Calculating random time to dementia for individuals ----
+  obs[variable_names$random_timetodementia_varnames[1:num_tests], ] <- 
+    random_timetodem(obs)
   
   #---- Calculating death data for each individual ----
   #Indicator of 1 means the individual died in that interval
@@ -99,7 +108,6 @@ data_gen <- function(num_obs){
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
   #---- Dementia indicators ----
-  
   #Based on Cij value
   max_dem <- length(variable_names$dem_varnames)
   for(i in 1:ncol(obs)){
