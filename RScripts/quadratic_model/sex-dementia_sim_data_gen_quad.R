@@ -74,7 +74,7 @@ data_gen <- function(num_obs){
   #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables per interval for Sij ----
-  obs[, variable_names$rij_varnames[1:num_tests]] <- 
+  obs[, variable_names$r1ij_varnames[1:num_tests]] <- 
     replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
   
   obs[, "death0"] <- 0
@@ -99,6 +99,8 @@ data_gen <- function(num_obs){
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
   #---- Dementia indicators ----
+  
+  #Based on Cij value
   max_dem <- length(variable_names$dem_varnames)
   for(i in 1:ncol(obs)){
     below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
@@ -164,6 +166,9 @@ data_gen <- function(num_obs){
     }
   }
   
+  #---- Random dementia events ----
+  #Based on contributed time, 
+  
   #---- Contributed time (1-year bands) ----
   for(i in 1:ncol(obs)){
     for(j in 1:num_tests){
@@ -215,3 +220,12 @@ data_gen <- function(num_obs){
   #---- Values to return ----
   return(as.data.frame(t(obs)))
 }
+
+# #---- Scratch code----
+# test <- data_gen(100000)
+# 
+# contributed_5yr <- colSums(test[, variable_names$contributed_varnames[1:9]], 
+#                            na.rm = TRUE)
+# 
+# num_random_cases <- 4*contributed_5yr/1000
+
