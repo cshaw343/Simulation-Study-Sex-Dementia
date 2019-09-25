@@ -240,9 +240,10 @@ column_names <- c(na.omit(variable_names$exo_var),
                   variable_names$random_timetodem_varnames[1:num_tests],
                   "death0", variable_names$deathij_varnames[1:num_tests], 
                   "study_death", "survtime", "age_death", 
-                  variable_names$dem_varnames, "dem_wave", "dem", "timetodem", 
-                  "ageatdem", "dem_death", "timetodem_death", "ageatdem_death", 
-                  "dem_alive", variable_names$contributed_varnames[1:num_tests], 
+                  variable_names$dem_varnames, "dem_wave", "dem", "dem_Cij", 
+                  "dem_random", "timetodem", "ageatdem", "dem_death", 
+                  "timetodem_death", "ageatdem_death", "dem_alive", 
+                  variable_names$contributed_varnames[1:num_tests], 
                   variable_names_1year$contributed_varnames, 
                   variable_names_1year$dem_varnames)
 
