@@ -93,7 +93,7 @@ data_gen <- function(num_obs){
                                na.rm = TRUE)
   
   #---- Calculating random time to dementia for individuals ----
-  obs[variable_names$random_timetodementia_varnames[1:num_tests], ] <- 
+  obs[variable_names$random_timetodem_varnames[1:num_tests], ] <- 
     random_timetodem(obs)
   
   #---- Calculating death data for each individual ----
@@ -108,8 +108,9 @@ data_gen <- function(num_obs){
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
   #---- Dementia indicators ----
-  #Based on Cij value
   max_dem <- length(variable_names$dem_varnames)
+  
+  #Based on Cij value
   for(i in 1:ncol(obs)){
     below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
     if(is.finite(below_dem)){
@@ -117,14 +118,39 @@ data_gen <- function(num_obs){
       obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
       obs["dem_wave", i] <- (below_dem - 1)
       obs["dem", i] <- 1
+      obs["dem_Cij", i] <- 1
     } else{
       obs[variable_names$dem_varnames[1:max_dem], i] <- 0
       obs["dem", i] <- 0
+      obs["dem_Cij", i] <- 0
     }
   }
-
-  #---- Dementia calculations ----
+  
+  #Calculate quadratic time to dementia
   obs["timetodem", ] <- dem_onset(obs, dem_cut)
+  
+  #Based on random time to dementia model
+  for(i in 1:ncol(obs)){
+    random_dem <- min(which(
+      obs[variable_names$random_timetodem_varnames[1:num_tests], i] < 
+        obs[variable_names$Sij_varnames[1:num_tests], i]))
+    if(is.finite(random_dem)){
+      obs["dem_random", i] <- 1
+      obs["dem", i] <- 1
+      timeto_random_dem <- 5*(random_dem - 1) + 
+        obs[variable_names$random_timetodem_varnames[random_dem], i]
+      if(timeto_random_dem <= obs["timetodem", i]){
+        obs[variable_names$dem_varnames[1:random_dem], i] <- 0
+        obs[variable_names$dem_varnames[(random_dem + 1):max_dem], i] <- 1
+        obs["dem_wave", i] <- random_dem
+        obs["timetodem", i] <- timeto_random_dem 
+      }
+    } else{
+      obs["dem_random", i] <- 0
+    }
+  }
+  
+  #---- Dementia calculations ----
   obs <- compare_survtime_timetodem(obs)
   obs["ageatdem", ] <- obs["age0", ] + obs["timetodem", ] #Age at dementia diagnosis
 
@@ -173,9 +199,6 @@ data_gen <- function(num_obs){
         obs["timetodem_death", i]%%5
     }
   }
-  
-  #---- Random dementia events ----
-  #Based on contributed time, 
   
   #---- Contributed time (1-year bands) ----
   for(i in 1:ncol(obs)){
