@@ -79,8 +79,8 @@ data_gen <- function(num_obs){
   
   obs[, variable_names$r1ij_varnames[1:num_tests]] <- 
     replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
-  obs[, variable_names$r2ij_varnames[1:num_tests]] <- 
-    replicate(num_tests, runif(nrow(obs), min = 0, max = 1))
+  obs[, variable_names$r2ij_varnames[4:num_tests]] <- 
+    replicate((num_tests - 3), runif(nrow(obs), min = 0, max = 1))
   
   obs[, "death0"] <- 0
   
@@ -93,7 +93,7 @@ data_gen <- function(num_obs){
                                na.rm = TRUE)
   
   #---- Calculating random time to dementia for individuals ----
-  obs[variable_names$random_timetodem_varnames[1:num_tests], ] <- 
+  obs[variable_names$random_timetodem_varnames[4:num_tests], ] <- 
     random_timetodem(obs)
   
   #---- Calculating death data for each individual ----
