@@ -42,9 +42,9 @@ data_gen <- function(num_obs){
     obs[, variable_names$age_varnames] - mean(age0)
   
   #---- Generating "true" cognitive function Cij ----
-  
   #Generating random terms for quadratic model
-  #Defining the covariance matrix
+  
+  #Defining the covariance matrix for intercept and linear term
   quad_coeff_cov <- matrix(c(cij_var0, cij_cov01, cij_cov02, 
                              cij_cov01, cij_var1, cij_cov12, 
                              cij_cov02, cij_cov12, cij_var2), 
@@ -53,6 +53,10 @@ data_gen <- function(num_obs){
   #Generate random terms for each individual
   obs[, c("z_0i", "z_1i", "z_2i")] <- 
     mvrnorm(n = num_obs, mu = rep(0, 3), Sigma = quad_coeff_cov) 
+  
+  #Take the negative absolute value of the quadratic noise so that this is drawn
+  #from a negative half normal distribution
+  obs[, "z_2i"] <- -abs(obs[, "z_2i"])
   
   #Generating noise term (unexplained variance in Cij) 
   obs[, "eps_ij"] <- rnorm(n = num_obs, mean = 0, sd = sqrt(cij_var3))

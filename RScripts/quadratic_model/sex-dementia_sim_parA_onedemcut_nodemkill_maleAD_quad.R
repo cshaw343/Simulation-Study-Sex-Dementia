@@ -38,8 +38,9 @@ cij_var1 <- 0.00009    #Variance of random linear term
 cij_var2 <- 0.000005   #Variance of random quadratic term (use tiny value b/c calcs give 0)
 
 cij_cov01 <- 0          #Covariance between random intercept and random linear term
-cij_cov12 <- -0.000001  #Covariance between random linear and random quadratic term
-cij_cov02 <- 0.0001     #Covariance between random intercept and random quadratic term (use tiny value b/c calcs give 0)
+cij_cov12 <- 0      #Covariance between random linear and random quadratic term
+cij_cov02 <- 0     #Covariance between random intercept and random quadratic term (use tiny value b/c calcs give 0)
+                         
 
 cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at time j)
 
