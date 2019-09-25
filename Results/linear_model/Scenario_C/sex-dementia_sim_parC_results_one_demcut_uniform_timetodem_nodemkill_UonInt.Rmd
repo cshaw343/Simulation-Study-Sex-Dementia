@@ -625,7 +625,7 @@ mean_U_summary$Age <- rep(seq(50, 95, by = 5), 2)
 ggplot(aes(Age, U), data = mean_U_summary) + 
   geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
   geom_line(aes(color = `Sex/Gender`)) + 
-  xlim(-2, 2) +
+  ylim(-2, 2) +
   ylab("Mean U") 
 # +  
 #   theme(text = element_text(size = 20))

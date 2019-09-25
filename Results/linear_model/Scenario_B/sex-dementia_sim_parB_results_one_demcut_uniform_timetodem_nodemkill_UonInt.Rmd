@@ -40,9 +40,9 @@ set.seed(03122019)
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "life_table_calcs.R"))
 source(
-  here("RScripts", 
+  here("RScripts", "linear_model",
        "sex-dementia_sim_parB_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))
-source(here("RScripts", "variable_names.R"))
+source(here("RScripts", "linear_model", "variable_names.R"))
 source(here("RScripts", "misc_custom_functions.R"))
 ```
 
@@ -79,15 +79,15 @@ france_F <- read_csv(here("Data", "france_cohort_F_calcs"),
 #One simulation run
 dataset <- 
   readRDS(here(
-    "Data", 
-    "dataset_B_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190823")) %>% 
+    "Data", "linear_model",
+    "dataset_B_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190917")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <- 
   read_csv(
-    here("Results", "Scenario_B", 
-         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190823.csv")) %>% 
+    here("Results", "linear_model", "Scenario_B", 
+         "one_demcut_uniform_timetodem_nodemkill_UonInt_500_20190917.csv")) %>% 
   na.omit()
 
 mean_sim_results <- colMeans(sim_results)
@@ -163,7 +163,7 @@ h_{\text{death}_{ij}}(t) =  \lambda_{j}\exp\{\gamma_{1j}\text{sex}_i + \gamma_2U
 (\#eq:mort-hazard)
 \end{equation}
 
-where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of sex/gender on mortality.  Note that $\gamma_2-\gamma_4$ are set to 0 in Simulation Scenario A signifying that in this scenario, there is no effect of U on mortality and no effects of cognitive slope or cognitive level on mortality.
+where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of sex/gender on mortality.  Note that $\gamma_2-\gamma_4$ are set to 0 in Simulation Scenario B signifying that in this scenario, there is no effect of U on mortality and no effects of cognitive slope or cognitive level on mortality.
 
 ```{r mort-haz-coeff}
 coeff_table <- 
@@ -399,7 +399,7 @@ and vascular dementia: The EURODEM Studies (Andersen 1999); Table 2.") %>% kable
 
 ```{r hr-table}
 hr_table <- 
-  tibble("Simulation Scenario A" = " ", 
+  tibble("Simulation Scenario B" = " ", 
          "HR" = exp(
            mean_sim_results[
              na.omit(variable_names$dementia_logHR_varnames)])) %>% 
@@ -416,7 +416,7 @@ kable(hr_table, caption =
 
 ```{r IRR-table}
 IRR_table <- 
-  tibble("Simulation Scenario A" = " ", 
+  tibble("Simulation Scenario B" = " ", 
          "IRR" = exp(
            mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
@@ -426,7 +426,7 @@ kable(IRR_table, caption = paste("Average incidence rate ratios for dementia (ex
 
 <br>
 
-# Some results from one simulated sample
+# Some results from one simulated sample (n = 500,000)
 
 ##  Cognitive Trajectories
 
@@ -525,7 +525,7 @@ kable(slope_var,
 
 ## Dementia Cases
 
-```{r dem-cases-plot, fig.align="center", fig.cap="Dementia cases by age from one simulated sample. Incident cases at each age are plotted in blue. (Note that the y-axis differs across age bands because of the large difference in number of live people across age bins.)"}
+```{r dem-cases-plot, fig.align="center", fig.cap="Dementia cases by age from one simulated sample (n = 500,000). Incident cases at each age are plotted in blue. (Note that the y-axis differs across age bands because of the large difference in number of live people across age bins.)"}
 cutoffs <- rep(dem_cut, 10)
 Cij_data <- dataset %>% dplyr::select(variable_names$Cij_varnames)
 dem_wave_data <- dataset %>% dplyr::select(dem_wave)
@@ -571,7 +571,7 @@ dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>%
   set_rownames("Prevalence")
 
 kable(dem_prev, 
-      caption = "Prevalence of dementia by age for one simulated sample. 
+      caption = "Prevalence of dementia by age for one simulated sample (n = 500,000). 
       Estimating this is not our primary goal, but we thought this might be 
       another good sanity check.  We expect that these numbers are higher than 
       what they should be because in this scenario, 
@@ -580,7 +580,7 @@ kable(dem_prev,
 
 ## Distributions of U
 
-```{r U-dists, fig.align="center", fig.cap="Distribution of U by age and sex/gender in one simulated sample."}
+```{r U-dists, fig.align="center", fig.cap="Distribution of U by age and sex/gender in one simulated sample (n = 500,000)."}
 mean_U <- rep(0, 10)
 
 dem_data <- dataset %>% 
@@ -643,7 +643,7 @@ py_by_sex <- dataset %>% group_by(female) %>%
   set_colnames(c("Sex", age_labels$formatted_age_intervals))
 
 kable(py_by_sex, caption = "Dementia-free person-years contributed to each 
-      5-year age interval by sex from one simulated sample.") %>% 
+      5-year age interval by sex from one simulated sample (n = 500,000).") %>% 
   kable_styling()
 ```
 
@@ -663,7 +663,7 @@ dem_inc_by_sex <- dataset %>%
   set_colnames(age_labels$formatted_age_intervals)
   
 kable(dem_inc_by_sex[-1, ], caption =  "Number of incident dementia cases in 
-      each 5-year age interval by sex in one simulated sample.") %>% 
+      each 5-year age interval by sex in one simulated sample (n = 500,000).") %>% 
   kable_styling()
 ```
 ```{r Dem-inc 1-year}
