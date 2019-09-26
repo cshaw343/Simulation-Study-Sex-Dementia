@@ -87,5 +87,5 @@ lambda_dj <- 0.004
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cut <- -6.5
+dem_cut <- -5.5
 
