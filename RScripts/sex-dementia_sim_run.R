@@ -8,11 +8,11 @@ set.seed(20190624)
 
 #---- Source Files ----
 source(
-  here("RScripts", "linear_model", 
-       "sex-dementia_sim_parB_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
-source(here("RScripts", "linear_model", "variable_names.R"))
-source(here("RScripts", "linear_model", 
-            "sex-dementia_sim_data_gen.R"))      #The data generation script
+  here("RScripts", "quadratic_model", 
+       "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))  #The parameter file
+source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+source(here("RScripts", "quadratic_model", 
+            "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
 source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
@@ -55,11 +55,11 @@ clusterEvalQ(cl, {
   p_load("here", "magrittr")
   
   source(
-    here("RScripts", "linear_model", 
-         "sex-dementia_sim_parB_onedemcut_uniform_timetodem_nodemkill_UonInt.R"))  #The parameter file
-  source(here("RScripts", "linear_model", "variable_names.R"))
-  source(here("RScripts", "linear_model", 
-              "sex-dementia_sim_data_gen.R"))      #The data generation script
+    here("RScripts", "quadratic_model", 
+         "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))  #The parameter file
+  source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+  source(here("RScripts", "quadratic_model", 
+              "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
   source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
   source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
   
@@ -68,8 +68,8 @@ clusterEvalQ(cl, {
 sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>% 
   t() %>% as.data.frame() %>% 
   write_csv(
-    here("Results", "linear_model", "Scenario_B", 
-         "one_demcut_uniform_timetodem_nodemkill_UonInt_1000_20190918.csv"))
+    here("Results", "quadratic_model", "Scenario_A", 
+         "one_demcut_nodemkill_maleAD_1000_20190925.csv"))
 
 #stop the cluster
 stopCluster(cl)
