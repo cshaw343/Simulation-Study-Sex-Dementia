@@ -17,9 +17,9 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 source(here("RScripts", "misc_custom_functions.R"))          #Other functions needed
 
 #---- Generating one cohort ----
-# data_gen(500000) %>%
-#   saveRDS(here("Data", "linear_model", 
-#                "dataset_B_onedemcut_uniform_timetodem_nodemkill_UonInt_500000_20190917"))
+data_gen(500000) %>%
+  saveRDS(here("Data", "quadratic_model",
+               "dataset_A_onedemcut_nodemkill_maleAD_500000_20190925"))
 
 #---- Running the simulation in parallel----
 # #Function to run simulation in batches
