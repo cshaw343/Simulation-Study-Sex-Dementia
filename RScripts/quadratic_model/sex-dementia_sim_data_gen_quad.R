@@ -21,7 +21,7 @@ source(here("RScripts", "quadratic_model", "dementia_onset_quad.R"))
 source(here("RScripts", "quadratic_model", "compare_survtime_timetodem_quad.R"))
 
 
-#---- The small batch data generation function ----
+#---- The data generation function ----
 data_gen <- function(num_obs){
   #---- Create a blank dataset ----
   obs <- matrix(NA, nrow = num_obs, ncol = length(column_names)) 
