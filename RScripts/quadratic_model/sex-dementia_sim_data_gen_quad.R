@@ -108,23 +108,41 @@ data_gen <- function(num_obs){
   obs["age_death", ] <- obs["age0", ] + obs["survtime", ]
   
   #---- Dementia indicators ----
-  max_dem <- length(variable_names$dem_varnames)
+  #Set all indicators to 0 first
+  obs[variable_names$dem_varnames, ] <- 0
   
   #Based on Cij value
   for(i in 1:ncol(obs)){
     below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
     if(is.finite(below_dem)){
-      obs[variable_names$dem_varnames[1:(below_dem - 1)], i] <- 0
-      obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
+      obs[variable_names$dem_varnames[below_dem], i] <- 1
       obs["dem_wave", i] <- (below_dem - 1)
       obs["dem", i] <- 1
       obs["dem_Cij", i] <- 1
     } else{
-      obs[variable_names$dem_varnames[1:max_dem], i] <- 0
       obs["dem", i] <- 0
       obs["dem_Cij", i] <- 0
     }
   }
+  
+  #---- BEGIN OLD CODE THAT INCLUDES CENSORING----
+  #max_dem <- length(variable_names$dem_varnames)
+  
+  # for(i in 1:ncol(obs)){
+  #   below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
+  #   if(is.finite(below_dem)){
+  #     obs[variable_names$dem_varnames[1:(below_dem - 1)], i] <- 0
+  #     obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
+  #     obs["dem_wave", i] <- (below_dem - 1)
+  #     obs["dem", i] <- 1
+  #     obs["dem_Cij", i] <- 1
+  #   } else{
+  #     obs[variable_names$dem_varnames[1:max_dem], i] <- 0
+  #     obs["dem", i] <- 0
+  #     obs["dem_Cij", i] <- 0
+  #   }
+  # }
+  #---- END OLD CODE THAT INCLUDES CENSORING ----
   
   #Calculate quadratic time to dementia
   obs["timetodem", ] <- dem_onset(obs, dem_cut)
@@ -132,23 +150,44 @@ data_gen <- function(num_obs){
   #Based on random time to dementia model
   for(i in 1:ncol(obs)){
     random_dem <- 3 + min(which(
-      obs[variable_names$random_timetodem_varnames[4:num_tests], i] < 
+      obs[variable_names$random_timetodem_varnames[4:num_tests], i] <
         obs[variable_names$Sij_varnames[4:num_tests], i]))
     if(is.finite(random_dem)){
       obs["dem_random", i] <- 1
       obs["dem", i] <- 1
-      timeto_random_dem <- 5*(random_dem - 1) + 
+      timeto_random_dem <- 5*(random_dem - 1) +
         obs[variable_names$random_timetodem_varnames[random_dem], i]
       if(timeto_random_dem <= obs["timetodem", i]){
-        obs[variable_names$dem_varnames[1:random_dem], i] <- 0
-        obs[variable_names$dem_varnames[(random_dem + 1):max_dem], i] <- 1
+        obs[variable_names$dem_varnames[(random_dem + 1)], i] <- 1
         obs["dem_wave", i] <- random_dem
-        obs["timetodem", i] <- timeto_random_dem 
+        obs["timetodem", i] <- timeto_random_dem
       }
     } else{
       obs["dem_random", i] <- 0
     }
   }
+  
+  #---- BEGIN OLD CODE THAT INCLUDES CENSORING----
+  # for(i in 1:ncol(obs)){
+  #   random_dem <- 3 + min(which(
+  #     obs[variable_names$random_timetodem_varnames[4:num_tests], i] < 
+  #       obs[variable_names$Sij_varnames[4:num_tests], i]))
+  #   if(is.finite(random_dem)){
+  #     obs["dem_random", i] <- 1
+  #     obs["dem", i] <- 1
+  #     timeto_random_dem <- 5*(random_dem - 1) + 
+  #       obs[variable_names$random_timetodem_varnames[random_dem], i]
+  #     if(timeto_random_dem <= obs["timetodem", i]){
+  #       obs[variable_names$dem_varnames[1:random_dem], i] <- 0
+  #       obs[variable_names$dem_varnames[(random_dem + 1):max_dem], i] <- 1
+  #       obs["dem_wave", i] <- random_dem
+  #       obs["timetodem", i] <- timeto_random_dem 
+  #     }
+  #   } else{
+  #     obs["dem_random", i] <- 0
+  #   }
+  # }
+  #---- END OLD CODE THAT INCLUDES CENSORING ----
   
   #---- Dementia calculations ----
   obs <- compare_survtime_timetodem(obs)
