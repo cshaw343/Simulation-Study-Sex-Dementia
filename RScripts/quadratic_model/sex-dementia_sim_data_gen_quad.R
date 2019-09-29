@@ -115,7 +115,6 @@ data_gen <- function(num_obs){
   for(i in 1:ncol(obs)){
     below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
     if(is.finite(below_dem)){
-      obs[variable_names$dem_varnames[below_dem], i] <- 1
       obs["dem_wave", i] <- (below_dem - 1)
       obs["dem", i] <- 1
       obs["dem_Cij", i] <- 1
@@ -158,12 +157,18 @@ data_gen <- function(num_obs){
       timeto_random_dem <- 5*(random_dem - 1) +
         obs[variable_names$random_timetodem_varnames[random_dem], i]
       if(timeto_random_dem <= obs["timetodem", i]){
-        obs[variable_names$dem_varnames[(random_dem + 1)], i] <- 1
         obs["dem_wave", i] <- random_dem
         obs["timetodem", i] <- timeto_random_dem
       }
     } else{
       obs["dem_random", i] <- 0
+    }
+  }
+  
+  #Fill in dementia indicator based on dem_wave
+  for(i in 1:ncol(obs)){
+    if(!is.na(obs["dem_wave", i])){
+      obs[variable_names$dem_varnames[obs["dem_wave", i] + 1], i] <- 1
     }
   }
   
