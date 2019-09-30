@@ -116,7 +116,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
   
   #Function we are trying to optimize
   survivors <- function(L, obs, pop_size, cp){
-    survtime = -log(sim_data_unexposed[, variable_names$rij_varnames[j]])/
+    survtime = -log(sim_data_unexposed[, variable_names$r1ij_varnames[j]])/
       (L*
          exp(g1[j]*sim_data_unexposed[, "female"] + 
                g2*sim_data_unexposed[, "U"] + 
@@ -166,7 +166,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
 opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
   #Function we are trying to optimize
   survivors <- function(LOG_G1, obs, pop_size, cp, opt_lambdas){
-    survtime = -log(sim_data_exposed[, variable_names$rij_varnames[j]])/
+    survtime = -log(sim_data_exposed[, variable_names$r1ij_varnames[j]])/
       (opt_lambdas[j]*
          exp(LOG_G1*sim_data_exposed[, "female"] + 
                g2*sim_data_exposed[, "U"] + 
@@ -225,5 +225,6 @@ sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
 
 optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)
 optim_g1s <- opt_log_g1s(sim_data_exposed, cp50_exposed)
+
 
 
