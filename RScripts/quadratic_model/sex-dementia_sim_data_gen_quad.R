@@ -316,11 +316,4 @@ data_gen <- function(num_obs){
   return(as.data.frame(t(obs)))
 }
 
-# #---- Scratch code----
-# test <- data_gen(100000)
-# 
-# contributed_5yr <- colSums(test[, variable_names$contributed_varnames[1:9]], 
-#                            na.rm = TRUE)
-# 
-# num_random_cases <- 4*contributed_5yr/1000
 
