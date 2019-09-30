@@ -23,19 +23,19 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.08
-opt_quadratic_term <- -0.00425
+opt_linear_term <- 0.05
+opt_quadratic_term <- -0.00275
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
 opt_cij_cov02 <- 0
 opt_cij_cov12 <- 0
 #-------------------------------
-opt_linear_var <- 0.00009
-opt_quadratic_var <- 0.000005
-opt_cij_cov01 <- -0.00009
+opt_linear_var <- 0.001
+opt_quadratic_var <- 0.000009
+opt_cij_cov01 <- -0.0009
 
-opt_dem_cut <- -5.5
+opt_dem_cut <- -6.5
 # 
 #---- Check PD matrix ----
 quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02,
@@ -80,92 +80,25 @@ male_data <- obs %>% filter(female == 0)
 female_data <- obs %>% filter(female == 1)
 
 #---- Compute incidence rates ----
-all_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
+all_inc_cases <- colSums(obs[, variable_names$dem_varnames])
+all_PY <- colSums(obs[, variable_names$contributed_varnames[1:9]])
+all_sim_inc_rates <- all_inc_cases[-1]/all_PY*1000
+
 colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(all_sim_inc_rates) <- c("")
 
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- obs %>%
-    dplyr::select(death_last_wave, death_this_wave,
-                  dem_last_wave, dem_this_wave, contributed) %>%
-    filter(!! as.name(death_last_wave) == 0 &
-             !! as.name(dem_last_wave) == 0)
 
-  all_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave],
-                                                na.rm = TRUE)/
-                                              sum(PY_data[, contributed])), 3)
-}
-
-male_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
+male_inc_cases <- colSums(male_data[, variable_names$dem_varnames])
+male_PY <- colSums(male_data[, variable_names$contributed_varnames[1:9]])
+male_sim_inc_rates <- male_inc_cases[-1]/male_PY*1000
 colnames(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(male_sim_inc_rates) <- c("")
 
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- male_data %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  male_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                       na.rm = TRUE)/
-                                     sum(PY_data[, contributed])), 3)
-}
-
-female_sim_inc_rates <- matrix(ncol = 9, nrow = 1)
+female_inc_cases <- colSums(female_data[, variable_names$dem_varnames])
+female_PY <- colSums(female_data[, variable_names$contributed_varnames[1:9]])
+female_sim_inc_rates <- female_inc_cases[-1]/male_PY*1000
 colnames(female_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(female_sim_inc_rates) <- c("")
-
-for(slot in 1:num_tests){
-  if(slot == 1){
-    dem_last_wave <- paste0("dem", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  } else {
-    dem_last_wave <- paste0("dem", (slot - 2), "-", (slot - 1))
-    dem_this_wave <- paste0("dem", (slot - 1), "-", slot)
-    death_last_wave <- paste0("death", (slot - 2), "-", (slot - 1))
-    death_this_wave <- paste0("death", (slot - 1), "-", slot)
-    contributed <- paste0("contributed", (slot - 1), "-", slot)
-  }
-  PY_data <- female_data %>% 
-    dplyr::select(death_last_wave, death_this_wave, 
-                  dem_last_wave, dem_this_wave, contributed) %>% 
-    filter(!! as.name(death_last_wave) == 0 & 
-             !! as.name(dem_last_wave) == 0) 
-  
-  female_sim_inc_rates[1, slot] = round(1000*(sum(PY_data[, dem_this_wave], 
-                                                  na.rm = TRUE)/
-                                              sum(PY_data[, contributed])), 3)
-}
 
 #---- Compute survival data ----
 
