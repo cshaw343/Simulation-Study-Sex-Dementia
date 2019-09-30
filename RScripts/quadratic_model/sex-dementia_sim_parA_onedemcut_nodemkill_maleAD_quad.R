@@ -34,8 +34,8 @@ pfemale <- 0.51
 #---- Variances and correlations ----
 #Calculated based on the work in test_quadratic_trajectories.R
 cij_var0 <- 0.05       #Variance of random cognitive intercept
-cij_var1 <- 0.00009    #Variance of random linear term
-cij_var2 <- 0.000005   #Variance of random quadratic term (use tiny value b/c calcs give 0)
+cij_var1 <- 0.001      #Variance of random linear term
+cij_var2 <- 0.000009   #Variance of random quadratic term (use tiny value b/c calcs give 0)
 
 cij_cov01 <- -0.00009  #Covariance between random intercept and random linear term
 cij_cov12 <- 0         #Covariance between random linear and random quadratic term
@@ -55,12 +55,12 @@ b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same 
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.08    #Cognitive linear term for males (taken from quad fit to linear model)                
+b10 <- 0.05    #Cognitive linear term for males (taken from quad fit to linear model)                
 b11 <- 0       #Effect of female on cognitive linear term
 b12 <- 0       #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0       #Effect of U on cognitive linear term 
 
-b20 <- -0.00425  #Cognitive quadratic term for males (taken from quad fit to linear model)
+b20 <- -0.00325  #Cognitive quadratic term for males (taken from quad fit to linear model)
 b21 <- 0         #Effect of female on cognitive quadratic term
 b22 <- 0         #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
 b23 <- 0         #Effect of U on cognitive quadratic term
@@ -87,5 +87,5 @@ lambda_dj <- 0.004
 
 #---- Dementia Cut Point ----
 #Based on slopes_dem-cut_search.R script (results from 20190202)
-dem_cut <- -5.5
+dem_cut <- -6.5
 
