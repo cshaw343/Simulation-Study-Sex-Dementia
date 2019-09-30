@@ -232,6 +232,10 @@ data_gen <- function(num_obs){
   obs["dem_alive", is.na(obs["dem_alive", ])] <- 0
   
   #---- Contributed time ----
+  #Start with 0 contributed time for everyone
+  obs[variable_names$contributed_varnames[1:9], ] <- 0
+  
+  #Fill in contributed time
   for(i in 1:ncol(obs)){
     #5-year bands
     last_full_slot <- floor(obs["timetodem_death", i]/5)
@@ -245,6 +249,10 @@ data_gen <- function(num_obs){
   }
   
   #---- Contributed time (1-year bands) ----
+  #Start with 0 contributed time for everyone
+  obs[variable_names_1year$contributed_varnames, ] <- 0
+  
+  #Fill in contributed time
   for(i in 1:ncol(obs)){
     for(j in 1:num_tests){
       contributed_var <- variable_names$contributed_varnames[j]
@@ -272,25 +280,32 @@ data_gen <- function(num_obs){
   }
   
   #---- Dementia indicators (1-year bands) ----
-  for(i in 1:ncol(obs)){
-    for(j in 2:(num_tests + 1)){
-      dem_var <- variable_names$dem_varnames[j]
-      if(is.na(obs[dem_var, i])){
-        break
-      } else if(obs[dem_var, i] == 0){
-        dem_vars_1year_block <-
-          variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-        obs[dem_vars_1year_block, i] <- 0
-      } else{
-        dem_vars_1year_block <-
-          variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-        contributed_vars_1year_block <-
-          variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
-        obs[dem_vars_1year_block, i] <-
-          (obs[contributed_vars_1year_block, i] < 1)*1
-      }
-    }
-  }
+  #Start with 0 indicators for everybody
+  obs[variable_names_1year$dem_varnames, ] <- 0
+  
+  
+  
+  #---- BEGIN OLD CODE THAT FILLS IN 1s FOR WHOLE INTERVAL ----
+  # for(i in 1:ncol(obs)){
+  #   for(j in 2:(num_tests + 1)){
+  #     dem_var <- variable_names$dem_varnames[j]
+  #     if(is.na(obs[dem_var, i])){
+  #       break
+  #     } else if(obs[dem_var, i] == 0){
+  #       dem_vars_1year_block <-
+  #         variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
+  #       obs[dem_vars_1year_block, i] <- 0
+  #     } else{
+  #       dem_vars_1year_block <-
+  #         variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
+  #       contributed_vars_1year_block <-
+  #         variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
+  #       obs[dem_vars_1year_block, i] <-
+  #         (obs[contributed_vars_1year_block, i] < 1)*1
+  #     }
+  #   }
+  # }
+  #---- END OLD CODE ----
   
   #---- Values to return ----
   return(as.data.frame(t(obs)))
