@@ -57,6 +57,10 @@ pre_survival_data_gen <- function(num_obs){
   obs[, c("z_0i", "z_1i", "z_2i")] <- 
     mvrnorm(n = num_obs, mu = rep(0, 3), Sigma = quad_coeff_cov) 
   
+  #Take the negative absolute value of the quadratic noise so that this is drawn
+  #from a negative half normal distribution
+  obs[, "z_2i"] <- -abs(obs[, "z_2i"])
+  
   #Generating noise term (unexplained variance in Cij) 
   obs[, "eps_ij"] <- rnorm(n = num_obs, mean = 0, sd = sqrt(cij_var3))
   
@@ -144,7 +148,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
         sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ] 
       opt_lambdas[j:length(opt_lambdas)] = 
         optimise(survivors, 
-                 interval = c(opt_lambdas[j - 1], 2*opt_lambdas[j - 1]), 
+                 interval = c(opt_lambdas[j - 1], 1.8*opt_lambdas[j - 1]), 
                  obs = sim_data_unexposed, pop_size = num_unexposed, 
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
