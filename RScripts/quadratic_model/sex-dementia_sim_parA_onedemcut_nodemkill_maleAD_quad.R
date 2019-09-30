@@ -60,7 +60,7 @@ b11 <- 0       #Effect of female on cognitive linear term
 b12 <- 0       #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0       #Effect of U on cognitive linear term 
 
-b20 <- -0.00325  #Cognitive quadratic term for males (taken from quad fit to linear model)
+b20 <- -0.00275  #Cognitive quadratic term for males (taken from quad fit to linear model)
 b21 <- 0         #Effect of female on cognitive quadratic term
 b22 <- 0         #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
 b23 <- 0         #Effect of U on cognitive quadratic term
