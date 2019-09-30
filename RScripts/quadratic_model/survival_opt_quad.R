@@ -91,7 +91,7 @@ survival_temp <- function(obs_matrix, lambda, opt_log_g1 = g1){
   for(i in 1:ncol(obs_matrix)){
     survtimes <- matrix(NA, nrow = (length(visit_times) - 1), ncol = 1)
     for(j in 1:length(survtimes)){
-      r_name <- variable_names$rij_varnames[j]
+      r_name <- variable_names$rij1_varnames[j]
       
       survtime = -log(obs_matrix[r_name, i])/
         (lambda[j]*exp(opt_log_g1[j]*obs_matrix["female", i] + 
