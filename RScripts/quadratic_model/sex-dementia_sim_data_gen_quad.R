@@ -283,7 +283,12 @@ data_gen <- function(num_obs){
   #Start with 0 indicators for everybody
   obs[variable_names_1year$dem_varnames, ] <- 0
   
-  
+  for(i in 1:ncol(obs)){
+    if(!is.na(obs["dem_wave", i])){
+      index = ceiling(obs["timetodem", i])
+      obs[variable_names_1year$dem_varnames[index], i] <- 1
+    }
+  }
   
   #---- BEGIN OLD CODE THAT FILLS IN 1s FOR WHOLE INTERVAL ----
   # for(i in 1:ncol(obs)){
