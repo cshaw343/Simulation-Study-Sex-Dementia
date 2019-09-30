@@ -57,16 +57,27 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_A_onedemcut_nodemkill_maleAD_500000_20190915")) %>% 
+    "dataset_A_onedemcut_nodemkill_maleAD_500000_20190925")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_1000_quad_20190915.csv")) 
+                "one_demcut_nodemkill_maleAD_100_20190926.csv")) 
 
+
+sim_results_65_plus <- sim_results %>% 
+  dplyr::select(-one_of(c("logIRR_50-55", "logIRR_55-60", "logIRR_60-65"))) %>%
+  dplyr::select(-contains("logIRR_CI")) %>% 
+  dplyr::select(-contains("logIRR_SE")) %>% 
+  dplyr::select(-one_of(c("dementia_logHR_50-55", "dementia_logHR_55-60", 
+                          "dementia_logHR_60-65"))) %>%
+  dplyr::select(-contains("dementia_logHR_CI")) %>% 
+  dplyr::select(-contains("dementia_logHR_SE")) 
+                        
+                        
 #mean_sim_results <- colMeans(sim_results)
-mean_sim_results <- colMeans(sim_results %>% dplyr::select(-contains("log")))
+mean_sim_results <- colMeans(sim_results_65_plus)
 
 #sd_sim_results <- apply(sim_results, 2, sd)
 ```
@@ -241,9 +252,9 @@ ggplot(plot_data_all,
 
 <br>
 
-```{r mort-HR-plots, fig.align="center", out.width = "75%", fig.cap=paste("Average simulated mortality hazard ratios for age 50+ across", runs, "simulation runs. Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the mortality HR for the interval [50, 55)."), eval = FALSE}
+```{r mort-HR-plots, fig.align="center", out.width = "75%", fig.cap=paste("Average simulated mortality hazard ratios for age 50+ across", runs, "simulation runs. Ages on the x-axis represent the age at the start of interval, i.e. 50 represents the mortality HR for the interval [50, 55).")}
 
-published_HR <- Hratio_US %>%
+published_HR <- Hratio_US[-1, ] %>%
   as.data.frame() %>% set_colnames("Published Mortality HR")
 
 simulated_HRs <- 
@@ -436,7 +447,7 @@ ggplot(samp_Cij, aes(Age, value)) +
 <br>
 **These values will eventually just be tables in the parameters for the $C_{ij}$ model.**
 
-```{r mean-slopes}
+```{r mean-slopes, eval = FALSE}
 Cij_check <- Cij_check <- 
   colMeans(dataset[, variable_names$Cij_varnames], na.rm = TRUE)
 
