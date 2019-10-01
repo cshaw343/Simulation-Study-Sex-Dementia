@@ -181,29 +181,29 @@ sex_dem_sim <- function(num_obs){
   # 
   #---- Dementia logIRRs (5-year bands) ----
   IRRs <- sim_rates_females/sim_rates_males
-  simulated_dementia_logIRRs <- log(IRRs)
+  #simulated_dementia_logIRRs <- log(IRRs)
 
-  # simulated_dementia_logIRRs_data <- matrix(nrow = num_tests, ncol = 5)
-  # #Point estimate
-  # simulated_dementia_logIRRs_data[, 1] <- log(IRRs)
-  # #SE calculation for log(IRR)
-  # simulated_dementia_logIRRs_data[, 2] <-
-  #   sqrt(1/inc_cases_females[-1] + 1/inc_cases_males[-1])
-  # #95% CI Lower Bound
-  # simulated_dementia_logIRRs_data[, 3] <-
-  #   simulated_dementia_logIRRs_data[, 1] -
-  #   1.96*simulated_dementia_logIRRs_data[, 2]
-  # #95% CI Upper Bound
-  # simulated_dementia_logIRRs_data[, 4] <-
-  #   simulated_dementia_logIRRs_data[, 1] +
-  #   1.96*simulated_dementia_logIRRs_data[, 2]
-  # #95% CI Coverage
-  # simulated_dementia_logIRRs_data[, 5] <-
-  #   (simulated_dementia_logIRRs_data[, 3] < 0 &
-  #   simulated_dementia_logIRRs_data[, 4] > 0)*1
-  # 
-  # simulated_dementia_logIRRs_data <-
-  #   as.vector(t(simulated_dementia_logIRRs_data))
+  simulated_dementia_logIRRs_data <- matrix(nrow = num_tests, ncol = 5)
+  #Point estimate
+  simulated_dementia_logIRRs_data[, 1] <- log(IRRs)
+  #SE calculation for log(IRR)
+  simulated_dementia_logIRRs_data[, 2] <-
+    sqrt(1/inc_cases_females[-1] + 1/inc_cases_males[-1])
+  #95% CI Lower Bound
+  simulated_dementia_logIRRs_data[, 3] <-
+    simulated_dementia_logIRRs_data[, 1] -
+    1.96*simulated_dementia_logIRRs_data[, 2]
+  #95% CI Upper Bound
+  simulated_dementia_logIRRs_data[, 4] <-
+    simulated_dementia_logIRRs_data[, 1] +
+    1.96*simulated_dementia_logIRRs_data[, 2]
+  #95% CI Coverage
+  simulated_dementia_logIRRs_data[, 5] <-
+    (simulated_dementia_logIRRs_data[, 3] < 0 &
+    simulated_dementia_logIRRs_data[, 4] > 0)*1
+
+  simulated_dementia_logIRRs_data <-
+    as.vector(t(simulated_dementia_logIRRs_data))
   
   #---- Dementia incidence cases, rates, and PY by sex (1-year bands) ----
   inc_cases_females_1year <- 
@@ -287,29 +287,29 @@ sex_dem_sim <- function(num_obs){
 
   # #---- Dementia logIRRs (1-year bands) ----
   IRRs_1year <- sim_rates_females_1year/sim_rates_males_1year
-  simulated_dementia_logIRRs_1yr <- log(IRRs_1year)
+  #simulated_dementia_logIRRs_1yr <- log(IRRs_1year)
   # 
-  # simulated_dementia_logIRRs_data_1yr <- matrix(nrow = num_tests*5, ncol = 5)
-  # #Point estimate
-  # simulated_dementia_logIRRs_data_1yr[, 1] <- log(IRRs_1year)
-  # #SE calculation for log(IRR)
-  # simulated_dementia_logIRRs_data_1yr[, 2] <-
-  #   sqrt(1/inc_cases_females_1year + 1/inc_cases_males_1year)
-  # #95% CI Lower Bound
-  # simulated_dementia_logIRRs_data_1yr[, 3] <-
-  #   simulated_dementia_logIRRs_data_1yr[, 1] -
-  #   1.96*simulated_dementia_logIRRs_data_1yr[, 2]
-  # #95% CI Upper Bound
-  # simulated_dementia_logIRRs_data_1yr[, 4] <-
-  #   simulated_dementia_logIRRs_data_1yr[, 1] +
-  #   1.96*simulated_dementia_logIRRs_data_1yr[, 2]
-  # #95% CI Coverage
-  # simulated_dementia_logIRRs_data_1yr[, 5] <-
-  #   (simulated_dementia_logIRRs_data_1yr[, 3] < 0 &
-  #      simulated_dementia_logIRRs_data_1yr[, 4] > 0)*1
-  # 
-  # simulated_dementia_logIRRs_data_1yr <-
-  #   as.vector(t(simulated_dementia_logIRRs_data_1yr))
+  simulated_dementia_logIRRs_data_1yr <- matrix(nrow = num_tests*5, ncol = 5)
+  #Point estimate
+  simulated_dementia_logIRRs_data_1yr[, 1] <- log(IRRs_1year)
+  #SE calculation for log(IRR)
+  simulated_dementia_logIRRs_data_1yr[, 2] <-
+    sqrt(1/inc_cases_females_1year + 1/inc_cases_males_1year)
+  #95% CI Lower Bound
+  simulated_dementia_logIRRs_data_1yr[, 3] <-
+    simulated_dementia_logIRRs_data_1yr[, 1] -
+    1.96*simulated_dementia_logIRRs_data_1yr[, 2]
+  #95% CI Upper Bound
+  simulated_dementia_logIRRs_data_1yr[, 4] <-
+    simulated_dementia_logIRRs_data_1yr[, 1] +
+    1.96*simulated_dementia_logIRRs_data_1yr[, 2]
+  #95% CI Coverage
+  simulated_dementia_logIRRs_data_1yr[, 5] <-
+    (simulated_dementia_logIRRs_data_1yr[, 3] < 0 &
+       simulated_dementia_logIRRs_data_1yr[, 4] > 0)*1
+
+  simulated_dementia_logIRRs_data_1yr <-
+    as.vector(t(simulated_dementia_logIRRs_data_1yr))
   
   # #---- Dementia logIRRs Poisson Regression ----
   # modeled_dementia_logIRRs <- vector(length = num_tests)
@@ -395,10 +395,10 @@ sex_dem_sim <- function(num_obs){
                    PY_males, 
                    inc_cases_females_1year, inc_cases_males_1year, 
                    PY_females_1year, PY_males_1year,
-                   simulated_dementia_logIRRs, 
-                   simulated_dementia_logIRRs_1yr
-                   # simulated_dementia_logIRRs_data, 
-                   # simulated_dementia_logIRRs_data_1yr
+                   #simulated_dementia_logIRRs, 
+                   #simulated_dementia_logIRRs_1yr,
+                   simulated_dementia_logIRRs_data, 
+                   simulated_dementia_logIRRs_data_1yr
                    #simulated_dementia_logHRs_model_data, 
                    #dem_cases_female, 
                    #dem_cases_male 
@@ -426,24 +426,24 @@ sex_dem_sim <- function(num_obs){
       variable_names_1year$inc_cases_males_varnames,
       variable_names_1year$PY_females_varnames, 
       variable_names_1year$PY_males_varnames, 
-      variable_names$logIRR_varnames[1:num_tests], 
-      variable_names_1year$logIRR_varnames
-      # t(
-      #   cbind(
-      #     na.omit(variable_names$logIRR_varnames),
-      #     na.omit(variable_names$logIRR_SE_varnames),
-      #     na.omit(variable_names$logIRR_95CI_Lower_varnames),
-      #     na.omit(variable_names$logIRR_95CI_Upper_varnames),
-      #     na.omit(variable_names$logIRR_95CI_Coverage_varnames))) %>%
-      #   as.vector(),
-      # t(
-      #   cbind(
-      #     variable_names_1year$logIRR_varnames,
-      #     variable_names_1year$logIRR_SE_varnames,
-      #     variable_names_1year$logIRR_95CI_Lower_varnames,
-      #     variable_names_1year$logIRR_95CI_Upper_varnames,
-      #     variable_names_1year$logIRR_95CI_Coverage_varnames)) %>%
-      #   as.vector()
+      #variable_names$logIRR_varnames[1:num_tests], 
+      #variable_names_1year$logIRR_varnames,
+      t(
+        cbind(
+          na.omit(variable_names$logIRR_varnames),
+          na.omit(variable_names$logIRR_SE_varnames),
+          na.omit(variable_names$logIRR_95CI_Lower_varnames),
+          na.omit(variable_names$logIRR_95CI_Upper_varnames),
+          na.omit(variable_names$logIRR_95CI_Coverage_varnames))) %>%
+        as.vector(),
+      t(
+        cbind(
+          variable_names_1year$logIRR_varnames,
+          variable_names_1year$logIRR_SE_varnames,
+          variable_names_1year$logIRR_95CI_Lower_varnames,
+          variable_names_1year$logIRR_95CI_Upper_varnames,
+          variable_names_1year$logIRR_95CI_Coverage_varnames)) %>%
+        as.vector()
       # t(
       #   cbind(
       #     na.omit(variable_names$dementia_logHR_varnames),
