@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parC_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
@@ -163,7 +163,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
 }
 
 #---- Search for effect of "female" on baseline hazard ----
-opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
+opt_log_g1s <- function(sim_data_exposed, cp50_exposed, opt_lambdas){
   #Function we are trying to optimize
   survivors <- function(LOG_G1, obs, pop_size, cp, opt_lambdas){
     survtime = -log(sim_data_exposed[, variable_names$r1ij_varnames[j]])/
@@ -187,9 +187,9 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
       opt_log_g1s[j:length(opt_log_g1s)] = 
         optimise(survivors, interval = c(-1, 0), obs = sim_data_exposed, 
                  pop_size = num_exposed, cp = cp50_exposed, 
-                 opt_lambdas = optim_lambda$opt_lambdas)$minimum
+                 opt_lambdas = opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
-                             lambda = optim_lambda$opt_lambdas,
+                             lambda = opt_lambdas,
                              opt_log_g1 = opt_log_g1s))
       sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
@@ -202,9 +202,9 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
                  interval = c(-1, 0), 
                  obs = sim_data_exposed, pop_size = num_exposed, 
                  cp = cp50_exposed, 
-                 opt_lambdas = optim_lambda$opt_lambdas)$minimum
+                 opt_lambdas = opt_lambdas)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed), 
-                             lambda = optim_lambda$opt_lambdas,
+                             lambda = opt_lambdas,
                              opt_log_g1 = opt_log_g1s))
       sim_data_exposed[, "alive_now"] <- (Sij[, j] >= 5)*1
       sim_cp50_exposed[j] = sum(sim_data_exposed[, "alive_now"]/num_exposed)
@@ -215,16 +215,32 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed){
 }
   
 #---- Doing the optimization ----
-sim_data <- pre_survival_data_gen(500000)
-
+#Do multiple optimizations and average over runs
 cp50_unexposed <- male_life_US$cum_surv_cond50[-1]
 cp50_exposed <- female_life_US$cum_surv_cond50[-1]
 
-sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
-sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
+lambda_optimization <- function(cp50_unexposed){
+  sim_data <- pre_survival_data_gen(100000)
+  sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
+  optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)$opt_lambdas
+  
+  return(optim_lambda)
+}
 
-optim_lambda <- opt_lambdas(sim_data_unexposed, cp50_unexposed)
-optim_g1s <- opt_log_g1s(sim_data_exposed, cp50_exposed)
+lambda_runs <- replicate(10, lambda_optimization(cp50_unexposed))
+opt_lambdas <- colMeans(t(lambda_runs))
+
+log_g1_optimization <- function(cp50_exposed, opt_lambdas){
+  sim_data <- pre_survival_data_gen(100000)
+  sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
+  optim_g1s <- 
+    opt_log_g1s(sim_data_exposed, cp50_exposed, opt_lambdas)$opt_log_g1s
+}
+
+log_g1_runs <- replicate(10, log_g1_optimization(cp50_exposed, lambda))
+opt_g1s <- exp(colMeans(t(log_g1_runs)))
+
+
 
 
 
