@@ -49,18 +49,18 @@ cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at
 
 #---- Parameters for Cij ----
 #Cognitive function for person i at time j
-b00 <- 0      #Cognitive intercept for males (taken from quad fit to linear model)
+b00 <- 0      #Cognitive intercept for males 
 b01 <- 0      #Effect of female on cognitive intercept
 b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.05    #Cognitive linear term for males (taken from quad fit to linear model)                
+b10 <- 0.05    #Cognitive linear term for males                
 b11 <- 0       #Effect of female on cognitive linear term
 b12 <- 0       #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0       #Effect of U on cognitive linear term 
 
-b20 <- -0.00275  #Cognitive quadratic term for males (taken from quad fit to linear model)
+b20 <- -0.00275  #Cognitive quadratic term for males 
 b21 <- 0         #Effect of female on cognitive quadratic term
 b22 <- 0         #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
 b23 <- 0         #Effect of U on cognitive quadratic term
@@ -68,8 +68,8 @@ b23 <- 0         #Effect of U on cognitive quadratic term
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.905976, 0.907032, 0.901912, 0.913730, 0.927659, 0.923475, 
-            0.931010, 0.924748, 0.999272)) 
+g1 <- log(c(0.731662, 0.751794, 0.807943, 0.893963, 0.993484, 0.999378, 
+            0.999468, 0.998827, 0.996810)) 
 
 g2 <- 0         #Effect of U on log hazard of death
 g3 <- -log(2)   #Effect of interaction between female and U on log hazard of death
@@ -83,6 +83,5 @@ lambda <- c(0.0141156, 0.0201450, 0.0291019, 0.0432166, 0.0671710, 0.1016312,
 lambda_dj <- 0.004
 
 #---- Dementia Cut Point ----
-#Based on slopes_dem-cut_search.R script (results from 20190202)
 dem_cut <- -6.5
 
