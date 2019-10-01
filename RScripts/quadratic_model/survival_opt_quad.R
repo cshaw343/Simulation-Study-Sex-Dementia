@@ -1,8 +1,8 @@
 #***************************************************************
 # Performs a search for baseline hazards and 
 # log(g1) (affect of female sex on survival)
-# Reference data found in euro_life_tables.R 
-# (using Netherlands data)
+# Reference data found in US_life_table_calcs.R 
+# (this is the 1919-1921 birth cohort)
 #***************************************************************
 
 #---- Package Loading and Options ----
