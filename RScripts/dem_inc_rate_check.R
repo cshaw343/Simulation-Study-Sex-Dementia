@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parC_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -24,7 +24,7 @@ source(here("RScripts", "US_life_table_calcs.R"))
 
 #Quadratic model
 opt_linear_term <- 0.05
-opt_quadratic_term <- -0.00275
+opt_quadratic_term <- -0.0028
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -218,3 +218,64 @@ p_alive_females
 
 # slopes_check
 # colMeans(slopes_check)
+
+#---- U plots ----
+#Interval labels i.e. [50, 55)
+age_labels <- tibble("Age" = c("Age ", rep("", (num_tests - 1))), 
+                     "Age_rep" = rep("Age ", num_tests),
+                     "left_brack" = "[", 
+                     "interval_ages" = na.omit(variable_names$interval_ages), 
+                     "right_pren" = ")") %>%
+  unite("formatted_age_intervals", 
+        c("Age", "left_brack", "interval_ages", "right_pren"), sep = "", 
+        remove = FALSE) %>%
+  unite("Age_interval", 
+        c("Age_rep", "left_brack", "interval_ages", "right_pren"), sep = "", 
+        remove = FALSE)
+
+mean_U <- rep(0, 10)
+
+dem_data <- obs %>% 
+  dplyr::select(c("female", "U", "death0", 
+                  head(variable_names$deathij_varnames, -1))) %>%
+  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>% 
+  dplyr::select(-one_of("female")) %>% 
+  dplyr::select("U", "death0", everything()) %>% 
+  set_colnames(c("U", "Age 50", age_labels$Age_interval, 
+                 "Sex/Gender")) %>%
+  gather(contains("Age"), 
+         key = "Age", value = "death_indicator") %>%
+  filter(death_indicator == 0) %>% 
+  mutate_at("Sex/Gender", as.factor)
+
+dem_data$Age <- fct_relevel(dem_data$Age, "Age 50")
+dem_data$`Sex/Gender` <- fct_relevel(dem_data$`Sex/Gender`, "Men")
+
+y <- data.frame(key = levels(dem_data$Age), cutoff = mean_U)
+
+dem_data %>% ggplot(aes(x = U)) + 
+  geom_vline(data = y, aes(xintercept = 0), color = "black", size = 1) + 
+  geom_histogram(data = dem_data %>% filter(`Sex/Gender` == "Women"), 
+                 aes(y = ..density.., fill = "Women"),
+                 binwidth = 0.01) +
+  geom_histogram(data = dem_data %>% filter(`Sex/Gender` == "Men"), 
+                 aes(y = ..density.., fill = "Men"), alpha = 0.5,
+                 binwidth = 0.01) + 
+  xlim(-3, 3) + ylim(0, 0.6) + 
+  labs(x = "U", 
+       y = "Density") + 
+  facet_wrap(~ Age, scales = "free") + theme_minimal() + 
+  theme(legend.title = element_text("Sex/Gender")) +  
+  #theme(text = element_text(size = 20)) + 
+  guides(fill = guide_legend(reverse = TRUE))
+
+#numerical summaries of U
+mean_U_summary <- dem_data %>% group_by(`Sex/Gender`, Age) %>% 
+  summarise_at("U", mean)
+
+#plot of numerical summary
+mean_U_summary$Age <- rep(seq(50, 95, by = 5), 2)
+ggplot(aes(Age, U), data = mean_U_summary) + 
+  geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
+  geom_line(aes(color = `Sex/Gender`)) + 
+  ylab("Mean U") 
