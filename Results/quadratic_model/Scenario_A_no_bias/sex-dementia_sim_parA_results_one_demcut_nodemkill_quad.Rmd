@@ -57,23 +57,30 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_A_onedemcut_nodemkill_maleAD_500000_20190925")) %>% 
+    "dataset_A_onedemcut_nodemkill_maleAD_500000_20191001")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_maleAD_100_20190926.csv")) 
+                "one_demcut_nodemkill_maleAD_1000_20191001.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
-  dplyr::select(-one_of(c("logIRR_50-55", "logIRR_55-60", "logIRR_60-65"))) %>%
-  dplyr::select(-contains("logIRR_CI")) %>% 
-  dplyr::select(-contains("logIRR_SE")) %>% 
-  dplyr::select(-one_of(c("dementia_logHR_50-55", "dementia_logHR_55-60", 
-                          "dementia_logHR_60-65"))) %>%
-  dplyr::select(-contains("dementia_logHR_CI")) %>% 
-  dplyr::select(-contains("dementia_logHR_SE")) 
+  dplyr::select(-one_of(variable_names$logIRR_varnames[1:3])) %>%
+  dplyr::select(-one_of(variable_names$logIRR_95CI_Lower_varnames[1:3])) %>% 
+  dplyr::select(-one_of(variable_names$logIRR_95CI_Upper_varnames[1:3])) %>% 
+  dplyr::select(-one_of(variable_names$logIRR_95CI_Coverage_varnames[1:3])) %>% 
+  dplyr::select(-one_of(variable_names$logIRR_SE_varnames[1:3])) %>% 
+  dplyr::select(-one_of(variable_names_1year$logIRR_varnames[1:15])) %>%
+  dplyr::select(
+    -one_of(variable_names_1year$logIRR_95CI_Lower_varnames[1:15])) %>% 
+  dplyr::select(
+    -one_of(variable_names_1year$logIRR_95CI_Upper_varnames[1:15])) %>% 
+  dplyr::select(
+    -one_of(variable_names_1year$logIRR_95CI_Coverage_varnames[1:15])) %>% 
+  dplyr::select(-one_of(variable_names_1year$logIRR_SE_varnames[1:15]))
+  
                         
                         
 #mean_sim_results <- colMeans(sim_results)
@@ -349,7 +356,7 @@ and vascular dementia: The EURODEM Studies (Andersen 1999); Table 2.") %>% kable
 
 <br>
 
-```{r hr-table}
+```{r hr-table, eval = FALSE}
 hr_table <- 
   tibble("Simulation Scenario A" = " ", 
          "HR" = exp(
@@ -438,10 +445,10 @@ ggplot(samp_Cij, aes(Age, value)) +
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("Mean Cognitive Trajectories") +
   theme_minimal() +  
-  #theme(text = element_text(size = 28)) + 
+  theme(text = element_text(size = 28)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
-  geom_hline(yintercept = dem_cut) + 
-  guides(color = guide_legend(reverse = TRUE))
+  #guides(color = guide_legend(reverse = TRUE)) +
+  geom_hline(yintercept = dem_cut) 
 ```
 
 <br>
@@ -498,17 +505,17 @@ hists %>% ggplot(aes(value)) +
   geom_histogram(fill = "gray", alpha = 0.6) + 
   geom_histogram(data = hists %>% filter(indicators == 1), fill = "dodgerblue2", 
                  alpha = 0.6) + 
-  labs(title = "Dementia Cases by Age Interval", 
+  labs(title = "Dementia Cases by Age Band", 
        x = "Cognitive Level", 
        y = "Live People") + 
   facet_wrap(~ key, scales = "free") + 
-  xlim(-30, 3.5) + theme_minimal() 
-#+ theme(text = element_text(size = 20))
+  theme(text = element_text(size = 28)) +
+  xlim(-30, 3.5) + theme_minimal()  
 ```
 
 <br>
 
-```{r dem-prev}
+```{r dem-prev, eval = FALSE}
 dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>% 
   colMeans(na.rm = TRUE) %>% as.data.frame() %>% t() %>%
   set_colnames(c("Age 50", "[50-55)", 
@@ -558,9 +565,9 @@ dem_data %>% ggplot(aes(x = U)) +
   labs(x = "U", 
        y = "Density") + 
   facet_wrap(~ Age, scales = "free") + theme_minimal() + 
-  theme(legend.title = element_text("Sex/Gender")) +  
   #theme(text = element_text(size = 20)) + 
-  guides(fill = guide_legend(reverse = TRUE))
+  #guides(fill = guide_legend(reverse = TRUE)) + 
+  theme(legend.title = element_text("Sex/Gender"))
 
 #numerical summaries of U
 mean_U_summary <- dem_data %>% group_by(`Sex/Gender`, Age) %>% 
@@ -571,9 +578,9 @@ mean_U_summary$Age <- rep(seq(50, 95, by = 5), 2)
 ggplot(aes(Age, U), data = mean_U_summary) + 
   geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
   geom_line(aes(color = `Sex/Gender`)) + 
+  theme(text = element_text(size = 22)) +
   ylab("Mean U") 
-#+  
-  #theme(text = element_text(size = 20))
+  
 ```
 
 ## Extra Sanity Check Calculations
@@ -667,6 +674,9 @@ ggplot(aes(age, inc_rate), data = mean_inc_rate_by_sex) +
   ggtitle("Annual Dementia Incidence Rates") + 
   scale_x_continuous(breaks = seq(50, 95, by = 5)) 
 #+ theme(text = element_text(size = 28))
+
+IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
+plot(IRRs_by_year$Female)
 ```
 
 # References
