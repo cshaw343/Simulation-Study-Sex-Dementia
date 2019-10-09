@@ -76,8 +76,9 @@ g3 <- log(2)   #Effect of interaction between male and U on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
-lambda <- c(0.0109, 0.0169, 0.0261, 0.0404, 0.0795, 0.1392, 
-            0.2438, 0.4286, 1.0572)
+lambda <- c(0.01094535930, 0.01746202883, 0.02632590951, 0.03968209184, 
+            0.07859151114, 0.13367543344, 0.22739513006, 0.45586864815,
+            0.98207460194)
 
 #---- Baseline hazard of random dementia ----
 lambda_dj <- 0.004
