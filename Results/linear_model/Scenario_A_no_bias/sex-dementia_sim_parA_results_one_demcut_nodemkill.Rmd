@@ -39,8 +39,8 @@ set.seed(03122019)
 ```{r Sourcing scripts}
 source(here("RScripts", "dementia_incidence_EURODEM_pooled.R"))
 source(here("RScripts", "life_table_calcs.R"))
-source(here("RScripts", "sex-dementia_sim_parA_onedemcut_nodemkill.R"))
-source(here("RScripts", "variable_names.R"))
+source(here("RScripts", "linear_model", "sex-dementia_sim_parA_onedemcut_nodemkill.R"))
+source(here("RScripts", "linear_model", "variable_names.R"))
 source(here("RScripts", "misc_custom_functions.R"))
 ```
 
@@ -77,13 +77,13 @@ france_F <- read_csv(here("Data", "france_cohort_F_calcs"),
 #One simulation run
 dataset <- 
   readRDS(here(
-    "Data", 
+    "Data", "linear_model",
     "dataset_A_onedemcut_nodemkill_500000_20190814")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <- 
-  read_csv(here("Results", "Scenario_A_no_bias", 
+  read_csv(here("Results", "linear_model", "Scenario_A_no_bias", 
                 "one_demcut_nodemkill_1000_20190815.csv")) %>% 
   na.omit()
 
