@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parB_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -279,3 +279,5 @@ ggplot(aes(Age, U), data = mean_U_summary) +
   geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
   geom_line(aes(color = `Sex/Gender`)) + 
   ylab("Mean U") 
+
+
