@@ -282,7 +282,9 @@ ggplot(pub_sim_HR_data_cox, aes(Age, HR)) +
   geom_point(aes(color = `Data Type`, group = `Data Type`), size = 1.75) + 
   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
             alpha = 0.6) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) +
+  #ylim(0, 1) +
+  #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
   labs(y = "Mortality Hazard Ratio (Female:Memale)", x = "Age", 
        color = "") + theme_minimal() + 
   #theme(text = element_text(size = 40)) + 
@@ -445,7 +447,7 @@ ggplot(samp_Cij, aes(Age, value)) +
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("Mean Cognitive Trajectories") +
   theme_minimal() +  
-  theme(text = element_text(size = 28)) + 
+  #theme(text = element_text(size = 28)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
   #guides(color = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = dem_cut) 
@@ -509,7 +511,7 @@ hists %>% ggplot(aes(value)) +
        x = "Cognitive Level", 
        y = "Live People") + 
   facet_wrap(~ key, scales = "free") + 
-  theme(text = element_text(size = 28)) +
+  #theme(text = element_text(size = 28)) +
   xlim(-30, 3.5) + theme_minimal()  
 ```
 
@@ -578,7 +580,7 @@ mean_U_summary$Age <- rep(seq(50, 95, by = 5), 2)
 ggplot(aes(Age, U), data = mean_U_summary) + 
   geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
   geom_line(aes(color = `Sex/Gender`)) + 
-  theme(text = element_text(size = 22)) +
+  #theme(text = element_text(size = 22)) +
   ylab("Mean U") 
   
 ```
