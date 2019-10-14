@@ -100,4 +100,15 @@ female_life <- tibble("Birth cohort" = "1919-1921",
 # #ggsave(filename = "hazard_plot_2014life.jpeg", width = 10, height = 7, 
 # #       plot = hazard_plot)
 
-
+# #---- Sanity check ----
+# male_life_check = male_life %>% 
+#   mutate("cp50" = 
+#            Survivors/as.numeric(male_life[which(male_life$Age == 50), 
+#                                           "Survivors"]), 
+#          "log_cp50" = log(cp50), 
+#          "Haz_check" = haz(age = Age, logprobs = log_cp50)) 
+# 
+# female_life_check = female_life %>% 
+#   mutate("cp50" = 
+#            Survivors/as.numeric(female_life[which(female_life$Age == 50), 
+#                                             "Survivors"]))
