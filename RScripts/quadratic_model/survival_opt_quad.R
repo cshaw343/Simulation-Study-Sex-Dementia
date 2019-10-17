@@ -94,9 +94,9 @@ survival_temp <- function(obs_matrix, lambda, opt_log_g1 = g1){
       r_name <- variable_names$r1ij_varnames[j]
       
       survtime = -log(obs_matrix[r_name, i])/
-        (lambda[j]*exp(opt_log_g1[j]*obs_matrix["female", i] + 
+        (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
                          g2*obs_matrix["U", i] + 
-                         g3*obs_matrix["female", i]*obs_matrix["U", i]))
+                         g3*(1 - obs_matrix["female", i])*obs_matrix["U", i]))
       
       survtimes[j] <- as.numeric(survtime)
       if(survtime < 5){
@@ -120,7 +120,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
       (L*
          exp(g1[j]*sim_data_unexposed[, "female"] + 
                g2*sim_data_unexposed[, "U"] + 
-               g3*sim_data_unexposed[, "female"]*sim_data_unexposed[, "U"]))
+               g3*(1 - sim_data_unexposed[, "female"])*sim_data_unexposed[, "U"]))
     
     alive <- (survtime >= 5) * 1
     return(abs((sum(alive)/pop_size) - cp50_unexposed[j]))
@@ -135,7 +135,7 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
   for(j in 1:length(opt_lambdas)){
     if(j == 1){
       opt_lambdas[j:length(opt_lambdas)] = 
-        optimise(survivors, interval = c(0, 0.015), 
+        optimise(survivors, interval = c(0.011274, 0.01128), 
                  obs = sim_data_unexposed, 
                  pop_size = num_unexposed, cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
@@ -144,12 +144,12 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
       sim_cp50_unexposed[j] = 
         sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
-    } else if(j >=2 && j <= 5){
+    } else if(j >=2 && j <= 3){
       sim_data_unexposed <- 
         sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ] 
       opt_lambdas[j:length(opt_lambdas)] = 
         optimise(survivors, 
-                 interval = c(opt_lambdas[j - 1], 1.75*opt_lambdas[j - 1]), 
+                 interval = c(opt_lambdas[j - 1], 1.52*opt_lambdas[j - 1]), 
                  obs = sim_data_unexposed, pop_size = num_unexposed, 
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed), 
@@ -157,12 +157,12 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
       sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
       sim_cp50_unexposed[j] = 
         sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
-    } else if(j >=6 && j <= 9){
+    } else if(j >=4 && j <= 4){
       sim_data_unexposed <-
         sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
       opt_lambdas[j:length(opt_lambdas)] =
         optimise(survivors,
-                 interval = c(opt_lambdas[j - 1], 2*opt_lambdas[j - 1]),
+                 interval = c(1.62729*opt_lambdas[j - 1], 1.635*opt_lambdas[j - 1]),
                  obs = sim_data_unexposed, pop_size = num_unexposed,
                  cp = cp50_unexposed)$minimum
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
@@ -170,38 +170,38 @@ opt_lambdas <- function(sim_data_unexposed, cp50_unexposed){
       sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
       sim_cp50_unexposed[j] =
         sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
-    # }else if(j >=5 && j <= 7){
-    #   sim_data_unexposed <-
-    #     sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
-    #   opt_lambdas[j:length(opt_lambdas)] =
-    #     optimise(survivors,
-    #              interval = c(1.7*opt_lambdas[j - 1], 2*opt_lambdas[j - 1]),
-    #              obs = sim_data_unexposed, pop_size = num_unexposed,
-    #              cp = cp50_unexposed)$minimum
-    #   Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
-    #                          lambda = opt_lambdas))
-    #   sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
-    #   sim_cp50_unexposed[j] =
-    #     sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
-    # } else if(j >=8 && j <= 9){
-    #   sim_data_unexposed <-
-    #     sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
-    #   opt_lambdas[j:length(opt_lambdas)] =
-    #     optimise(survivors,
-    #              interval = c(2*opt_lambdas[j - 1], 2.25*opt_lambdas[j - 1]),
-    #              obs = sim_data_unexposed, pop_size = num_unexposed,
-    #              cp = cp50_unexposed)$minimum
-    #   Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
-    #                          lambda = opt_lambdas))
-    #   sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
-    #   sim_cp50_unexposed[j] =
-    #     sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
+    }else if(j >=5 && j <= 6){
+      sim_data_unexposed <-
+        sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
+      opt_lambdas[j:length(opt_lambdas)] =
+        optimise(survivors,
+                 interval = c(1.765*opt_lambdas[j - 1], 2*opt_lambdas[j - 1]),
+                 obs = sim_data_unexposed, pop_size = num_unexposed,
+                 cp = cp50_unexposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
+                             lambda = opt_lambdas))
+      sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
+      sim_cp50_unexposed[j] =
+        sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
+    } else if(j >=7 && j <= 9){
+      sim_data_unexposed <-
+        sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
+      opt_lambdas[j:length(opt_lambdas)] =
+        optimise(survivors,
+                 interval = c(1.9*opt_lambdas[j - 1], 2*opt_lambdas[j - 1]),
+                 obs = sim_data_unexposed, pop_size = num_unexposed,
+                 cp = cp50_unexposed)$minimum
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
+                             lambda = opt_lambdas))
+      sim_data_unexposed[, "alive_now"] <- (Sij[, j] >= 5)*1
+      sim_cp50_unexposed[j] =
+        sum(sim_data_unexposed[, "alive_now"]/num_unexposed)
     # } else {
     #   sim_data_unexposed <-
     #     sim_data_unexposed[sim_data_unexposed[, "alive_now"] == 1, ]
     #   opt_lambdas[j:length(opt_lambdas)] =
     #     optimise(survivors,
-    #              interval = c(3.5*opt_lambdas[j - 1], 4.3*opt_lambdas[j - 1]),
+    #              interval = c(1.875*opt_lambdas[j - 1], 2*opt_lambdas[j - 1]),
     #              obs = sim_data_unexposed, pop_size = num_unexposed,
     #              cp = cp50_unexposed)$minimum
     #   Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
@@ -223,7 +223,7 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed, opt_lambdas){
       (opt_lambdas[j]*
          exp(LOG_G1*sim_data_exposed[, "female"] + 
                g2*sim_data_exposed[, "U"] + 
-               g3*sim_data_exposed[, "female"]*sim_data_exposed[, "U"]))
+               g3*(1 - sim_data_exposed[, "female"])*sim_data_exposed[, "U"]))
     
     alive <- (survtime >= 5) * 1
     return(abs((sum(alive)/pop_size) - cp50_exposed[j]))
@@ -238,7 +238,7 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed, opt_lambdas){
   for(j in 1:length(opt_log_g1s)){
     if(j <= 1){
       opt_log_g1s[j:length(opt_log_g1s)] = 
-        optimise(survivors, interval = c(-0.049, -0.045), 
+        optimise(survivors, interval = c(-1, 1), 
                  obs = sim_data_exposed, 
                  pop_size = num_exposed, cp = cp50_exposed, 
                  opt_lambdas = opt_lambdas)$minimum
@@ -253,7 +253,7 @@ opt_log_g1s <- function(sim_data_exposed, cp50_exposed, opt_lambdas){
         sim_data_exposed[sim_data_exposed[, "alive_now"] == 1, ] 
       opt_log_g1s[j:length(opt_log_g1s)] = 
         optimise(survivors, 
-                 interval = c(-1.5, 0), 
+                 interval = c(0.5, 1), 
                  obs = sim_data_exposed, pop_size = num_exposed, 
                  cp = cp50_exposed, 
                  opt_lambdas = opt_lambdas)$minimum
@@ -321,7 +321,6 @@ log_g1_optimization <- function(cp50_exposed, opt_lambdas){
 
 log_g1_runs <- replicate(10, log_g1_optimization(cp50_exposed, opt_lambdas))
 opt_g1s <- colMeans(t(log_g1_runs))
-
 
 
 
