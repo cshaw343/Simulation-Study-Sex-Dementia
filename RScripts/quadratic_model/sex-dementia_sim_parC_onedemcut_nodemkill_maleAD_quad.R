@@ -8,7 +8,7 @@
 #*******************************************************************************
 
 #---- Number of simulation runs ----
-runs = 100
+runs = 1000
 
 #---- Number of observations ----
 #Multiples of 1000
@@ -68,8 +68,8 @@ b23 <- 0         #Effect of U on cognitive quadratic term
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.952, 0.965, 0.965, 0.965, 0.965, 0.548, 
-            0.549, 0.548, 0.371)) 
+g1 <- log(c(1.160264, 1.063264, 1.002552, 0.943113, 0.835486, 0.704947, 
+            0.606099, 0.440200, 0.286078)) 
 
 g2 <- 0        #Effect of U on log hazard of death
 g3 <- log(2)   #Effect of interaction between male and U on log hazard of death
