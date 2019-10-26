@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parB_highU_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -23,8 +23,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.048
-opt_quadratic_term <- -0.003025
+opt_linear_term <- 0.049
+opt_quadratic_term <- -0.0031225
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -261,7 +261,7 @@ dem_data %>% ggplot(aes(x = U)) +
   geom_histogram(data = dem_data %>% filter(`Sex/Gender` == "Men"), 
                  aes(y = ..density.., fill = "Men"), alpha = 0.5,
                  binwidth = 0.01) + 
-  xlim(-3, 3) + ylim(0, 0.6) + 
+  #xlim(-2.5, 2.5) + ylim(0, 0.6) + 
   labs(x = "U", 
        y = "Density") + 
   facet_wrap(~ Age, scales = "free") + theme_minimal() + 
