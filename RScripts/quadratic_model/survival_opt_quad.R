@@ -322,7 +322,7 @@ cp_unexposed <- male_life_US$CP[-1]
 cp_exposed <- female_life_US$CP[-1]
 
 lambda_optimization <- function(cp_unexposed){
-  sim_data <- pre_survival_data_gen(10000)
+  sim_data <- pre_survival_data_gen(100000)
   sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
   optim_lambda <- opt_lambdas(sim_data_unexposed, cp_unexposed)$opt_lambdas
   
