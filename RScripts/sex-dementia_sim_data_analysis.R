@@ -79,7 +79,7 @@ sex_dem_sim <- function(num_obs){
   alive_females <- female_data %>% 
     dplyr::select(variable_names$deathij_varnames[1:num_tests])
   
-  for(i in 1:length(cond_p_alive)){
+  for(i in 1:length(cp_alive_females)){
     if(i == 1){
       cp_alive_females[i] = 
         sum(alive_females[, variable_names$deathij_varnames[i]] == 0)/
