@@ -1,5 +1,5 @@
 ---
-title: "Simulation Scenario A:  No bias anticipated"
+title: "Simulation Scenario B:  Collider bias... large effect of U on cognitive intercept and survival"
 subtitle: "One dementia cut point; quadratic time to dementia"
 output: 
   bookdown::html_document2:
@@ -40,7 +40,7 @@ set.seed(03122019)
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", 
-       "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+       "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 ```
 
@@ -57,13 +57,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_A_onedemcut_nodemkill_maleAD_500000_20191001")) %>% 
+    "dataset_B_highUonSurv_onedemcut_nodemkill_maleAD_500000_20191023")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
-  read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_maleAD_1000_20191001.csv")) 
+  read_csv(here("Results", "quadratic_model", "Scenario_B_highU", 
+                "one_demcut_nodemkill_highUonSurv_maleAD_1000_20191023.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -108,7 +108,7 @@ age_labels <- tibble("Age" = c("Age ", rep("", (num_tests - 1))),
 <br>
 
 ```{r DAG, fig.align="center", out.width="75%"}
-knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG_UonInt_only.png"))
+knitr::include_graphics(here("DAGs", "sex-dem_sim_parBandC_DAG_UonInt_only.png"))
 ```
 <br>
 
@@ -147,12 +147,12 @@ h_{\text{death}_{ij}}(t) =  \lambda_{j}\exp\{\gamma_{1j}\text{sex}_i + \gamma_2U
 (\#eq:mort-hazard)
 \end{equation}
 
-where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of sex/gender on mortality.  Note that $\gamma_2-\gamma_3$ are set to 0 in Simulation Scenario A signifying that in this scenario, there is no effect of U on mortality.
+where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of sex/gender on mortality.  
 
 ```{r mort-haz-coeff}
 coeff_table <- 
   tibble("Simulation Scenario" = rep("", 11), 
-         "A" = c(g1, g2, g3)) %>% 
+         "B" = c(g1, g2, g3)) %>% 
   t() %>% 
   set_colnames(c("$\\gamma_{11}$", "$\\gamma_{12}$", 
                  "$\\gamma_{13}$", "$\\gamma_{14}$", "$\\gamma_{15}$", 
@@ -282,9 +282,7 @@ ggplot(pub_sim_HR_data_cox, aes(Age, HR)) +
   geom_point(aes(color = `Data Type`, group = `Data Type`), size = 1.75) + 
   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
             alpha = 0.6) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) +
-  #ylim(0, 1) +
-  #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(y = "Mortality Hazard Ratio (Female:Memale)", x = "Age", 
        color = "") + theme_minimal() + 
   #theme(text = element_text(size = 40)) + 
@@ -370,7 +368,7 @@ Average dementia incidence rates per 1000 person years across `r runs` simulated
 dem_table <- 
   tibble("ACT" = c(" ", " ", " ", 
                        round(ACT_inc_rates$Male_AD_1000PY, 3)), 
-         "Simulation Scenario A" = " ", 
+         "Simulation Scenario B" = " ", 
          "F" = as.vector(
            mean_sim_results[
              na.omit(variable_names$dem_inc_rate_females_varnames)]), 
@@ -392,7 +390,7 @@ and vascular dementia: The EURODEM Studies (Andersen 1999); Table 2.") %>% kable
 
 ```{r hr-table, eval = FALSE}
 hr_table <- 
-  tibble("Simulation Scenario A" = " ", 
+  tibble("Simulation Scenario B" = " ", 
          "HR" = exp(
            mean_sim_results[
              na.omit(variable_names$dementia_logHR_varnames)])) %>% 
@@ -409,12 +407,21 @@ kable(hr_table, caption =
 
 ```{r IRR-table}
 IRR_table <- 
-  tibble("Simulation Scenario A" = " ", 
+  tibble("Simulation Scenario B" = " ", 
          "IRR" = exp(
            mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
 kable(IRR_table, caption = paste("Average incidence rate ratios for dementia (exponentiated mean of the observed ln(dementia IRR) across", runs, "simulated samples).")) %>% kable_styling()
+```
+
+```{r ACT-IRR-table}
+ACT_IRR_table <- 
+  tibble("ACT" = " ", 
+         "IRR (Women:Men)" = ACT_inc_rates$`AD_IRR_F:M`) %>% 
+  t() %>% set_colnames(age_labels$formatted_age_intervals[4:nrow(age_labels)])
+
+kable(ACT_IRR_table, caption = paste("Incidence rate ratios for dementia from the ACT study")) %>% kable_styling()
 ```
 
 <br>
@@ -546,6 +553,9 @@ hists %>% ggplot(aes(value)) +
   #theme(text = element_text(size = 28)) +
   xlim(-30, 3.5) + theme_minimal()  
 ```
+
+<br>
+
 ```{r Random-vs-trajectory-dem}
 dem_both <- ifelse(dataset$dem_Cij == 1 & dataset$dem_random == 1, 1, 0)
 ```
@@ -553,8 +563,6 @@ dem_both <- ifelse(dataset$dem_Cij == 1 & dataset$dem_random == 1, 1, 0)
 Number of people with random/shock dementia:  `r sum(dataset$dem_random)` (`r mean(dataset$dem_random)`)  
 Number of people with trajectory dementia:  `r sum(dataset$dem_Cij)` (`r mean(dataset$dem_Cij)`)  
 Number of people with both types: `r sum(dem_both)` (`r mean(dem_both)`)
-
-<br>
 
 ```{r dem-prev, eval = FALSE}
 dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>% 
@@ -716,8 +724,8 @@ ggplot(aes(age, inc_rate), data = mean_inc_rate_by_sex) +
   scale_x_continuous(breaks = seq(50, 95, by = 5)) 
 #+ theme(text = element_text(size = 28))
 
-IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
-plot(IRRs_by_year$Female)
+# IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
+# plot(IRRs_by_year$Female)
 ```
 
 # References
