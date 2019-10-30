@@ -48,6 +48,7 @@ Results/linear_model/Scenario_C/*.csv
 Results/linear_model/Scenario_A_no_bias/sim_results*
 Results/linear_model/Scenario_A_no_bias/unform_timetodem*
 Results/quadratic_model/Scenario_A_no_bias/*.csv
+Results/quadratic_model/Scenario_B/*.csv
 Results/quadratic_model/Scenario_C/*.csv
 Results/Scenario_A_no_bias/*.csv
 Results/Scenario_B/*.csv
