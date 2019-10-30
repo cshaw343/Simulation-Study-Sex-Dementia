@@ -160,7 +160,7 @@ for(i in 1:length(cond_p_alive_males)){
 
 cond_p_alive_females <- vector(length = 
                          length(na.omit(variable_names$deathij_varnames)))
-alive_females <- obs %>% 
+alive_females <- female_data %>% 
   dplyr::select(variable_names$deathij_varnames[1:num_tests])
 
 for(i in 1:length(cond_p_alive)){
