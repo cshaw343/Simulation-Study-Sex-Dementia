@@ -107,12 +107,12 @@ num_obs <- nrow(obs)
 num_males <- nrow(male_data)
 num_females <- nrow(female_data)
 
-#---- Survival probabilities ----
+#---- Cumulative survival probabilities ----
 p_alive <- obs %>% 
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_obs
 
-#---- Survival probabilities by sex ----
+#---- Cumulative survival probabilities by sex ----
 p_alive_males <- male_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
@@ -120,6 +120,63 @@ p_alive_males <- male_data %>%
 p_alive_females <- female_data %>%
   dplyr::select(variable_names$deathij_varnames[1:num_tests]) %>% 
   map_dbl(~sum(. == 0, na.rm = TRUE))/num_females
+
+#---- Conditional survival probabilities ----
+cond_p_alive <- vector(length = 
+                         length(na.omit(variable_names$deathij_varnames)))
+alive <- obs %>% 
+  dplyr::select(variable_names$deathij_varnames[1:num_tests])
+
+for(i in 1:length(cond_p_alive)){
+  if(i == 1){
+    cond_p_alive[i] = 
+      sum(alive[, variable_names$deathij_varnames[i]] == 0)/nrow(alive)
+  } else{
+    alive <- alive[alive[, variable_names$deathij_varnames[i - 1]] == 0, ]
+    cond_p_alive[i] = 
+      sum(alive[, variable_names$deathij_varnames[i]] == 0)/nrow(alive)
+  }
+}
+
+#---- Conditional survival probabilities by sex ----
+cond_p_alive_males <- vector(length = 
+                         length(na.omit(variable_names$deathij_varnames)))
+alive_males <- male_data %>% 
+  dplyr::select(variable_names$deathij_varnames[1:num_tests])
+
+for(i in 1:length(cond_p_alive_males)){
+  if(i == 1){
+    cond_p_alive_males[i] = 
+      sum(alive_males[, variable_names$deathij_varnames[i]] == 0)/
+      nrow(alive_males)
+  } else{
+    alive_males <- 
+      alive_males[alive_males[, variable_names$deathij_varnames[i - 1]] == 0, ]
+    cond_p_alive_males[i] = 
+      sum(alive_males[, variable_names$deathij_varnames[i]] == 0)/
+      nrow(alive_males)
+  }
+}
+
+cond_p_alive_females <- vector(length = 
+                         length(na.omit(variable_names$deathij_varnames)))
+alive_females <- obs %>% 
+  dplyr::select(variable_names$deathij_varnames[1:num_tests])
+
+for(i in 1:length(cond_p_alive)){
+  if(i == 1){
+    cond_p_alive_females[i] = 
+      sum(alive_females[, variable_names$deathij_varnames[i]] == 0)/
+      nrow(alive_females)
+  } else{
+    alive_females <- 
+      alive_females[
+        alive_females[, variable_names$deathij_varnames[i - 1]] == 0, ]
+    cond_p_alive_females[i] = 
+      sum(alive_females[, variable_names$deathij_varnames[i]] == 0)/
+      nrow(alive_females)
+  }
+}
 
 #---- Visualize Cij data ----
 Cij_check <- obs %>% 
