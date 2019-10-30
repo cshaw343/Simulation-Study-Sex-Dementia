@@ -37,6 +37,63 @@ sex_dem_sim <- function(num_obs){
     dplyr::select(na.omit(variable_names$deathij_varnames)) %>% 
     map_dbl(~sum(. == 0, na.rm = TRUE))/num_males
   
+  #---- Conditional survival probabilities ----
+  cp_alive <- vector(length = length(na.omit(variable_names$deathij_varnames)))
+  alive <- data %>% 
+    dplyr::select(variable_names$deathij_varnames[1:num_tests])
+  
+  for(i in 1:length(cp_alive)){
+    if(i == 1){
+      cp_alive[i] = 
+        sum(alive[, variable_names$deathij_varnames[i]] == 0)/nrow(alive)
+    } else{
+      alive <- alive[alive[, variable_names$deathij_varnames[i - 1]] == 0, ]
+      cp_alive[i] = 
+        sum(alive[, variable_names$deathij_varnames[i]] == 0)/nrow(alive)
+    }
+  }
+  
+  #---- Conditional survival probabilities by sex ----
+  cp_alive_males <- 
+    vector(length = length(na.omit(variable_names$deathij_varnames)))
+  alive_males <- male_data %>% 
+    dplyr::select(variable_names$deathij_varnames[1:num_tests])
+  
+  for(i in 1:length(cp_alive_males)){
+    if(i == 1){
+      cp_alive_males[i] = 
+        sum(alive_males[, variable_names$deathij_varnames[i]] == 0)/
+        nrow(alive_males)
+    } else{
+      alive_males <- 
+        alive_males[
+          alive_males[, variable_names$deathij_varnames[i - 1]] == 0, ]
+      cp_alive_males[i] = 
+        sum(alive_males[, variable_names$deathij_varnames[i]] == 0)/
+        nrow(alive_males)
+    }
+  }
+  
+  cp_alive_females <- 
+    vector(length = length(na.omit(variable_names$deathij_varnames)))
+  alive_females <- female_data %>% 
+    dplyr::select(variable_names$deathij_varnames[1:num_tests])
+  
+  for(i in 1:length(cond_p_alive)){
+    if(i == 1){
+      cp_alive_females[i] = 
+        sum(alive_females[, variable_names$deathij_varnames[i]] == 0)/
+        nrow(alive_females)
+    } else{
+      alive_females <- 
+        alive_females[
+          alive_females[, variable_names$deathij_varnames[i - 1]] == 0, ]
+      cp_alive_females[i] = 
+        sum(alive_females[, variable_names$deathij_varnames[i]] == 0)/
+        nrow(alive_females)
+    }
+  }
+  
   #---- Mortality logHR (F:M) ----
   survival_data <- data[, variable_names$Sij_varnames[1:num_tests]]
   survival_data[survival_data == 5] <- 4.99999
@@ -388,7 +445,8 @@ sex_dem_sim <- function(num_obs){
   
   #---- Vector to return ----
   results_vec <- c(num_obs, num_females, num_males, p_alive, p_alive_females, 
-                   p_alive_males, simulated_mortality_logHRs, #at_risk_females, 
+                   p_alive_males, cp_alive, cp_alive_females, cp_alive_males,
+                   simulated_mortality_logHRs, #at_risk_females, 
                    #at_risk_males, 
                    sim_rates, sim_rates_females, sim_rates_males, 
                    inc_cases_females[-1], inc_cases_males[-1], PY_females, 
@@ -411,7 +469,10 @@ sex_dem_sim <- function(num_obs){
       "num_males_baseline", 
       variable_names$p_alive_varnames[1:num_tests], 
       variable_names$p_alive_females_varnames[1:num_tests], 
-      variable_names$p_alive_males_varnames[1:num_tests], 
+      variable_names$p_alive_males_varnames[1:num_tests],
+      variable_names$cp_alive_varnames[1:num_tests], 
+      variable_names$cp_alive_females_varnames[1:num_tests], 
+      variable_names$cp_alive_males_varnames[1:num_tests],
       variable_names$mortality_logHR_varnames[1:num_tests],
       #variable_names$at_risk_females_varnames[1:num_tests], 
       #variable_names$at_risk_males_varnames[1:num_tests], 
