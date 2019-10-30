@@ -27,6 +27,7 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                                                   num_tests + 1),
                          "contributed" = rep("contributed", num_tests + 1), 
                          "p_alive" = rep("p_alive", num_tests + 1), 
+                         "cp_alive" = rep("cp_alive", num_tests + 1), 
                          "females" = rep("females", num_tests + 1), 
                          "males" = rep("males", num_tests + 1), 
                          "mortality_logHR" = 
@@ -85,6 +86,11 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
   unite("p_alive_females_varnames", c(p_alive, females, end_ages), sep = "_", 
         remove = FALSE) %>%
   unite("p_alive_males_varnames", c(p_alive, males, end_ages), sep = "_", 
+        remove = FALSE) %>% 
+  unite("cp_alive_varnames", c(cp_alive, end_ages), sep = "_", remove = FALSE) %>%
+  unite("cp_alive_females_varnames", c(cp_alive, females, end_ages), sep = "_", 
+        remove = FALSE) %>%
+  unite("cp_alive_males_varnames", c(cp_alive, males, end_ages), sep = "_", 
         remove = FALSE) %>% 
   unite("mortality_logHR_varnames", c(mortality_logHR, interval_ages), sep = "_", 
         remove = FALSE) %>% 
@@ -146,7 +152,9 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                 "contributed_varnames", "age_varnames", "agec_varnames", 
                 "Cij_varnames", "dem_varnames", "interval_ages", 
                 "p_alive_varnames", "p_alive_females_varnames", 
-                "p_alive_males_varnames", "mortality_logHR_varnames", 
+                "p_alive_males_varnames", "cp_alive_varnames", 
+                "cp_alive_females_varnames", "cp_alive_males_varnames", 
+                "mortality_logHR_varnames", 
                 "at_risk_females_varnames", "at_risk_males_varnames", 
                 "dem_inc_rate_varnames", "dem_inc_rate_females_varnames", 
                 "dem_inc_rate_males_varnames", "inc_cases_females_varnames", 

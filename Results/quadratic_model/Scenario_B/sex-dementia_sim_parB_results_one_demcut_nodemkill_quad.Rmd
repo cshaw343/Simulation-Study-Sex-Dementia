@@ -1,5 +1,5 @@
 ---
-title: "Simulation Scenario A:  No bias anticipated"
+title: "Simulation Scenario B:  Collider bias"
 subtitle: "One dementia cut point; quadratic time to dementia"
 output: 
   bookdown::html_document2:
@@ -40,7 +40,7 @@ set.seed(03122019)
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", 
-       "sex-dementia_sim_parA_onedemcut_nodemkill_maleAD_quad.R"))
+       "sex-dementia_sim_parB_onedemcut_nodemkill_maleAD_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 ```
 
@@ -57,13 +57,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_A_onedemcut_nodemkill_maleAD_500000_20191001")) %>% 
+    "dataset_B_onedemcut_nodemkill_maleAD_500000_20191014")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
-  read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_maleAD_1000_20191001.csv")) 
+  read_csv(here("Results", "quadratic_model", "Scenario_B", 
+                "one_demcut_nodemkill_maleAD_1000_20191014.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -108,8 +108,9 @@ age_labels <- tibble("Age" = c("Age ", rep("", (num_tests - 1))),
 <br>
 
 ```{r DAG, fig.align="center", out.width="75%"}
-knitr::include_graphics(here("DAGs", "sex-dem_sim_parA_DAG_UonInt_only.png"))
+knitr::include_graphics(here("DAGs", "sex-dem_sim_parBandC_DAG_UonInt_only.png"))
 ```
+
 <br>
 
 In this scenario, sex influences survival while U influences level of cognitive function at age 50 (the intercept in our case) and dementia incidence.  The dotted line from U to survival represents the fact that in this causal structure, U does not influence survival; but the effects of U on survival will be added in future scenarios consistent with collider bias.
@@ -282,10 +283,8 @@ ggplot(pub_sim_HR_data_cox, aes(Age, HR)) +
   geom_point(aes(color = `Data Type`, group = `Data Type`), size = 1.75) + 
   geom_line(aes(color = `Data Type`, group = `Data Type`), size = 1.25, 
             alpha = 0.6) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) +
-  #ylim(0, 1) +
-  #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
-  labs(y = "Mortality Hazard Ratio (Female:Memale)", x = "Age", 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
        color = "") + theme_minimal() + 
   #theme(text = element_text(size = 40)) + 
   ggtitle("Mortality Hazard Ratios")
@@ -321,8 +320,8 @@ HR_check <- cbind(published_HR, simulated_HRs) %>%
 
 kable(HR_check, 
       caption = "HRs (Women:Men)") %>% kable_styling()
-```
-
+``` 
+ 
 ## Dementia
 
 Dementia incidence was generated based on cognitive function using an age-constant cut point for "dementia". The model for generating $C_{ij}$ is displayed in \@ref(eq:Cij)
@@ -415,6 +414,15 @@ IRR_table <-
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
 kable(IRR_table, caption = paste("Average incidence rate ratios for dementia (exponentiated mean of the observed ln(dementia IRR) across", runs, "simulated samples).")) %>% kable_styling()
+```
+
+```{r ACT-IRR-table}
+ACT_IRR_table <- 
+  tibble("ACT" = " ", 
+         "IRR (Women:Men)" = ACT_inc_rates$`AD_IRR_F:M`) %>% 
+  t() %>% set_colnames(age_labels$formatted_age_intervals[4:nrow(age_labels)])
+
+kable(ACT_IRR_table, caption = paste("Incidence rate ratios for dementia from the ACT study")) %>% kable_styling()
 ```
 
 <br>
@@ -546,6 +554,7 @@ hists %>% ggplot(aes(value)) +
   #theme(text = element_text(size = 28)) +
   xlim(-30, 3.5) + theme_minimal()  
 ```
+
 ```{r Random-vs-trajectory-dem}
 dem_both <- ifelse(dataset$dem_Cij == 1 & dataset$dem_random == 1, 1, 0)
 ```
@@ -716,8 +725,8 @@ ggplot(aes(age, inc_rate), data = mean_inc_rate_by_sex) +
   scale_x_continuous(breaks = seq(50, 95, by = 5)) 
 #+ theme(text = element_text(size = 28))
 
-IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
-plot(IRRs_by_year$Female)
+# IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
+# plot(IRRs_by_year$Female)
 ```
 
 # References
