@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parA_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -86,7 +86,6 @@ all_sim_inc_rates <- all_inc_cases[-1]/all_PY*1000
 
 colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(all_sim_inc_rates) <- c("")
-
 
 male_inc_cases <- colSums(male_data[, variable_names$dem_varnames])
 male_PY <- colSums(male_data[, variable_names$contributed_varnames[1:9]])
@@ -251,13 +250,20 @@ head(ACT_inc_rates$Male_AD_1000PY)
 male_sim_inc_rates
 #female_sim_inc_rates
 
-#male_life_netherlands$cum_surv_cond50
-male_life_US$cum_surv_cond50[-1]
-p_alive_males
+# #male_life_netherlands$cum_surv_cond50
+# male_life_US$cum_surv_cond50[-1]
+# p_alive_males
+# 
+# #female_life_netherlands$cum_surv_cond50
+# female_life_US$cum_surv_cond50[-1]
+# p_alive_females
 
-#female_life_netherlands$cum_surv_cond50
-female_life_US$cum_surv_cond50[-1]
-p_alive_females
+#conditional survival
+male_life_US$CP[-1]
+cond_p_alive_males
+
+female_life_US$CP[-1]
+cond_p_alive_females
 
 # #Linear splines model
 # #Calculate observed slopes
