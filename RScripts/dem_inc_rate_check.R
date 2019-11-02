@@ -23,8 +23,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.049
-opt_quadratic_term <- -0.0031225
+opt_linear_term <- 0.0475
+opt_quadratic_term <- -0.00295
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -246,17 +246,17 @@ ggplot(samp_Cij, aes(Age, value)) +
 #---- Checking values ----
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 #all_sim_inc_rates
-head(ACT_inc_rates$Male_AD_1000PY)
+head(ACT_inc_rates$Male_All_Dementia_1000PY)
 male_sim_inc_rates
 #female_sim_inc_rates
 
-# #male_life_netherlands$cum_surv_cond50
-# male_life_US$cum_surv_cond50[-1]
-# p_alive_males
-# 
-# #female_life_netherlands$cum_surv_cond50
-# female_life_US$cum_surv_cond50[-1]
-# p_alive_females
+#male_life_netherlands$cum_surv_cond50
+male_life_US$cum_surv_cond50[-1]
+p_alive_males
+
+#female_life_netherlands$cum_surv_cond50
+female_life_US$cum_surv_cond50[-1]
+p_alive_females
 
 #conditional survival
 male_life_US$CP[-1]
