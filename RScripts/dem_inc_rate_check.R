@@ -11,7 +11,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_maleAD_quad.R"))
+  "sex-dementia_sim_parA_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -23,8 +23,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.049
-opt_quadratic_term <- -0.0031225
+opt_linear_term <- 0.0475
+opt_quadratic_term <- -0.00295
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -86,7 +86,6 @@ all_sim_inc_rates <- all_inc_cases[-1]/all_PY*1000
 
 colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 rownames(all_sim_inc_rates) <- c("")
-
 
 male_inc_cases <- colSums(male_data[, variable_names$dem_varnames])
 male_PY <- colSums(male_data[, variable_names$contributed_varnames[1:9]])
@@ -247,7 +246,7 @@ ggplot(samp_Cij, aes(Age, value)) +
 #---- Checking values ----
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 #all_sim_inc_rates
-head(ACT_inc_rates$Male_AD_1000PY)
+head(ACT_inc_rates$Male_All_Dementia_1000PY)
 male_sim_inc_rates
 #female_sim_inc_rates
 
@@ -258,6 +257,13 @@ p_alive_males
 #female_life_netherlands$cum_surv_cond50
 female_life_US$cum_surv_cond50[-1]
 p_alive_females
+
+#conditional survival
+male_life_US$CP[-1]
+cond_p_alive_males
+
+female_life_US$CP[-1]
+cond_p_alive_females
 
 # #Linear splines model
 # #Calculate observed slopes

@@ -57,13 +57,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_C_highUonSurv_onedemcut_nodemkill_maleAD_500000_20191025")) %>% 
+    "dataset_C_highUonSurv_onedemcut_nodemkill_maleAD_500000_20191029")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_C", 
-                "one_demcut_nodemkill_highUonSurv_maleAD_1000_20191025.csv")) 
+                "one_demcut_nodemkill_highUonSurv_maleAD_1000_20191029.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -181,12 +181,19 @@ kable(lambda_values,
 <br>
 
 ```{r Survival plot data}
-all_cp_survival <- 
+all_cp50_survival <- 
   c(1, mean_sim_results[na.omit(variable_names$p_alive_varnames)])
-female_cp_survival <- 
+female_cp50_survival <- 
   c(1, mean_sim_results[na.omit(variable_names$p_alive_females_varnames)])
-male_cp_survival <- 
+male_cp50_survival <- 
   c(1, mean_sim_results[na.omit(variable_names$p_alive_males_varnames)])
+
+all_cp_survival <- 
+  mean_sim_results[variable_names$cp_alive_varnames[1:num_tests]]
+female_cp_survival <- 
+  mean_sim_results[variable_names$cp_alive_females_varnames[1:num_tests]]
+male_cp_survival <- 
+  mean_sim_results[variable_names$cp_alive_males_varnames[1:num_tests]]
 
 #Netherlands data that we need
 US_MF_survival <- US_MF %>% filter(Age >= 50)
@@ -194,12 +201,20 @@ US_M_survival <- US_M %>% filter(Age >= 50)
 US_F_survival <- US_F %>% filter(Age >= 50)
 
 plot_data <- tibble("age" = seq(50, 95, by = 5), 
-                      "pub_all_survival" = all_life_US$cum_surv_cond50, 
-                      "pub_female_survival" = female_life_US$cum_surv_cond50, 
-                      "pub_male_survival" = male_life_US$cum_surv_cond50, 
-                      "cohort_all_survival" = all_cp_survival, 
-                      "cohort_female_survival" = female_cp_survival, 
-                      "cohort_male_survival" = male_cp_survival) 
+                    "pub_all_survival" = all_life_US$cum_surv_cond50, 
+                    "pub_female_survival" = female_life_US$cum_surv_cond50, 
+                    "pub_male_survival" = male_life_US$cum_surv_cond50,
+                    "cohort_all_survival" = all_cp50_survival, 
+                    "cohort_female_survival" = female_cp50_survival, 
+                    "cohort_male_survival" = male_cp50_survival) 
+
+cp_plot_data <- tibble("age" = seq(55, 95, by = 5), 
+                       "pub_all_cp_survival" = all_life_US$CP[-1], 
+                       "pub_female_cp_survival" = female_life_US$CP[-1], 
+                       "pub_male_cp_survival" = male_life_US$CP[-1],
+                       "cohort_all_cp_survival" = all_cp_survival, 
+                       "cohort_female_cp_survival" = female_cp_survival, 
+                       "cohort_male_cp_survival" = male_cp_survival) 
 ```
 
 ```{r survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated cumulative survival probabilites from age 50 years across", runs, "iterations of sample generation")}
@@ -255,6 +270,65 @@ ggplot(plot_data_all,
        y = "Cumulative Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal()
+```
+
+```{r cp-survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated conditional survival probabilites from age 50 years across", runs, "iterations of sample generation")}
+#Female survival plot
+plot_data_cp_female <- cp_plot_data %>% 
+  dplyr::select(age, contains("female")) %>%
+  gather(key = key, value = value, 
+         c("pub_female_cp_survival", "cohort_female_cp_survival")) %>% 
+  separate(col = key, into = c("type", "key"), sep = "_female_cp_survival", 
+           remove = FALSE) %>% 
+  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
+
+ggplot(plot_data_cp_female, 
+       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
+  geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(title = "Females", 
+       y = "Conditional Survival Probability from age 50", 
+       x = "Age") + 
+  theme_minimal() 
+#+ theme(text = element_text(size = 40))
+
+#Male survival plot
+plot_data_cp_male <- cp_plot_data %>% 
+  dplyr::select(age, contains("male")) %>%
+  gather(key = key, value = value, 
+         c("pub_male_cp_survival", "cohort_male_cp_survival")) %>% 
+  separate(col = key, into = c("type", "key"), sep = "_male_cp_survival", 
+           remove = FALSE) %>% 
+  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
+
+ggplot(plot_data_cp_male, 
+       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
+  geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(title = "Males", 
+       y = "Conditional Survival Probability from age 50", 
+       x = "Age") + 
+  theme_minimal() 
+#+ theme(text = element_text(size = 40))
+
+#All survival plot
+plot_data_cp_all <- cp_plot_data %>% 
+  dplyr::select(age, contains("all")) %>%
+  gather(key = key, value = value, 
+         c("pub_all_cp_survival", "cohort_all_cp_survival")) %>% 
+  separate(col = key, into = c("type", "key"), sep = "_all_cp_survival", 
+           remove = FALSE) %>% 
+  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
+
+ggplot(plot_data_cp_all, 
+       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
+  geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(title = "Whole Population", 
+       y = "Conditional Survival Probability from age 50", 
+       x = "Age") + 
+  theme_minimal() 
+#+ theme(text = element_text(size = 40))
 ```
 
 <br>
@@ -319,6 +393,27 @@ HR_check <- cbind(published_HR, simulated_HRs) %>%
 
 kable(HR_check, 
       caption = "HRs (Women:Men)") %>% kable_styling()
+```
+```{r Numerical-survival-checks2}
+female_cp_surv_check <- cbind(cp_plot_data$pub_female_cp_survival, 
+                              cp_plot_data$cohort_female_cp_survival) %>% 
+  as.data.frame() %>% set_colnames(c("Published", "Simulated")) %>% 
+  mutate("Difference (Sim - Pub)" = Simulated - Published) %>% t() %>% as.data.frame() %>%
+  set_colnames(c(age_labels$formatted_age_intervals))
+
+kable(female_cp_surv_check, 
+      caption = 
+        "Cumulative survival for women conditional on survival to age 50") %>% kable_styling()
+
+male_cp_surv_check <- cbind(cp_plot_data$pub_male_cp_survival, 
+                         cp_plot_data$cohort_male_cp_survival) %>% 
+  as.data.frame() %>% set_colnames(c("Published", "Simulated")) %>% 
+  mutate("Difference (Sim - Pub)" = Simulated - Published) %>% t() %>% as.data.frame() %>%
+  set_colnames(age_labels$formatted_age_intervals)
+
+kable(male_cp_surv_check, 
+      caption = 
+        "Cumulative survival for men conditional on survival to age 50") %>% kable_styling()
 ```
 
 
