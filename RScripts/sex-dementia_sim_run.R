@@ -19,7 +19,7 @@ source(here("RScripts", "misc_custom_functions.R"))          #Other functions ne
 #---- Generating one cohort ----
 data_gen(500000) %>%
   saveRDS(here("Data", "quadratic_model",
-               "dataset_A_onedemcut_nodemkill_male_AllDem_500000_20191102"))
+               "dataset_A_onedemcut_nodemkill_male_AllDem_500000_20191104"))
 
 #---- Running the simulation in parallel----
 # #Function to run simulation in batches
@@ -70,7 +70,7 @@ sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>%
 
 write_csv(sim_results, 
           here("Results", "quadratic_model", "Scenario_A_no_bias", 
-               "one_demcut_nodemkill_male_AllDem_1000_20191102.csv"))
+               "one_demcut_nodemkill_male_AllDem_1000_20191104.csv"))
 
 #stop the cluster
 stopCluster(cl)
