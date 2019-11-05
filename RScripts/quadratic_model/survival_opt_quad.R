@@ -303,8 +303,8 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
         sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
     } else if(j >= 2 && j <= 9){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
-        optim(exp(g1[j]), survivors, 
-              lower = 0.75,
+        optim(opt_exp_g1s[j], survivors, 
+              lower = 0.8,
               upper = 1.25,
               obs = sim_data_exposed, 
               pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
@@ -328,24 +328,24 @@ cp_unexposed <- male_life_US$CP[-1]
 cp_exposed <- female_life_US$CP[-1]
 
 lambda_optimization <- function(cp_unexposed){
-  sim_data <- pre_survival_data_gen(100000)
+  sim_data <- pre_survival_data_gen(500000)
   sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
   optim_lambda <- opt_lambdas(sim_data_unexposed, cp_unexposed)$opt_lambdas
   
   return(optim_lambda)
 }
 
-lambda_runs <- replicate(10, lambda_optimization(cp_unexposed))
+lambda_runs <- replicate(1, lambda_optimization(cp_unexposed))
 opt_lambdas <- colMeans(t(lambda_runs))
 
 exp_g1_optimization <- function(cp_exposed, opt_lambdas){
-  sim_data <- pre_survival_data_gen(100000)
+  sim_data <- pre_survival_data_gen(500000)
   sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
   optim_exp_g1s <- 
     opt_exp_g1s(sim_data_exposed, cp_exposed, opt_lambdas)$opt_exp_g1s
 }
 
-exp_g1_runs <- replicate(10, exp_g1_optimization(cp_exposed, opt_lambdas))
+exp_g1_runs <- replicate(1, exp_g1_optimization(cp_exposed, opt_lambdas))
 opt_exp_g1s <- colMeans(t(exp_g1_runs))
 
 
