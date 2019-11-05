@@ -415,7 +415,7 @@ exp_g1_optimization <- function(cp_exposed, opt_lambdas){
     opt_exp_g1s(sim_data_exposed, cp_exposed, opt_lambdas)$opt_exp_g1s
 }
 
-exp_g1_runs <- replicate(1, exp_g1_optimization(cp_exposed, opt_lambdas))
+exp_g1_runs <- replicate(10, exp_g1_optimization(cp_exposed, opt_lambdas))
 opt_exp_g1s <- colMeans(t(exp_g1_runs))
 
 
