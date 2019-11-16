@@ -301,10 +301,10 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp_exposed[j] = 
         sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
-    } else if(j >= 2 && j <= 9){
+    } else if(j >= 2 && j <= 6){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
-        optim(opt_exp_g1s[j], survivors, 
-              lower = 0.8,
+        optim(opt_exp_g1s[j - 1], survivors, 
+              lower = 0.85,
               upper = 1.25,
               obs = sim_data_exposed, 
               pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
@@ -316,8 +316,38 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp_exposed[j] = 
         sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
+    } else if(j >= 7 && j <= 8){
+    opt_exp_g1s[j:length(opt_exp_g1s)] = 
+      optim(0.845, survivors, 
+            lower = 0.84275,
+            upper = 0.8525,
+            obs = sim_data_exposed, 
+            pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
+            opt_lambdas = opt_lambdas)$par
+    Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
+                           lambda = opt_lambdas,
+                           opt_exp_g1 = opt_exp_g1s))
+    sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
+    colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
+    sim_cp_exposed[j] = 
+      sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
+    } else if(j >= 9 && j <= 9){
+      opt_exp_g1s[j:length(opt_exp_g1s)] = 
+        optim(0.874, survivors, 
+              lower = 0.8725,
+              upper = 0.875,
+              obs = sim_data_exposed, 
+              pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
+              opt_lambdas = opt_lambdas)$par
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
+                             lambda = opt_lambdas,
+                             opt_exp_g1 = opt_exp_g1s))
+      sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
+      colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
+      sim_cp_exposed[j] = 
+        sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
     } 
-  }
+}
   return(list("opt_exp_g1s" = opt_exp_g1s, 
               "sim_cp_exposed" = sim_cp_exposed))
 }
