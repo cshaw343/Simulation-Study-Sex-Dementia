@@ -24,7 +24,7 @@ source(here("RScripts", "US_life_table_calcs.R"))
 
 #Quadratic model
 opt_linear_term <- 0.0475
-opt_quadratic_term <- -0.00295
+opt_quadratic_term <- -0.00325
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -247,6 +247,8 @@ ggplot(samp_Cij, aes(Age, value)) +
 #head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 #all_sim_inc_rates
 head(ACT_inc_rates$Male_All_Dementia_1000PY)
+scenario_A_rates <- c(7.046, 8.864, 21.173, 45.525, 71.635, 96.946)
+scenario_A_rates
 male_sim_inc_rates
 #female_sim_inc_rates
 
