@@ -289,8 +289,8 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
     if(j <= 1){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
         optim(exp(g1[j]), survivors, 
-              lower = 0.85,
-              upper = 1,
+              lower = 1.5,
+              upper = 2,
               obs = sim_data_exposed, 
               pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
               opt_lambdas = opt_lambdas)$par
@@ -301,11 +301,11 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp_exposed[j] = 
         sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
-    } else if(j >= 2 && j <= 6){
+    } else if(j >= 2 && j <= 3){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
         optim(opt_exp_g1s[j - 1], survivors, 
-              lower = 0.85,
-              upper = 1.25,
+              lower = 1,
+              upper = 1.75,
               obs = sim_data_exposed, 
               pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
               opt_lambdas = opt_lambdas)$par
@@ -316,11 +316,11 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
       colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
       sim_cp_exposed[j] = 
         sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
-    } else if(j >= 7 && j <= 8){
+    } else if(j >= 4 && j <= 4){
     opt_exp_g1s[j:length(opt_exp_g1s)] = 
       optim(0.845, survivors, 
-            lower = 0.84275,
-            upper = 0.8525,
+            lower = 0.75,
+            upper = 1,
             obs = sim_data_exposed, 
             pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
             opt_lambdas = opt_lambdas)$par
@@ -331,11 +331,26 @@ opt_exp_g1s <- function(sim_data_exposed, cp_exposed, opt_lambdas){
     colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
     sim_cp_exposed[j] = 
       sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
-    } else if(j >= 9 && j <= 9){
+    } else if(j >= 5 && j <= 5){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
-        optim(0.874, survivors, 
-              lower = 0.8725,
-              upper = 0.875,
+        optim(0.5, survivors, 
+              lower = 0.6,
+              upper = 0.75,
+              obs = sim_data_exposed, 
+              pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
+              opt_lambdas = opt_lambdas)$par
+      Sij <- t(survival_temp(obs_matrix = t(sim_data_exposed),
+                             lambda = opt_lambdas,
+                             opt_exp_g1 = opt_exp_g1s))
+      sim_data_exposed = cbind(sim_data_exposed, (Sij[, j] >= 5)*1)
+      colnames(sim_data_exposed)[ncol(sim_data_exposed)] <- "alive_now"
+      sim_cp_exposed[j] = 
+        sum(sim_data_exposed[, "alive_now"]/nrow(sim_data_exposed))
+    } else if(j >= 6 && j <= 9){
+      opt_exp_g1s[j:length(opt_exp_g1s)] = 
+        optim(0.4, survivors, 
+              lower = 0.1,
+              upper = 0.6,
               obs = sim_data_exposed, 
               pop_size = nrow(sim_data_exposed), cp = cp_exposed, 
               opt_lambdas = opt_lambdas)$par
