@@ -55,12 +55,12 @@ b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same 
 b03 <- -0.5   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.04725  #Cognitive linear term for males                
+b10 <- 0.04777  #Cognitive linear term for males                
 b11 <- 0        #Effect of female on cognitive linear term
 b12 <- 0        #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0        #Effect of U on cognitive linear term 
 
-b20 <- -0.003355  #Cognitive quadratic term for males 
+b20 <- -0.003327  #Cognitive quadratic term for males 
 b21 <- 0          #Effect of female on cognitive quadratic term
 b22 <- 0          #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
 b23 <- 0          #Effect of U on cognitive quadratic term
@@ -68,11 +68,11 @@ b23 <- 0          #Effect of U on cognitive quadratic term
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.86832, 0.85000, 0.85000, 0.85000, 0.85000, 0.85000, 0.84275, 
-            0.84275, 0.85300)) 
+g1 <- log(c(1.7415561, 1.4258785, 1.1602865, 0.9193923, 0.6761160, 0.4685176, 
+            0.2952180, 0.1643030, 0.0912754)) 
 
-g2 <- log(3.5)  #Effect of U on log hazard of death
-g3 <- 0         #Effect of interaction between female and U on log hazard of death
+g2 <- 0         #Effect of U on log hazard of death
+g3 <- log(3.5)  #Effect of interaction between female and U on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
