@@ -40,7 +40,7 @@ set.seed(03122019)
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", 
-       "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_maleAD_quad.R"))
+       "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 ```
 
@@ -57,13 +57,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_F_calcs.csv"),
 dataset <- 
   readRDS(here(
     "Data", "quadratic_model",
-    "dataset_B_highUonSurv_onedemcut_nodemkill_maleAD_500000_20191023")) %>% 
+    "dataset_B_onedemcut_nodemkill_male_AllDem_500000_20191116")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_B_highU", 
-                "one_demcut_nodemkill_highUonSurv_maleAD_1000_20191023.csv")) 
+                "one_demcut_nodemkill_highUonSurv_male_AllDem_1000_20191116.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -581,7 +581,7 @@ kable(dem_prev,
 
 ## Distributions of U
 
-```{r U-dists, fig.align="center", fig.cap="Distribution of U by age and sex/gender in one simulated sample."}
+```{r U-dists, fig.align="center", fig.cap="Distribution of U by age and sex/gender in one simulated sample.", eval = FALSE}
 mean_U <- rep(0, 10)
 
 dem_data <- dataset %>% 
@@ -611,8 +611,8 @@ dem_data %>% ggplot(aes(x = U)) +
                  aes(y = ..density.., fill = "Men"), alpha = 0.5,
                  binwidth = 0.01) + 
   #xlim(-3, 3) + ylim(0, 0.6) + 
-  labs(x = "U", 
-       y = "Density") + 
+  labs(x = "U",
+       y = "Density") +
   facet_wrap(~ Age, scales = "free") + theme_minimal() + 
   #theme(text = element_text(size = 20)) + 
   #guides(fill = guide_legend(reverse = TRUE)) + 
