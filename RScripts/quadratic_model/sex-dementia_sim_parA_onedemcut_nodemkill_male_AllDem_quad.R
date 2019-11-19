@@ -51,7 +51,7 @@ b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same 
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.0475    #Cognitive linear term for males                
+b10 <- 0.0475  #Cognitive linear term for males                
 b11 <- 0       #Effect of female on cognitive linear term
 b12 <- 0       #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0       #Effect of U on cognitive linear term 
@@ -68,7 +68,7 @@ g1 <- log(c(0.89695, 0.88194, 0.88905, 0.91242, 0.91887, 0.93319, 0.94056,
             0.93297, 1.00817)) 
 
 g2 <- 0     #Effect of U on log hazard of death
-g3 <- 0     #Effect of interaction between female and U on log hazard of death
+g3 <- 0     #Effect of interaction between male and U on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
