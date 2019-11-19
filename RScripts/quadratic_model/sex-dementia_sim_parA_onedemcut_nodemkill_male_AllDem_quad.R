@@ -10,7 +10,6 @@
 runs = 1000
 
 #---- Number of observations ----
-#Multiples of 1000
 num_obs <- 100000
 
 #---- Baseline age ----
