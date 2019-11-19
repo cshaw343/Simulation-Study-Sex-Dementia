@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
@@ -326,11 +326,10 @@ opt_lambdas <- colMeans(t(lambda_runs))
 
 exp_g1_optimization <- function(hr, opt_lambdas){
   sim_data <- pre_survival_data_gen(100000)
-  optim_exp_g1s <- 
-    opt_exp_g1s(sim_data, hr, opt_lambdas)$opt_exp_g1s
+  optim_exp_g1s <- opt_exp_g1s(sim_data, hr, opt_lambdas)
 }
 
-exp_g1_runs <- replicate(1, exp_g1_optimization(hr_wm, opt_lambdas))
+exp_g1_runs <- replicate(5, exp_g1_optimization(hr_wm, opt_lambdas))
 opt_exp_g1s <- colMeans(t(exp_g1_runs))
 
 
