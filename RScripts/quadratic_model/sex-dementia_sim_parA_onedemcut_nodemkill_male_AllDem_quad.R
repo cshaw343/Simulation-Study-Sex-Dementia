@@ -3,8 +3,7 @@
 # 25% cumulative incidence of mortality
 # Exposure = male gender
 # Based on US lifetables, sample is 51% F / 49% M at age 50
-# Remaining LE at age 50:  33.2 years for F and 29.6 years for M
-# This is a test change
+# Remaining LE at age 50:  XXXXX years for F and XXXXX years for M
 #*******************************************************************************
 
 #---- Number of simulation runs ----
@@ -67,9 +66,9 @@ b23 <- 0         #Effect of U on cognitive quadratic term
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
-#chosen using calc from life_table_calcs.R 
-g1 <- log(c(0.901841, 0.883440, 0.888899, 0.901467, 0.919111, 0.938202, 
-            0.937739, 0.930228, 1.004235)) 
+#chosen using calc from US_life_table_calcs.R 
+g1 <- log(c(0.89695, 0.88194, 0.88905, 0.91242, 0.91887, 0.93319, 0.94056, 
+            0.93297, 1.00817)) 
 
 g2 <- 0     #Effect of U on log hazard of death
 g3 <- 0     #Effect of interaction between female and U on log hazard of death
