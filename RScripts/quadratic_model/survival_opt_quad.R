@@ -9,7 +9,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "MASS")
+p_load("here", "MASS", "survival")
 
 #Suppress warnings
 options(warnings = -1)
@@ -292,15 +292,15 @@ opt_exp_g1s <- function(sim_data, hr, opt_lambdas){
     if(j <= 1){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
         optim(exp(g1[j]), sim_hr, method = "L-BFGS-B",
-              lower = 0.75,
-              upper = 1,
+              lower = 0.5,
+              upper = 1.15,
               obs = sim_data, hr = hr, 
               opt_lambdas = opt_lambdas)$par
     } else if(j >= 2 && j <= 9){
       opt_exp_g1s[j:length(opt_exp_g1s)] = 
         optim(exp(g1[j - 1]), sim_hr, method = "L-BFGS-B",
-              lower = 0.75,
-              upper = 1,
+              lower = 0.5,
+              upper = 1.15,
               obs = sim_data, hr = hr, 
               opt_lambdas = opt_lambdas)$par
     } 
@@ -329,7 +329,7 @@ exp_g1_optimization <- function(hr, opt_lambdas){
   optim_exp_g1s <- opt_exp_g1s(sim_data, hr, opt_lambdas)
 }
 
-exp_g1_runs <- replicate(5, exp_g1_optimization(hr_wm, opt_lambdas))
+exp_g1_runs <- replicate(10, exp_g1_optimization(hr_wm, opt_lambdas))
 opt_exp_g1s <- colMeans(t(exp_g1_runs))
 
 
