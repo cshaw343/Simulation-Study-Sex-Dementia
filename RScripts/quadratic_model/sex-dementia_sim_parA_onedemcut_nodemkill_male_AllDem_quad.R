@@ -30,7 +30,6 @@ visit_times <- seq(from = 0, to = int_time*num_tests, by = int_time)
 pfemale <- 0.51
 
 #---- Variances and correlations ----
-#Calculated based on the work in test_quadratic_trajectories.R
 cij_var0 <- 0.05       #Variance of random cognitive intercept
 cij_var1 <- 0.001      #Variance of random linear term
 cij_var2 <- 0.000009   #Variance of random quadratic term (use tiny value b/c calcs give 0)
