@@ -9,7 +9,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "MASS", "survival", "parallel")
+p_load("here", "MASS", "survival", "future.apply")
 
 #Suppress warnings
 options(warnings = -1)
@@ -267,6 +267,7 @@ opt_lambdas <- function(sim_data_unexposed, cp_unexposed){
 
 #---- Search for effect of "female" on baseline hazard ----
 opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
+  
   #---- Function we are trying to optimize ----
   sim_hr <- function(EXP_G1, obs, hr, opt_lambdas, j){
     survival_int <- variable_names$Sij_varnames[j]
@@ -345,9 +346,11 @@ exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
   optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, sim_data)
 }
 
-exp_g1_runs <- replicate(5, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
-                                                start = 1))
-opt_exp_g1s <- colMeans(t(exp_g1_runs))
+plan(multiprocess, workers = 0.5*availableCores())
+exp_g1_runs <- 
+  future_replicate(10, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
+      start = 1))
+opt_exp_g1s <- rowMeans(exp_g1_runs)
 
 
 
