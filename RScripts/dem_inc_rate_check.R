@@ -2,7 +2,8 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("tidyverse", "here", "magrittr", "MASS", "matrixcalc", "Matrix")
+p_load("tidyverse", "here", "magrittr", "MASS", "matrixcalc", "Matrix", 
+       "survival")
 
 options(scipen = 999) #Standard Notation
 options(digits = 6)   #Round to 6 decimal places
@@ -11,7 +12,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -250,7 +251,19 @@ head(ACT_inc_rates$Male_All_Dementia_1000PY)
 scenario_A_rates <- c(7.046, 8.864, 21.173, 45.525, 71.635, 96.946)
 scenario_A_rates
 male_sim_inc_rates
-#female_sim_inc_rates
+
+simulated_mortality_logHRs <- vector(length = num_tests)
+
+for(i in 1:length(simulated_mortality_logHRs)){
+  survtime_name <- paste0("survtime", i - 1, "-", i)
+  death_indicator_name <- paste0("death", i - 1, "-", i)
+  cox_model <- coxph(Surv(obs[, survtime_name], 
+                          obs[, death_indicator_name]) ~ obs$female)
+  simulated_mortality_logHRs[i] <- cox_model$coefficients
+}
+
+Hratio_US[-1, ]
+exp(simulated_mortality_logHRs)
 
 #male_life_netherlands$cum_surv_cond50
 male_life_US$cum_surv_cond50[-1]
