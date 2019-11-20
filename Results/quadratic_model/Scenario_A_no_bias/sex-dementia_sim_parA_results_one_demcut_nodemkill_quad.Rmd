@@ -1,6 +1,6 @@
 ---
 title: "Simulation Scenario A:  No bias anticipated"
-subtitle: "One dementia cut point; quadratic time to dementia"
+subtitle: "One dementia cut point; no effect of dementia on survival; quadratic cognitive trajectories"
 output: 
   bookdown::html_document2:
     fig_caption: TRUE
@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
 
 ```{r Pacman statement}
 if (!require("pacman")) 
-  install.packages("pacman", repos='http://cran.us.r-project.org')
+  install.packages("pacman", repos = 'http://cran.us.r-project.org')
 
 p_load("bookdown", "here", "tidyverse", "knitr", "kableExtra", "magrittr", 
        "reshape2", "survival")
@@ -56,14 +56,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_white_F_calcs.csv"),
 #One simulation run
 dataset <- 
   readRDS(here(
-    "Data", "quadratic_model",
-    "dataset_A_onedemcut_nodemkill_male_AllDem_500000_20191104")) %>% 
+    "Data", "quadratic_model", "dataset_A_male_AllDem_500000_20191118")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "one_demcut_nodemkill_male_AllDem_1000_20191104.csv")) 
+                "sim_A_male_AllDem_1000_20191118.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -194,12 +193,12 @@ US_M_survival <- US_M %>% filter(Age >= 50 & Age <= 95)
 US_F_survival <- US_F %>% filter(Age >= 50 & Age <= 95)
 
 plot_data <- tibble("age" = seq(50, 95, by = 5), 
-                      "pub_all_survival" = all_life_US$cum_surv_cond50, 
-                      "pub_female_survival" = female_life_US$cum_surv_cond50, 
-                      "pub_male_survival" = male_life_US$cum_surv_cond50, 
-                      "cohort_all_survival" = all_cp_survival, 
-                      "cohort_female_survival" = female_cp_survival, 
-                      "cohort_male_survival" = male_cp_survival) 
+                    "pub_all_survival" = all_life_US$cum_surv_cond50, 
+                    "pub_female_survival" = female_life_US$cum_surv_cond50, 
+                    "pub_male_survival" = male_life_US$cum_surv_cond50, 
+                    "cohort_all_survival" = all_cp_survival, 
+                    "cohort_female_survival" = female_cp_survival, 
+                    "cohort_male_survival" = male_cp_survival) 
 ```
 
 ```{r survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated cumulative survival probabilites from age 50 years across", runs, "iterations of sample generation")}
