@@ -9,7 +9,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "MASS", "survival")
+p_load("here", "MASS", "survival", "parallel")
 
 #Suppress warnings
 options(warnings = -1)
@@ -85,7 +85,7 @@ pre_survival_data_gen <- function(num_obs){
   return(obs)
 }
 
-survival_temp <- function(obs_matrix, lambda, opt_exp_g1 = exp(g1)){
+survival_temp <- function(obs_matrix, lambda, g1){
   #Calculate survival times for each interval
   Sij <- matrix(ncol = ncol(obs_matrix), nrow = (length(visit_times) - 1))
   for(i in 1:ncol(obs_matrix)){
@@ -94,7 +94,7 @@ survival_temp <- function(obs_matrix, lambda, opt_exp_g1 = exp(g1)){
       r_name <- variable_names$r1ij_varnames[j]
       
       survtime = -log(obs_matrix[r_name, i])/
-        (lambda[j]*exp(log(opt_exp_g1[j])*obs_matrix["female", i] + 
+        (lambda[j]*exp(g1[j]*obs_matrix["female", i] + 
                          g2*obs_matrix["U", i] + 
                          g3*(1 - obs_matrix["female", i])*obs_matrix["U", i]))
       
@@ -266,47 +266,106 @@ opt_lambdas <- function(sim_data_unexposed, cp_unexposed){
 }
 
 #---- Search for effect of "female" on baseline hazard ----
-opt_exp_g1s <- function(sim_data, hr, opt_lambdas){
+opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
   #---- Function we are trying to optimize ----
-  sim_hr <- function(EXP_G1, obs, hr, opt_lambdas){
+  sim_hr <- function(EXP_G1, obs, hr, opt_lambdas, j){
+    survival_int <- variable_names$Sij_varnames[j]
+    dead <- which(is.na(obs[, survival_int]))
     survtime = -log(obs[, variable_names$r1ij_varnames[j]])/
       (opt_lambdas[j]*
          exp(log(EXP_G1)*obs[, "female"] + g2*obs[, "U"] + 
                g3*(1 - obs[, "female"])*obs[, "U"]))
     
-    dead <- (survtime < 5) * 1
+    survtime[dead] <- NA
+    dead_now <- (survtime < 5) * 1
     survtime[survtime == 5] <- 4.99999
     
     #Modeled mortality
-    cox_model <- coxph(Surv(survtime, dead) ~ obs[, "female"])
+    cox_model <- coxph(Surv(survtime, dead_now) ~ obs[, "female"])
     sim_HR <- as.numeric(exp(cox_model$coefficients))
     
     return(abs(sim_HR - hr[j]))
   }
   
-  #Create vector to return
-  opt_exp_g1s <- vector(length = num_tests)
+  sim_data[, na.omit(variable_names$Sij_varnames)] <- 
+    t(survival_temp(t(sim_data), opt_lambdas, log(exp_g1s)))
   
-  #Begin search
-  for(j in 1:length(opt_exp_g1s)){
-    if(j <= 1){
-      opt_exp_g1s[j:length(opt_exp_g1s)] = 
-        optim(exp(g1[j]), sim_hr, method = "L-BFGS-B",
+  for(i in start:length(exp_g1s)){
+    if(i == 1){
+      warm_start = 0.8775
+      
+      exp_g1s[i:length(exp_g1s)] = 
+        optim(warm_start, sim_hr, method = "L-BFGS-B",
               lower = 0.5,
-              upper = 1.15,
+              upper = 1,
               obs = sim_data, hr = hr, 
-              opt_lambdas = opt_lambdas)$par
-    } else if(j >= 2 && j <= 9){
-      opt_exp_g1s[j:length(opt_exp_g1s)] = 
-        optim(exp(g1[j - 1]), sim_hr, method = "L-BFGS-B",
+              opt_lambdas = opt_lambdas, 
+              j = i)$par
+    } else {
+      warm_start = exp_g1s[i - 1]
+      
+      exp_g1s[i:length(exp_g1s)] = 
+        optim(warm_start, sim_hr, method = "L-BFGS-B",
               lower = 0.5,
-              upper = 1.15,
+              upper = 1,
               obs = sim_data, hr = hr, 
-              opt_lambdas = opt_lambdas)$par
-    } 
+              opt_lambdas = opt_lambdas, 
+              j = i)$par
+    }
+    
+    sim_data[, na.omit(variable_names$Sij_varnames)] <- 
+      t(survival_temp(t(sim_data), opt_lambdas, log(exp_g1s)))
+    dead_now <- (sim_data[, "survtime0-1"] < 5) * 1
+    
+    cox_model <- coxph(Surv(sim_data[, "survtime0-1"], 
+                            dead_now) ~ sim_data[, "female"])
+    sim_HR <- as.numeric(exp(cox_model$coefficients))
+  }
+  return(exp_g1s)
 }
-  return(opt_exp_g1s)
-}
+
+# #---- (OLD) Search for effect of "female" on baseline hazard ----
+# opt_exp_g1s <- function(sim_data, hr, opt_lambdas){
+#   #---- Function we are trying to optimize ----
+#   sim_hr <- function(EXP_G1, obs, hr, opt_lambdas){
+#     survtime = -log(obs[, variable_names$r1ij_varnames[j]])/
+#       (opt_lambdas[j]*
+#          exp(log(EXP_G1)*obs[, "female"] + g2*obs[, "U"] + 
+#                g3*(1 - obs[, "female"])*obs[, "U"]))
+#     
+#     dead <- (survtime < 5) * 1
+#     survtime[survtime == 5] <- 4.99999
+#     
+#     #Modeled mortality
+#     cox_model <- coxph(Surv(survtime, dead) ~ obs[, "female"])
+#     sim_HR <- as.numeric(exp(cox_model$coefficients))
+#     
+#     return(abs(sim_HR - hr[j]))
+#   }
+#   
+#   #Create vector to return
+#   opt_exp_g1s <- vector(length = num_tests)
+#   
+#   #Begin search
+#   for(j in 1:length(opt_exp_g1s)){
+#     if(j <= 1){
+#       opt_exp_g1s[j:length(opt_exp_g1s)] = 
+#         optim(0.8775, sim_hr, method = "L-BFGS-B",
+#               lower = 0.876,
+#               upper = 0.88,
+#               obs = sim_data, hr = hr, 
+#               opt_lambdas = opt_lambdas)$par
+#     } else if(j >= 2 && j <= 9){
+#       opt_exp_g1s[j:length(opt_exp_g1s)] = 
+#         optim(opt_exp_g1s[j - 1], sim_hr, method = "L-BFGS-B",
+#               lower = 0.80,
+#               upper = 0.9,
+#               obs = sim_data, hr = hr, 
+#               opt_lambdas = opt_lambdas)$par
+#     } 
+# }
+#   return(opt_exp_g1s)
+# }
 
 #---- Doing the optimization ----
 #Do multiple optimizations and average over runs
@@ -324,12 +383,27 @@ lambda_optimization <- function(cp_unexposed){
 lambda_runs <- replicate(1, lambda_optimization(cp_unexposed))
 opt_lambdas <- colMeans(t(lambda_runs))
 
-exp_g1_optimization <- function(hr, opt_lambdas){
+exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
   sim_data <- pre_survival_data_gen(100000)
-  optim_exp_g1s <- opt_exp_g1s(sim_data, hr, opt_lambdas)
+  optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, sim_data)
 }
 
-exp_g1_runs <- replicate(10, exp_g1_optimization(hr_wm, opt_lambdas))
+library(parallel)
+cl <- makeCluster(detectCores()-1)  
+# get library support needed to run the code
+clusterEvalQ(cl,library(MASS))
+# put objects in place that might be needed for the code
+myData <- data.frame(x=1:10, y=rnorm(10))
+clusterExport(cl,c("myData"))
+# Set a different seed on each member of the cluster (just in case)
+clusterSetRNGStream(cl)
+#... then parallel replicate...
+parSapply(cl, 1:10000, function(i,...) { x <- rnorm(10); mean(x)/sd(x) } )
+#stop the cluster
+stopCluster(cl)
+
+exp_g1_runs <- replicate(5, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
+                                                start = 1))
 opt_exp_g1s <- colMeans(t(exp_g1_runs))
 
 
