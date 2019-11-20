@@ -324,49 +324,6 @@ opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
   return(exp_g1s)
 }
 
-# #---- (OLD) Search for effect of "female" on baseline hazard ----
-# opt_exp_g1s <- function(sim_data, hr, opt_lambdas){
-#   #---- Function we are trying to optimize ----
-#   sim_hr <- function(EXP_G1, obs, hr, opt_lambdas){
-#     survtime = -log(obs[, variable_names$r1ij_varnames[j]])/
-#       (opt_lambdas[j]*
-#          exp(log(EXP_G1)*obs[, "female"] + g2*obs[, "U"] + 
-#                g3*(1 - obs[, "female"])*obs[, "U"]))
-#     
-#     dead <- (survtime < 5) * 1
-#     survtime[survtime == 5] <- 4.99999
-#     
-#     #Modeled mortality
-#     cox_model <- coxph(Surv(survtime, dead) ~ obs[, "female"])
-#     sim_HR <- as.numeric(exp(cox_model$coefficients))
-#     
-#     return(abs(sim_HR - hr[j]))
-#   }
-#   
-#   #Create vector to return
-#   opt_exp_g1s <- vector(length = num_tests)
-#   
-#   #Begin search
-#   for(j in 1:length(opt_exp_g1s)){
-#     if(j <= 1){
-#       opt_exp_g1s[j:length(opt_exp_g1s)] = 
-#         optim(0.8775, sim_hr, method = "L-BFGS-B",
-#               lower = 0.876,
-#               upper = 0.88,
-#               obs = sim_data, hr = hr, 
-#               opt_lambdas = opt_lambdas)$par
-#     } else if(j >= 2 && j <= 9){
-#       opt_exp_g1s[j:length(opt_exp_g1s)] = 
-#         optim(opt_exp_g1s[j - 1], sim_hr, method = "L-BFGS-B",
-#               lower = 0.80,
-#               upper = 0.9,
-#               obs = sim_data, hr = hr, 
-#               opt_lambdas = opt_lambdas)$par
-#     } 
-# }
-#   return(opt_exp_g1s)
-# }
-
 #---- Doing the optimization ----
 #Do multiple optimizations and average over runs
 cp_unexposed <- male_life_US$CP[-1]
@@ -387,20 +344,6 @@ exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
   sim_data <- pre_survival_data_gen(100000)
   optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, sim_data)
 }
-
-library(parallel)
-cl <- makeCluster(detectCores()-1)  
-# get library support needed to run the code
-clusterEvalQ(cl,library(MASS))
-# put objects in place that might be needed for the code
-myData <- data.frame(x=1:10, y=rnorm(10))
-clusterExport(cl,c("myData"))
-# Set a different seed on each member of the cluster (just in case)
-clusterSetRNGStream(cl)
-#... then parallel replicate...
-parSapply(cl, 1:10000, function(i,...) { x <- rnorm(10); mean(x)/sd(x) } )
-#stop the cluster
-stopCluster(cl)
 
 exp_g1_runs <- replicate(5, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
                                                 start = 1))
