@@ -293,11 +293,11 @@ opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
   
   for(i in start:length(exp_g1s)){
     if(i == 1){
-      warm_start = 0.8775
+      warm_start = 0.895
       
       exp_g1s[i:length(exp_g1s)] = 
         optim(warm_start, sim_hr, method = "L-BFGS-B",
-              lower = 0.5,
+              lower = 0.75,
               upper = 1,
               obs = sim_data, hr = hr, 
               opt_lambdas = opt_lambdas, 
@@ -307,7 +307,7 @@ opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
       
       exp_g1s[i:length(exp_g1s)] = 
         optim(warm_start, sim_hr, method = "L-BFGS-B",
-              lower = 0.5,
+              lower = 0.75,
               upper = 1,
               obs = sim_data, hr = hr, 
               opt_lambdas = opt_lambdas, 
@@ -346,12 +346,13 @@ exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
   optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, sim_data)
 }
 
+start <- Sys.time()
 plan(multiprocess, workers = 0.5*availableCores())
 exp_g1_runs <- 
-  future_replicate(10, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
+  future_replicate(50, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
       start = 1))
 opt_exp_g1s <- rowMeans(exp_g1_runs)
-
-
+plan(sequential)
+Sys.time() - start
 
 
