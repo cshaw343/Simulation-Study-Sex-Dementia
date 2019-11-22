@@ -133,7 +133,9 @@ HR_plot_data <- Hratio_US %>%
 ggplot(HR_plot_data, aes(Age, HR)) + 
   geom_line(aes(color = Country, group = Country), size = 1.25, alpha = 0.6) +
   labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
-       color = "") + ylim(0, 1) + theme_minimal() + 
+       color = "", subtitle = "HR at age x = HR in age interval [x, x + 5)") + 
+  ylim(0, 1) + 
+  theme_minimal() + 
   scale_y_continuous(breaks = seq(0.75, 1, 0.01)) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   ggtitle("1919-1921 Birth Cohort")
@@ -146,7 +148,7 @@ h_{\text{death}_{ij}}(t) =  \lambda_{j}\exp\{\gamma_{1j}\text{female}_i + \gamma
 (\#eq:mort-hazard)
 \end{equation}
 
-where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of being a woman on mortality.  Note that $\gamma_2-\gamma_3$ are set to 0 in Simulation Scenario A signifying that in this scenario, there is no effect of U on mortality.
+where $U_i \sim N(0, 1)$.  The values for each of the coefficients in the hazard function are displayed in Table \@ref(tab:mort-haz-coeff).  In the table, $\gamma_{10}-\gamma_{19}$ represent the age-specific effect of being a woman on mortality.  Note that $\gamma_2$ and $\gamma_3$ are set to 0 in Simulation Scenario A signifying that in this scenario, there is no effect of U on mortality.
 
 ```{r mort-haz-coeff}
 coeff_table <- 
@@ -163,9 +165,9 @@ kable(coeff_table, escape = FALSE,
   kable_styling()
 ```
 
-Using R's optim function [@Roptim], we solved for the $\lambda_j$ values and $\gamma_{1j}$ (baseline mortality hazard for men in each 5-year age band and the effect of being a woman on mortality, respectively) in our hazard function so that conditional probabilities of survival (survival to age x + 5 conditional on survival to age x) in our simulated data closely matched those calculated from the US cohort life table.  
+Using R's optim function [@Roptim], we solved for the $\lambda_j$ values (baseline mortality hazard for men in each 5-year age band) in our hazard function so that conditional probabilities of survival (survival to age x + 5 conditional on survival to age x) for men in our simulated data closely matched those calculated from the US cohort life table.  We then optimize values of $\gamma_{1j}$ (the effect of being a woman on mortality) so that mortality hazard ratios (women:men) closely match those in the US cohort life table.   
 
-Table \@ref(tab:Lambda-values) shows the computed values of $\lambda_j$ for our hazard function. Figure \@ref(fig:survival-plots) compares the simulated cumulative survival probabilities from age 50 years based on these $\lambda_j$, i.e., the probability of surviving to each age conditional on survival to age 50, with cumulative survival probabilites calculated from the US life tables. Figure \@ref(fig:cp-survival-plots) compares the simulated conditional survival probabilities from age 50 years based on these $\lambda_j$, with conditional survival probabilites calculated from the US life tables.  Figure \@ref(fig:mort-HR-plots) compares the simulated mortality hazard ratios from ages 50+ to those calculated from life tables.  Both the survival probabilities calculated from simulated data and the modeled mortality hazard ratios were averaged over `r runs` iterations of sample generation.  The average of the mortality hazard ratios was computed by first taking the mean of the observed age-specific ln(mortality HR) across the `r runs` simulated samples and then exponentiating.  Average cumulative mortality  = `r as.numeric(round((1 - mean_sim_results["p_alive_95"])*100, 1))`% across the `r runs` simulated samples.
+Table \@ref(tab:Lambda-values) shows the computed values of $\lambda_j$ for our hazard function. Figure \@ref(fig:cp-survival-plots) compares the simulated conditional survival probabilities from age 50 years based on these $\lambda_j$, i.e., the probability of surviving to each age interval conditional on survival to the age interval before (survival to age x + 5, conditional on survival to age x), with conditional survival probabilites calculated from the US life tables. Figure \@ref(fig:mort-HR-plots) compares the simulated mortality hazard ratios from ages 50+ to those calculated from life tables.  Both the survival probabilities calculated from simulated data and the modeled mortality hazard ratios were averaged over `r runs` iterations of sample generation.  The average of the mortality hazard ratios was computed by first taking the mean of the observed age-specific ln(mortality HR) across the `r runs` simulated samples and then exponentiating.  Average cumulative mortality  = `r as.numeric(round((1 - mean_sim_results["p_alive_95"])*100, 1))`% across the `r runs` simulated samples.
 
 <br>
 
@@ -181,27 +183,27 @@ kable(lambda_values,
 
 ```{r Survival plot data}
 all_cp_survival <- 
-  c(1, mean_sim_results[na.omit(variable_names$p_alive_varnames)])
+  c(mean_sim_results[variable_names$cp_alive_varnames[1:num_tests]])
 female_cp_survival <- 
-  c(1, mean_sim_results[na.omit(variable_names$p_alive_females_varnames)])
+  c(mean_sim_results[variable_names$cp_alive_females_varnames[1:num_tests]])
 male_cp_survival <- 
-  c(1, mean_sim_results[na.omit(variable_names$p_alive_males_varnames)])
+  c(mean_sim_results[variable_names$cp_alive_males_varnames[1:num_tests]])
 
 #Data that we need
 US_MF_survival <- US_MF %>% filter(Age >= 50 & Age <= 95)
 US_M_survival <- US_M %>% filter(Age >= 50 & Age <= 95)
 US_F_survival <- US_F %>% filter(Age >= 50 & Age <= 95)
 
-plot_data <- tibble("age" = seq(50, 95, by = 5), 
-                    "pub_all_survival" = all_life_US$cum_surv_cond50, 
-                    "pub_female_survival" = female_life_US$cum_surv_cond50, 
-                    "pub_male_survival" = male_life_US$cum_surv_cond50, 
+plot_data <- tibble("age" = seq(55, 95, by = 5), 
+                    "pub_all_survival" = all_life_US$CP[-1], 
+                    "pub_female_survival" = female_life_US$CP[-1], 
+                    "pub_male_survival" = male_life_US$CP[-1], 
                     "cohort_all_survival" = all_cp_survival, 
                     "cohort_female_survival" = female_cp_survival, 
                     "cohort_male_survival" = male_cp_survival) 
 ```
 
-```{r survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated cumulative survival probabilites from age 50 years across", runs, "iterations of sample generation")}
+```{r cp-survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated cumulative survival probabilites from age 50 years across", runs, "iterations of sample generation")}
 #Female survival plot
 plot_data_female <- plot_data %>% dplyr::select(age, contains("female")) %>%
   gather(key = key, value = value, 
@@ -215,7 +217,7 @@ ggplot(plot_data_female,
   geom_line(size = 1.25) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Women", 
-       y = "Cumulative Survival Probability from age 50", 
+       y = "Conditional Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal() 
 #+ theme(text = element_text(size = 40))
@@ -233,7 +235,7 @@ ggplot(plot_data_Male,
   geom_line(size = 1.25) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Men", 
-       y = "Cumulative Survival Probability from age 50", 
+       y = "Conditional Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal() 
 #+ theme(text = element_text(size = 40))
@@ -251,69 +253,9 @@ ggplot(plot_data_all,
   geom_line(size = 1.25) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   labs(title = "Whole Population", 
-       y = "Cumulative Survival Probability from age 50", 
+       y = "Conditional Survival Probability from age 50", 
        x = "Age") + 
   theme_minimal()
-```
-
-
-```{r cp-survival-plots, fig.show="hold", out.width="50%", fig.cap=paste("Average simulated conditional survival probabilites from age 50 years across", runs, "iterations of sample generation"), eval = FALSE}
-#Female survival plot
-plot_data_cp_female <- cp_plot_data %>% 
-  dplyr::select(age, contains("female")) %>%
-  gather(key = key, value = value, 
-         c("pub_female_cp_survival", "cohort_female_cp_survival")) %>% 
-  separate(col = key, into = c("type", "key"), sep = "_female_cp_survival", 
-           remove = FALSE) %>% 
-  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
-
-ggplot(plot_data_cp_female, 
-       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
-  geom_line(size = 1.25) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) + 
-  labs(title = "Women", 
-       y = "Conditional Survival Probability from age 50", 
-       x = "Age") + 
-  theme_minimal() 
-#+ theme(text = element_text(size = 40))
-
-#Male survival plot
-plot_data_cp_male <- cp_plot_data %>% 
-  dplyr::select(age, contains("male")) %>%
-  gather(key = key, value = value, 
-         c("pub_male_cp_survival", "cohort_male_cp_survival")) %>% 
-  separate(col = key, into = c("type", "key"), sep = "_male_cp_survival", 
-           remove = FALSE) %>% 
-  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
-
-ggplot(plot_data_cp_male, 
-       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
-  geom_line(size = 1.25) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) + 
-  labs(title = "Men", 
-       y = "Conditional Survival Probability from age 50", 
-       x = "Age") + 
-  theme_minimal() 
-#+ theme(text = element_text(size = 40))
-
-#All survival plot
-plot_data_cp_all <- cp_plot_data %>% 
-  dplyr::select(age, contains("all")) %>%
-  gather(key = key, value = value, 
-         c("pub_all_cp_survival", "cohort_all_cp_survival")) %>% 
-  separate(col = key, into = c("type", "key"), sep = "_all_cp_survival", 
-           remove = FALSE) %>% 
-  mutate("Data Type" = if_else(type == "pub", "Published", "Simulated"))
-
-ggplot(plot_data_cp_all, 
-       aes(age, value, group = `Data Type`, color = `Data Type`)) + 
-  geom_line(size = 1.25) + 
-  scale_x_continuous(breaks = seq(50, 95, 5)) + 
-  labs(title = "Whole Population", 
-       y = "Conditional Survival Probability from age 50", 
-       x = "Age") + 
-  theme_minimal() 
-#+ theme(text = element_text(size = 40))
 ```
 
 <br>
@@ -350,9 +292,9 @@ ggplot(pub_sim_HR_data_cox, aes(Age, HR)) +
   ggtitle("Mortality Hazard Ratios")
 ```
  
-## Survival Sanity Check Calculations
+<!-- ## Survival Sanity Check Calculations
 
-```{r Numerical-survival-checks}
+```{r Numerical-survival-checks, eval = FALSE}
 female_surv_check <- cbind(plot_data$pub_female_survival, 
                            plot_data$cohort_female_survival) %>% 
   as.data.frame() %>% set_colnames(c("Published", "Simulated")) %>% 
@@ -384,6 +326,7 @@ HR_check <- cbind(published_HR, simulated_HRs) %>%
 kable(HR_check, 
       caption = "HRs (Women:Men)") %>% kable_styling()
 ```
+-->
 
 ## Dementia
 
@@ -396,9 +339,7 @@ C_{ij}(t) = \beta_{00} + \zeta_{0i} + \beta_{01}\text{sex}_i + \beta_{02}U_i + \
 
 where $U_i \sim N(0,1)$. Here, $\varepsilon_{ij} \sim N(0, \sigma^2_{\varepsilon})$ represents unexplained variation in $C_{ij}$.
 
-Time to dementia is calculated based on when the individual fell below the age-constant dementia cut point.
-
-The chosen dementia cut point and its associated percentile for each 5-year age band are displayed in Table \@ref(tab:dem-cuts).  Percentile values represent the proportion of the living, dementia-free cohort that will be diagnosed with dementia by the end of the time interval. There was no interval censoring included in our simulations; age at dementia diagnosis was based on the age at which a participant's cognitive function fell below the diagnostic threshold for the 5-year age band.  Age-specific dementia incidence rates for ages 65-95 were generated to match male AD incidence rates from the ACT study.  The data were generated assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence, thus associations between sex/gender and dementia incidence reflect survival bias in our simulations.   
+The chosen dementia cut point and its associated percentile for each 5-year age band are displayed in Table \@ref(tab:dem-cuts).  Percentile values represent the proportion of the living, dementia-free cohort that will be diagnosed with dementia by the end of the time interval. There was no interval censoring included in our simulations; age at dementia diagnosis was based on the age at which a participant's cognitive function fell below the diagnostic threshold for the 5-year age band.  Age-specific dementia incidence rates for ages 65-95 were generated to match male All Dementia incidence rates from the ACT study.  The data were generated assuming no effect of sex/gender on late-life cognitive trajectories and dementia incidence, thus associations between sex/gender and dementia incidence reflect survival bias in our simulations.   
 
 
 ```{r dem-cuts}
@@ -424,7 +365,7 @@ kable(percentile_table,
 
 <br>
 
-Average dementia incidence rates per 1000 person years across `r runs` simulated samples are displayed in Table \@ref(tab:dem-inc-rates). The dementia incidence rates from the ACT study, used as reference, are displayed in the first line of the table. The average dementia hazard ratios across `r runs` simulated scenarios are displayed in Table \@ref(tab:hr-table), and the average incidence rate ratios are displayed in Table \@ref(tab:IRR-table).  In both cases, ratios are presented as women:men.
+Average dementia incidence rates per 1000 person years across `r runs` simulated samples are displayed in Table \@ref(tab:dem-inc-rates). The dementia incidence rates from the ACT study, used as reference, are displayed in the first line of the table. The average dementia incidence rate ratios are displayed in Table \@ref(tab:IRR-table).  Ratios are presented as women:men.
 
 <br>
 
@@ -446,10 +387,13 @@ dem_table <-
            t() %>% set_colnames(age_labels$formatted_age_intervals)
 
 kable(dem_table, caption = 
-"Dementia incidence rates. Source: Characterization of Dementia and Alzheimer's Disease in an Older Population. (Tom et al 2015); Table 2.") %>% kable_styling()
+"Dementia incidence rates. Source: Characterization of Dementia and Alzheimer's Disease in an Older Population. (Tom et al 2015); Table 2.") %>% 
+  kable_styling()
 ```
 
 <br>
+
+<!--
 
 ```{r hr-table, eval = FALSE}
 hr_table <- 
@@ -466,12 +410,14 @@ kable(hr_table, caption =
   kable_styling()
 ```
 
+-->
+
 <br>
 
 ```{r IRR-table}
 IRR_table <- 
   tibble("Simulation Scenario A" = " ", 
-         "IRR" = exp(
+         "IRR (Women:Men)" = exp(
            mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
   t() %>% set_colnames(age_labels$formatted_age_intervals)
 
@@ -547,7 +493,8 @@ ggplot(samp_Cij, aes(Age, value)) +
 ```
 
 <br>
-**These values will eventually just be tables in the parameters for the $C_{ij}$ model.**
+
+<!--
 
 ```{r mean-slopes, eval = FALSE}
 Cij_check <- Cij_check <- 
@@ -567,6 +514,8 @@ kable(mean_slopes_observed, caption = "Observed mean slopes at each interval.
       Note that the mean slope (rate of cognitive change) 
       becomes more negative with age.") %>% kable_styling()
 ```
+
+-->
 
 <br>
 
@@ -607,8 +556,34 @@ hists %>% ggplot(aes(value)) +
   #theme(text = element_text(size = 28)) +
   xlim(-30, 3.5) + theme_minimal()  
 ```
+
 ```{r Random-vs-trajectory-dem}
-dem_both <- ifelse(dataset$dem_Cij == 1 & dataset$dem_random == 1, 1, 0)
+demented <- dataset %>% filter(dem == 1) %>% 
+  dplyr::select("dem", "dem_Cij", "dem_random", variable_names$dem_varnames)
+
+#All-- across age-bands
+num_dem <- nrow(demented)
+prop_dem <- mean(dataset$dem)
+
+num_dem_random <- sum(demented$dem_random)
+prop_dem_random <- mean(demented$dem_random)
+
+num_dem_Cij <- sum(demented$dem_Cij)
+prop_dem_Cij <- mean(demented$dem_Cij)
+
+both_types <- demented %>% filter(dem_Cij == 1 & dem_random == 1)
+num_both <- nrow(both_types)
+prop_both <- nrow(both_types)/nrow(demented)
+
+#All-- age-band specific
+
+```
+
+```{r dem-type-table}
+dem_type_colnames <- c("All ages", age_labels$formatted_age_intervals)
+dem_type_rownames <- c("overall", "women", "men")
+
+
 ```
 
 Number of people with random/shock dementia:  `r sum(dataset$dem_random)` (`r mean(dataset$dem_random)`)  
@@ -616,6 +591,8 @@ Number of people with trajectory dementia:  `r sum(dataset$dem_Cij)` (`r mean(da
 Number of people with both types: `r sum(dem_both)` (`r mean(dem_both)`)
 
 <br>
+
+<!--
 
 ```{r dem-prev, eval = FALSE}
 dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>% 
@@ -631,6 +608,7 @@ kable(dem_prev,
       what they should be because in this scenario, 
       dementia does not kill anyone. ") %>% kable_styling()
 ```
+-->
 
 ## Distributions of U
 
@@ -664,12 +642,12 @@ dem_data %>% ggplot(aes(x = U)) +
                  aes(y = ..density.., fill = "Men"), alpha = 0.5,
                  binwidth = 0.01) + 
   #xlim(-3, 3) + ylim(0, 0.6) + 
-  labs(x = "U", 
-       y = "Density") + 
-  facet_wrap(~ Age, scales = "free") + theme_minimal() + 
-  #theme(text = element_text(size = 20)) + 
+  labs(x = "U",
+       y = "Density") +
+  facet_wrap(~ Age, scales = "free") + theme_minimal() +  
+  #theme(text = element_text(size = 5)) + 
   #guides(fill = guide_legend(reverse = TRUE)) + 
-  theme(legend.title = element_text("Sex/Gender"))
+  theme(legend.title = element_blank())
 
 #numerical summaries of U
 mean_U_summary <- dem_data %>% group_by(`Sex/Gender`, Age) %>% 
