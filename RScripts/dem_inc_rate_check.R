@@ -24,8 +24,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.04777
-opt_quadratic_term <- -0.0033270
+opt_linear_term <- 0.047275
+opt_quadratic_term <- -0.0033515
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
@@ -265,13 +265,13 @@ for(i in 1:length(simulated_mortality_logHRs)){
 Hratio_US[-1, ]
 exp(simulated_mortality_logHRs)
 
-#male_life_netherlands$cum_surv_cond50
-male_life_US$cum_surv_cond50[-1]
-p_alive_males
-
-#female_life_netherlands$cum_surv_cond50
-female_life_US$cum_surv_cond50[-1]
-p_alive_females
+# #male_life_netherlands$cum_surv_cond50
+# male_life_US$cum_surv_cond50[-1]
+# p_alive_males
+# 
+# #female_life_netherlands$cum_surv_cond50
+# female_life_US$cum_surv_cond50[-1]
+# p_alive_females
 
 #conditional survival
 male_life_US$CP[-1]
@@ -343,7 +343,7 @@ dem_data %>% ggplot(aes(x = U)) +
   labs(x = "U", 
        y = "Density") + 
   facet_wrap(~ Age, scales = "free") + theme_minimal() + 
-  theme(legend.title = element_text("Sex/Gender")) +  
+  theme(legend.title = element_blank()) +  
   #theme(text = element_text(size = 20)) + 
   guides(fill = guide_legend(reverse = TRUE))
 
