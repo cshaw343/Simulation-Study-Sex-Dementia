@@ -68,8 +68,8 @@ b23 <- 0          #Effect of U on cognitive quadratic term
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
 #chosen using calc from life_table_calcs.R 
-g1 <- log(c(1.7415561, 1.4258785, 1.1602865, 0.9193923, 0.6761160, 0.4685176, 
-            0.2952180, 0.1643030, 0.0912754)) 
+g1 <- log(c( 1.775376, 1.435483, 1.162078, 0.930176, 0.689173, 0.479025, 
+             0.305908, 0.174879, 0.100314)) 
 
 g2 <- 0         #Effect of U on log hazard of death
 g3 <- log(3.5)  #Effect of interaction between female and U on log hazard of death
