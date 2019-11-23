@@ -71,8 +71,8 @@ b23 <- 0          #Effect of U on cognitive quadratic term
 g1 <- log(c(1.7415561, 1.4258785, 1.1602865, 0.9193923, 0.6761160, 0.4685176, 
             0.2952180, 0.1643030, 0.0912754)) 
 
-g2 <- 0         #Effect of U on log hazard of death
-g3 <- log(3.5)  #Effect of interaction between female and U on log hazard of death
+g2 <- 0       #Effect of U on log hazard of death
+g3 <- log(2)  #Effect of interaction between female and U on log hazard of death
 
 #---- Baseline hazard of death for unexposed ----
 #For male matching
