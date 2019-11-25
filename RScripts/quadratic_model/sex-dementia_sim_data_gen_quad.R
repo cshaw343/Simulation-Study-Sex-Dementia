@@ -147,22 +147,33 @@ data_gen <- function(num_obs){
   obs["timetodem", ] <- dem_onset(obs, dem_cut)
   
   #Based on random time to dementia model
+  obs["dem_random", ] <- 0
+  
   for(i in 1:ncol(obs)){
     random_dem <- 3 + min(which(
       obs[variable_names$random_timetodem_varnames[4:num_tests], i] <
         obs[variable_names$Sij_varnames[4:num_tests], i]))
     if(is.finite(random_dem)){
-      obs["dem_random", i] <- 1
-      obs["dem", i] <- 1
       timeto_random_dem <- 5*(random_dem - 1) +
         obs[variable_names$random_timetodem_varnames[random_dem], i]
-      if(timeto_random_dem <= obs["timetodem", i]){
+      
+      if(obs["dem", i] == 0){
+        obs["dem_random", i] <- 1
+        obs["dem", i] <- 1
         obs["dem_wave", i] <- random_dem
         obs["timetodem", i] <- timeto_random_dem
+        
+      } else if(timeto_random_dem <= obs["timetodem", i]){
+        obs["dem_random", i] <- 1
+        obs["timetodem", i] <- timeto_random_dem
+        
+        if(obs["dem_wave", i] != random_dem){
+          obs["dem_Cij", i] <- 0
+          obs["dem_wave", i] <- random_dem
+        }
+        
       }
-    } else{
-      obs["dem_random", i] <- 0
-    }
+    } 
   }
   
   #Fill in dementia indicator based on dem_wave
