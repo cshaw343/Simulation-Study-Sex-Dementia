@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parC_highUonSurv_highUonInt_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
@@ -325,25 +325,34 @@ opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
   return(exp_g1s)
 }
 
-#---- Doing the optimization ----
+#---- Optimization inputs ----
 #Do multiple optimizations and average over runs
 cp_unexposed <- male_life_US$CP[-1]
 hr_wm <- Hratio_US[-1, ]
 
-lambda_optimization <- function(cp_unexposed){
-  sim_data <- pre_survival_data_gen(500000)
+#---- Lambda optimization ----
+lambda_optimization <- function(cp_unexposed, lambdas, start){
+  sim_data <- pre_survival_data_gen(200000)
   sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
   optim_lambda <- opt_lambdas(sim_data_unexposed, cp_unexposed)$opt_lambdas
   
   return(optim_lambda)
 }
 
-lambda_runs <- replicate(1, lambda_optimization(cp_unexposed))
-opt_lambdas <- colMeans(t(lambda_runs))
+start <- Sys.time()
+plan(multiprocess, workers = 0.5*availableCores())
+lambda_runs <- 
+  future_replicate(10, lambda_optimization(cp_unexposed, start = 1))
+opt_lambdas <- rowMeans(lambda_runs)
+plan(sequential)
+Sys.time() - start
 
+#---- Gamma optimization ----
 exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
-  sim_data <- pre_survival_data_gen(100000)
-  optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, sim_data)
+  sim_data <- pre_survival_data_gen(200000)
+  sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
+  optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, 
+                               sim_data_exposed)
 }
 
 start <- Sys.time()
