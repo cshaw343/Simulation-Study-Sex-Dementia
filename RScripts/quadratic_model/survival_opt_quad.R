@@ -117,6 +117,7 @@ opt_lambdas <- function(cp_unexposed, lambdas, exp_g1s, start, sim_data){
   #---- Function we are trying to optimize ----
   sim_cp_surv <- function(L, obs, cp_unexposed, exp_g1s, j){
     survival_int <- variable_names$Sij_varnames[j]
+    dead <- which(is.na(obs[, survival_int]))
     survtime = -log(obs[, variable_names$r1ij_varnames[j]])/
       (L*
          exp(log(exp_g1s[j])*obs[, "female"] + g2*obs[, "U"] + 
@@ -124,49 +125,48 @@ opt_lambdas <- function(cp_unexposed, lambdas, exp_g1s, start, sim_data){
     
     survtime[dead] <- NA
     alive_now <- (survtime >= 5) * 1
-    num_alive <- length(which(!is.na(obs[, prev_survival_int])))
     
-    return(abs((sum(alive)/pop_size) - cp_unexposed[j]))
+    return(abs(mean(alive_now, na.rm = TRUE) - cp_unexposed[j]))
   }
-
-  #Create vector to return
-  opt_lambdas <- vector(length = num_tests)
+  
+  sim_data[, na.omit(variable_names$Sij_varnames)] <- 
+    t(survival_temp(t(sim_data), lambdas, log(exp_g1s)))
 
   #Begin search
-  for(j in 1:length(opt_lambdas)){
-    if(j == 1){
-      warm_start = 0.007
+  for(i in 1:length(lambdas)){
+    if(i == 1){
+      warm_start = 0.008
       
-      opt_lambdas[j:length(opt_lambdas)] =
-        optim(warm_start, survivors,
-              lower = 0.005,
-              upper = 0.007,
+      lambdas[i:length(lambdas)] =
+        optim(warm_start, sim_cp_surv, method = "L-BFGS-B",
+              lower = 0.007,
+              upper = 0.05,
               obs = sim_data_unexposed,
-              pop_size = nrow(sim_data_unexposed),
-              cp = cp_unexposed)$par
+              cp_unexposed = cp_unexposed, exp_g1s = exp(g1), j = i)$par
+      
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
                              lambda = opt_lambdas))
       sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
       sim_cp_unexposed[j] =
         sum(sim_data_unexposed[, "alive_now"]/nrow(sim_data_unexposed))
-    } else if(j >= 2 && j <= 9){
-      opt_lambdas[j:length(opt_lambdas)] =
-        optim(1.74*opt_lambdas[j - 1], survivors,
-              lower = 1.7325*opt_lambdas[j - 1],
-              upper = 1.75*opt_lambdas[j - 1],
+    } else if(i >= 2 && i <= 9){
+      opt_lambdas[i:length(opt_lambdas)] =
+        optim(1.74*opt_lambdas[i - 1], survivors,
+              lower = 1.7325*opt_lambdas[i - 1],
+              upper = 1.75*opt_lambdas[i - 1],
               obs = sim_data_unexposed,
               pop_size = nrow(sim_data_unexposed),
               cp = cp_unexposed)$par
       Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
                              lambda = opt_lambdas))
-      sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
+      sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, i] >= 5)*1)
       colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
       sim_cp_unexposed[j] =
         sum(sim_data_unexposed[, "alive_now"]/nrow(sim_data_unexposed))
     } 
   }
-  return(opt_lambdas)
+  return(lambdas)
 }
 
 #---- Search for effect of "female" on baseline hazard ----
@@ -234,7 +234,7 @@ hr_wm <- Hratio_US[-1, ]
 
 #---- Lambda optimization ----
 lambda_optimization <- function(cp_unexposed, lambdas, exp_g1s, start){
-  sim_data <- pre_survival_data_gen(2000)
+  sim_data <- pre_survival_data_gen(200000)
   sim_data_unexposed <- sim_data[sim_data[, "female"] == 0, ]
   optim_lambda <- opt_lambdas(cp_unexposed, lambdas, exp_g1s, start = 1, 
                               sim_data_unexposed)
@@ -252,16 +252,15 @@ Sys.time() - start
 
 #---- Gamma optimization ----
 exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
-  sim_data <- pre_survival_data_gen(200000)
-  sim_data_exposed <- sim_data[sim_data[, "female"] == 1, ]
+  sim_data <- pre_survival_data_gen(100000)
   optim_exp_g1s <- opt_exp_g1s(hr, opt_lambdas, exp_g1s, start = 1, 
-                               sim_data_exposed)
+                               sim_data)
 }
 
 start <- Sys.time()
 plan(multiprocess, workers = 0.5*availableCores())
 exp_g1_runs <- 
-  future_replicate(50, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
+  future_replicate(2, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
                                            start = 1))
 opt_exp_g1s <- rowMeans(exp_g1_runs)
 plan(sequential)
