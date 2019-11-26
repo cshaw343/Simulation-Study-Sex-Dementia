@@ -139,31 +139,26 @@ opt_lambdas <- function(cp_unexposed, lambdas, exp_g1s, start, sim_data){
       
       lambdas[i:length(lambdas)] =
         optim(warm_start, sim_cp_surv, method = "L-BFGS-B",
-              lower = 0.007,
+              lower = 0.001,
               upper = 0.05,
-              obs = sim_data_unexposed,
+              obs = sim_data,
               cp_unexposed = cp_unexposed, exp_g1s = exp(g1), j = i)$par
       
-      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
-                             lambda = opt_lambdas))
-      sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, j] >= 5)*1)
-      colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
-      sim_cp_unexposed[j] =
-        sum(sim_data_unexposed[, "alive_now"]/nrow(sim_data_unexposed))
+      sim_data[, na.omit(variable_names$Sij_varnames)] <- 
+        t(survival_temp(t(sim_data), lambdas, log(exp_g1s)))
+      
     } else if(i >= 2 && i <= 9){
-      opt_lambdas[i:length(opt_lambdas)] =
-        optim(1.74*opt_lambdas[i - 1], survivors,
-              lower = 1.7325*opt_lambdas[i - 1],
-              upper = 1.75*opt_lambdas[i - 1],
-              obs = sim_data_unexposed,
-              pop_size = nrow(sim_data_unexposed),
-              cp = cp_unexposed)$par
-      Sij <- t(survival_temp(obs_matrix = t(sim_data_unexposed),
-                             lambda = opt_lambdas))
-      sim_data_unexposed = cbind(sim_data_unexposed, (Sij[, i] >= 5)*1)
-      colnames(sim_data_unexposed)[ncol(sim_data_unexposed)] <- "alive_now"
-      sim_cp_unexposed[j] =
-        sum(sim_data_unexposed[, "alive_now"]/nrow(sim_data_unexposed))
+      warm_start = 1.5*lambdas[i - 1]
+      
+      lambdas[i:length(lambdas)] =
+        optim(warm_start, sim_cp_surv, method = "L-BFGS-B",
+              lower = lambdas[i - 1],
+              upper = 3*lambdas[i - 1],
+              obs = sim_data,
+              cp_unexposed = cp_unexposed, exp_g1s = exp(g1), j = i)$par
+      
+      sim_data[, na.omit(variable_names$Sij_varnames)] <- 
+        t(survival_temp(t(sim_data), lambdas, log(exp_g1s)))
     } 
   }
   return(lambdas)
@@ -244,7 +239,7 @@ lambda_optimization <- function(cp_unexposed, lambdas, exp_g1s, start){
 start <- Sys.time()
 plan(multiprocess, workers = 0.5*availableCores())
 lambda_runs <- 
-  future_replicate(10, lambda_optimization(cp_unexposed, lambda, exp(g1), 
+  future_replicate(2, lambda_optimization(cp_unexposed, lambda, exp(g1), 
                                            start = 1))
 opt_lambdas <- rowMeans(lambda_runs)
 plan(sequential)
