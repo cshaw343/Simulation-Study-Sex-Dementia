@@ -186,8 +186,6 @@ sex_dem_sim <- function(num_obs){
   sim_rates_females <- inc_cases_females[-1]/PY_females*1000
   sim_rates_males <- inc_cases_males[-1]/PY_males*1000
   
-  
-  
   # #Computing female incidence cases, rates, PY
   # for(slot in 1:num_tests){
   #   if(slot == 1){
@@ -443,6 +441,105 @@ sex_dem_sim <- function(num_obs){
   #   dplyr::select(variable_names$dem_varnames[-1]) %>% 
   #   colMeans(na.rm = TRUE) 
   
+  #---- Dementia types ----
+  demented <- data %>% filter(dem == 1) %>% 
+    dplyr::select("female", "dem", "dem_Cij", "dem_random", 
+                  variable_names$dem_varnames[-1]) %>% 
+    mutate("dem_both" = ifelse(dem_Cij == 1 & dem_random == 1, 1, 0))
+  
+  n_demented_by_age <- demented %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  
+  demented_women <- demented %>% filter(female == 1)
+  n_demented_by_age_W <- demented_women %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  
+  demented_men <- demented %>% filter(female == 0) 
+  n_demented_by_age_M <- demented_men %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  
+  #---- Random dementia people ----
+  #Overall
+  n_dem_random <- demented %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_random", sum) %>% as.numeric()
+  prop_dem_random <- n_dem_random/nrow(demented)
+  
+  n_dem_random_W <- demented_women %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_random", sum) %>% as.numeric()
+  prop_dem_random_W <- n_dem_random_W/nrow(demented_women)
+  
+  n_dem_random_M <- demented_men %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_random", sum) %>% as.numeric()
+  prop_dem_random_M <- n_dem_random/nrow(demented)
+  
+  #Age-band specific
+  n_dem_random_by_age <- demented %>% 
+    filter(dem_random == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_random_by_age <- n_dem_random_by_age/n_demented_by_age
+  
+  n_dem_random_by_age_W <- demented_women %>% 
+    filter(dem_random == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_random_by_age_W <- n_dem_random_by_age_W/n_demented_by_age_W
+  
+  n_dem_random_by_age_M <- demented_men %>% 
+    filter(dem_random == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_random_by_age_M <- n_dem_random_by_age_M/n_demented_by_age_M
+  
+  #---- Cij dementia people ----
+  #Overall
+  n_dem_Cij <- demented %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_Cij", sum) %>% as.numeric()
+  prop_dem_Cij <- n_dem_Cij/nrow(demented)
+  
+  n_dem_Cij_W <- demented_women %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_Cij", sum) %>% as.numeric()
+  prop_dem_Cij_W <- n_dem_Cij_W/nrow(demented_women)
+  
+  n_dem_Cij_M <- demented_men %>% filter(dem_both != 1) %>% 
+    summarise_at("dem_Cij", sum) %>% as.numeric()
+  prop_dem_Cij_M <- n_dem_Cij_M/nrow(demented_men)
+  
+  #Age-band specific
+  n_dem_Cij_by_age <- demented %>% filter(dem_Cij == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_Cij_by_age <- n_dem_Cij_by_age/n_demented_by_age
+  
+  n_dem_Cij_by_age_W <- demented_women %>% 
+    filter(dem_Cij == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_Cij_by_age_W <- n_dem_Cij_by_age_W/n_demented_by_age_W
+  
+  n_dem_Cij_by_age_M <- demented_men %>% 
+    filter(dem_Cij == 1 & dem_both != 1) %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_Cij_by_age_M <- n_dem_Cij_by_age_M/n_demented_by_age_M
+  
+  #---- Both types dementia people ----
+  dem_both <- demented %>% filter(dem_both == 1)
+  dem_both_women <- dem_both %>% filter(female == 1)
+  dem_both_men <- dem_both %>% filter(female == 0)
+  
+  #Overall
+  prop_dem_both <- nrow(dem_both)/nrow(demented)
+  prop_dem_both_W <- nrow(dem_both_women)/nrow(demented_women)
+  prop_dem_both_M <-  nrow(dem_both_men)/nrow(demented_men)
+  
+  #Age-band specific
+  n_dem_both_by_age <- dem_both %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_both_by_age <- n_dem_both_by_age/n_demented_by_age
+  
+  n_dem_both_by_age_W <- dem_both_women %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_both_by_age_W <- n_dem_both_by_age_W/n_demented_by_age_W
+  
+  n_dem_both_by_age_M <- dem_both_men %>% 
+    dplyr::select(variable_names$dem_varnames[-1]) %>% colSums() 
+  prop_dem_both_by_age_M <- n_dem_both_by_age_M/n_demented_by_age_M
+  
   #---- Vector to return ----
   results_vec <- c(num_obs, num_females, num_males, p_alive, p_alive_females, 
                    p_alive_males, cp_alive, cp_alive_females, cp_alive_males,
@@ -456,13 +553,21 @@ sex_dem_sim <- function(num_obs){
                    #simulated_dementia_logIRRs, 
                    #simulated_dementia_logIRRs_1yr,
                    simulated_dementia_logIRRs_data, 
-                   simulated_dementia_logIRRs_data_1yr
+                   simulated_dementia_logIRRs_data_1yr,
                    #simulated_dementia_logHRs_model_data, 
                    #dem_cases_female, 
                    #dem_cases_male 
                    #prop_dem_females, prop_dem_males, 
-                   #mean_U_at_risk_females, mean_U_at_risk_males)
-  )
+                   #mean_U_at_risk_females, mean_U_at_risk_males, 
+                   prop_dem_random, prop_dem_random_W, prop_dem_random_M, 
+                   prop_dem_random_by_age, prop_dem_random_by_age_W, 
+                   prop_dem_random_by_age_M,
+                   prop_dem_Cij, prop_dem_Cij_W, prop_dem_Cij_M, 
+                   prop_dem_Cij_by_age, prop_dem_Cij_by_age_W, 
+                   prop_dem_Cij_by_age_M, 
+                   prop_dem_both, prop_dem_both_W, prop_dem_both_M, 
+                   prop_dem_both_by_age, prop_dem_both_by_age_W, 
+                   prop_dem_both_by_age_M)
   
   names(results_vec) <- 
     c("num_obs_baseline", "num_females_baseline", 
@@ -504,7 +609,7 @@ sex_dem_sim <- function(num_obs){
           variable_names_1year$logIRR_95CI_Lower_varnames,
           variable_names_1year$logIRR_95CI_Upper_varnames,
           variable_names_1year$logIRR_95CI_Coverage_varnames)) %>%
-        as.vector()
+        as.vector(),
       # t(
       #   cbind(
       #     na.omit(variable_names$dementia_logHR_varnames),
@@ -518,7 +623,19 @@ sex_dem_sim <- function(num_obs){
       #variable_names$prop_dem_females_varnames[1:num_tests], 
       #variable_names$prop_dem_males_varnames[1:num_tests], 
       #variable_names$mean_U_at_risk_females_varnames[1:num_tests], 
-      #variable_names$mean_U_at_risk_males_varnames[1:num_tests])
+      #variable_names$mean_U_at_risk_males_varnames[1:num_tests]), 
+      "prop_dem_random", "prop_dem_random_W", "prop_dem_random_M", 
+      variable_names$prop_dem_random_by_age[1:num_tests], 
+      variable_names$prop_dem_random_W_by_age[1:num_tests], 
+      variable_names$prop_dem_random_M_by_age[1:num_tests],
+      "prop_dem_Cij", "prop_dem_Cij_W", "prop_dem_Cij_M", 
+      variable_names$prop_dem_Cij_by_age[1:num_tests], 
+      variable_names$prop_dem_Cij_W_by_age[1:num_tests], 
+      variable_names$prop_dem_Cij_M_by_age[1:num_tests], 
+      "prop_dem_both", "prop_dem_both_W", "prop_dem_both_M", 
+      variable_names$prop_dem_both_by_age[1:num_tests], 
+      variable_names$prop_dem_both_W_by_age[1:num_tests], 
+      variable_names$prop_dem_both_M_by_age[1:num_tests]
     )
   
   #---- Return ----
