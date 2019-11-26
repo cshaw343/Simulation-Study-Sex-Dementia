@@ -47,7 +47,12 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                            rep("CI_95_Coverage", num_tests + 1),
                          "dem_cases" = rep("dem_cases", num_tests + 1), 
                          "prop_dem" = rep("prop_dem", num_tests + 1), 
-                         "mean_U" = rep("mean_U", num_tests + 1)) %>% 
+                         "mean_U" = rep("mean_U", num_tests + 1), 
+                         "prop_dem_random" = rep("prop_dem_random", 
+                                                 num_tests + 1), 
+                         "prop_dem_Cij" = rep("prop_dem_Cij", num_tests + 1), 
+                         "prop_dem_both" = rep("prop_dem_both", 
+                                               num_tests + 1)) %>% 
   #Interval timepoints
   unite("interval_times", c(timepoints, timepoints_nobase), sep = "-", 
         remove = FALSE) %>%
@@ -147,6 +152,27 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
         c(mean_U, at_risk, females, start_ages), sep = "_", remove = FALSE) %>%
   unite("mean_U_at_risk_males_varnames", 
         c(mean_U, at_risk, males, start_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_random_by_age", 
+        c(prop_dem_random, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_random_W_by_age", 
+        c(prop_dem_random, females, interval_ages), sep = "_", 
+        remove = FALSE) %>%
+  unite("prop_dem_random_M_by_age", 
+        c(prop_dem_random, males, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_Cij_by_age", 
+        c(prop_dem_Cij, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_Cij_W_by_age", 
+        c(prop_dem_random, females, interval_ages), sep = "_", 
+        remove = FALSE) %>%
+  unite("prop_dem_Cij_M_by_age", 
+        c(prop_dem_random, males, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_both_by_age", 
+        c(prop_dem_both, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_both_W_by_age", 
+        c(prop_dem_both, females, interval_ages), sep = "_", 
+        remove = FALSE) %>%
+  unite("prop_dem_both_M_by_age", 
+        c(prop_dem_both, males, interval_ages), sep = "_", remove = FALSE) %>%
   dplyr::select("exo_var","r1ij_varnames", "r2ij_varnames", 
                 "deathij_varnames", "Sij_varnames", "random_timetodem_varnames", 
                 "contributed_varnames", "age_varnames", "agec_varnames", 
@@ -169,7 +195,12 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                 "dem_cases_females_varnames", 
                 "dem_cases_males_varnames", "prop_dem_females_varnames", 
                 "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
-                "mean_U_at_risk_males_varnames")
+                "mean_U_at_risk_males_varnames", 
+                "prop_dem_random_by_age", "prop_dem_random_W_by_age", 
+                "prop_dem_random_M_by_age", "prop_dem_Cij_by_age", 
+                "prop_dem_Cij_W_by_age", "prop_dem_Cij_M_by_age", 
+                "prop_dem_both_by_age", "prop_dem_both_W_by_age",
+                "prop_dem_both_M_by_age")
 
 #---- Generating variable names for dataset (1 year) ----
 variable_names_1year <- tibble("dem" = rep("dem", num_tests*5),
