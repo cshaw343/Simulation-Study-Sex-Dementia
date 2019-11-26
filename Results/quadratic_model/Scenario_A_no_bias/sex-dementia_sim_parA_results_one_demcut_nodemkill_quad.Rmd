@@ -56,13 +56,13 @@ US_F <- read_csv(here("Data", "US_cohort_table_white_F_calcs.csv"),
 #One simulation run
 dataset <- 
   readRDS(here(
-    "Data", "quadratic_model", "dataset_A_male_AllDem_500000_20191118")) %>% 
+    "Data", "quadratic_model", "dataset_A_male_AllDem_500000_20191125")) %>% 
   as.data.frame()
 
 #Data Analyses
 sim_results <-
   read_csv(here("Results", "quadratic_model", "Scenario_A_no_bias", 
-                "sim_A_male_AllDem_1000_20191118.csv")) 
+                "sim_A_male_AllDem_2_20191125.csv")) 
 
 
 sim_results_65_plus <- sim_results %>% 
@@ -71,6 +71,15 @@ sim_results_65_plus <- sim_results %>%
   dplyr::select(-one_of(variable_names$logIRR_95CI_Upper_varnames[1:3])) %>% 
   dplyr::select(-one_of(variable_names$logIRR_95CI_Coverage_varnames[1:3])) %>% 
   dplyr::select(-one_of(variable_names$logIRR_SE_varnames[1:3])) %>% 
+  dplyr::select(-one_of(variable_names$prop_dem_random_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_Cij_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_both_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_random_W_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_Cij_W_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_both_W_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_random_M_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_Cij_M_by_age[1:3])) %>%
+  dplyr::select(-one_of(variable_names$prop_dem_both_M_by_age[1:3])) %>%
   dplyr::select(-one_of(variable_names_1year$logIRR_varnames[1:15])) %>%
   dplyr::select(
     -one_of(variable_names_1year$logIRR_95CI_Lower_varnames[1:15])) %>% 
@@ -547,8 +556,8 @@ z <- data.frame(key = levels(hists$key),
 hists %>% ggplot(aes(value)) + 
   geom_vline(data = z, aes(xintercept = cutoff), color = "black", size = 1) + 
   geom_histogram(fill = "gray", alpha = 0.6) + 
-  geom_histogram(data = hists %>% filter(indicators == 1), fill = "dodgerblue2", 
-                 alpha = 0.6) + 
+  geom_histogram(data = hists %>% filter(indicators == 1), fill = "#00BFC4", 
+                 alpha = 0.8) + 
   labs(title = "Dementia Cases by Age Band", 
        x = "Cognitive Level", 
        y = "Live People") + 
@@ -557,42 +566,65 @@ hists %>% ggplot(aes(value)) +
   xlim(-30, 3.5) + theme_minimal()  
 ```
 
-```{r Random-vs-trajectory-dem}
-demented <- dataset %>% filter(dem == 1) %>% 
-  dplyr::select("dem", "dem_Cij", "dem_random", variable_names$dem_varnames)
+```{r dem-type-table-random}
+dem_type_colnames <- c("All ages", age_labels$formatted_age_intervals[-c(1:3)])
+dem_type_rownames <- c("Overall", "Women", "Men")
 
-#All-- across age-bands
-num_dem <- nrow(demented)
-prop_dem <- mean(dataset$dem)
+random_table <- 
+  rbind(c(mean_sim_results["prop_dem_random"], 
+          mean_sim_results[
+            variable_names$prop_dem_random_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_random_W"], 
+            mean_sim_results[
+              variable_names$prop_dem_random_W_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_random_M"], 
+            mean_sim_results[
+              variable_names$prop_dem_random_M_by_age[-c(1:3, 
+                                                         num_tests + 1)]])) %>% 
+          set_colnames(dem_type_colnames) %>% 
+          set_rownames(dem_type_rownames)
 
-num_dem_random <- sum(demented$dem_random)
-prop_dem_random <- mean(demented$dem_random)
-
-num_dem_Cij <- sum(demented$dem_Cij)
-prop_dem_Cij <- mean(demented$dem_Cij)
-
-both_types <- demented %>% filter(dem_Cij == 1 & dem_random == 1)
-num_both <- nrow(both_types)
-prop_both <- nrow(both_types)/nrow(demented)
-
-#All-- age-band specific
-
+kable(random_table, 
+      caption = paste0("Proportion of incident dementia cases in each age band attributable to \"random shock\" overall and by sex/gender averaged across ", runs, " simulation runs.")) %>% kable_styling()
 ```
 
-```{r dem-type-table}
-dem_type_colnames <- c("All ages", age_labels$formatted_age_intervals)
-dem_type_rownames <- c("overall", "women", "men")
+```{r dem-type-table-Cij}
+Cij_table <- 
+  rbind(c(mean_sim_results["prop_dem_Cij"], 
+          mean_sim_results[
+            variable_names$prop_dem_Cij_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_Cij_W"], 
+            mean_sim_results[
+              variable_names$prop_dem_Cij_W_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_Cij_M"], 
+            mean_sim_results[
+              variable_names$prop_dem_Cij_M_by_age[-c(1:3, 
+                                                         num_tests + 1)]])) %>% 
+          set_colnames(dem_type_colnames) %>% 
+          set_rownames(dem_type_rownames)
 
-
+kable(Cij_table, 
+      caption = paste0("Proportion of incident dementia cases in each age band attributable to cognitive decline overall and by sex/gender averaged across ", runs, " simulation runs.")) %>% kable_styling()
 ```
 
-Number of people with random/shock dementia:  `r sum(dataset$dem_random)` (`r mean(dataset$dem_random)`)  
-Number of people with trajectory dementia:  `r sum(dataset$dem_Cij)` (`r mean(dataset$dem_Cij)`)  
-Number of people with both types: `r sum(dem_both)` (`r mean(dem_both)`)
+```{r dem-type-table-both}
+both_table <- 
+  rbind(c(mean_sim_results["prop_dem_both"], 
+          mean_sim_results[
+            variable_names$prop_dem_both_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_both_W"], 
+            mean_sim_results[
+              variable_names$prop_dem_both_W_by_age[-c(1:3, num_tests + 1)]]), 
+          c(mean_sim_results["prop_dem_both_M"], 
+            mean_sim_results[
+              variable_names$prop_dem_both_M_by_age[-c(1:3, 
+                                                         num_tests + 1)]])) %>% 
+          set_colnames(dem_type_colnames) %>% 
+          set_rownames(dem_type_rownames)
 
-<br>
-
-<!--
+kable(both_table, 
+      caption = paste0("Proportion of incident dementia cases in each age band attributable to both \"random shock\" and cognitive decline overall and by sex/gender averaged across ", runs, " simulation runs.")) %>% kable_styling()
+```
 
 ```{r dem-prev, eval = FALSE}
 dem_prev <- dataset %>% dplyr::select(variable_names$dem_varnames) %>% 
@@ -608,7 +640,6 @@ kable(dem_prev,
       what they should be because in this scenario, 
       dementia does not kill anyone. ") %>% kable_styling()
 ```
--->
 
 ## Distributions of U
 
@@ -665,7 +696,7 @@ ggplot(aes(Age, U), data = mean_U_summary) +
 
 ## Extra Sanity Check Calculations
 
-```{r PY-by-sex}
+```{r PY-by-sex, eval = FALSE}
 py_by_sex <- dataset %>% group_by(female) %>% 
   dplyr::select(head(variable_names$contributed_varnames, -1)) %>% 
   summarise_all(~sum(., na.rm = TRUE)) %>% 
@@ -699,6 +730,7 @@ kable(dem_inc_by_sex[-1, ], caption =  "Number of incident dementia cases in
       each 5-year age interval by sex in one simulated sample.") %>% 
   kable_styling()
 ```
+
 ```{r Dem-inc 1-year}
 mean_results <- 
   mean_sim_results[variable_names_1year$inc_cases_males_varnames] %>% 
@@ -754,9 +786,20 @@ ggplot(aes(age, inc_rate), data = mean_inc_rate_by_sex) +
   ggtitle("Annual Dementia Incidence Rates") + 
   scale_x_continuous(breaks = seq(50, 95, by = 5)) 
 #+ theme(text = element_text(size = 28))
+```
 
-IRRs_by_year <- mean_inc_rate_females/mean_inc_rate_males
-plot(IRRs_by_year$Female)
+```{r Dem IRR by year}
+IRRs_by_year <- (mean_inc_rate_females/mean_inc_rate_males)[-c(1:15), ] %>% 
+  cbind(66:95, .) %>% set_colnames(c("Age", "IRR")) %>% as.data.frame()
+  
+ggplot(aes(Age, IRR), data = IRRs_by_year) + 
+  geom_point(color = "#00BFC4", size = 4) + theme_minimal() + 
+  xlab("Age") + ylab("IRR (Women:Men)") + 
+  ggtitle("Annual Dementia Incidence Rate Ratios") + 
+  labs(subtitle = 
+         "Age x represents the age at the end of the interval [x-1, x)") +
+  scale_x_continuous(breaks = seq(66, 95, by = 5)) + 
+  geom_hline(yintercept = 1)
 ```
 
 # References
