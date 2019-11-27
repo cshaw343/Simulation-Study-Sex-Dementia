@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonSurv_highUonInt_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
@@ -255,7 +255,7 @@ exp_g1_optimization <- function(hr, opt_lambdas, exp_g1s, start){
 start <- Sys.time()
 plan(multiprocess, workers = 0.5*availableCores())
 exp_g1_runs <- 
-  future_replicate(2, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
+  future_replicate(50, exp_g1_optimization(hr_wm, opt_lambdas, exp(g1), 
                                            start = 1))
 opt_exp_g1s <- rowMeans(exp_g1_runs)
 plan(sequential)
