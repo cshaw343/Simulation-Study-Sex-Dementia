@@ -80,7 +80,7 @@ lambda <- c(0.0112989, 0.0170117, 0.0261463, 0.0422322, 0.0737974, 0.1329980,
             0.2501845, 0.4862891, 0.8830971)
 
 #---- Baseline hazard of random dementia ----
-lambda_dj <- 0.004
+lambda_dj <- 0.007
 
 #---- Dementia Cut Point ----
 dem_cut <- -6.5
