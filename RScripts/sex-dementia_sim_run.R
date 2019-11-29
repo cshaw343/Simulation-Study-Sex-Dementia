@@ -9,7 +9,7 @@ set.seed(20190624)
 #---- Source Files ----
 source(
   here("RScripts", "quadratic_model", 
-       "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))  #The parameter file
+       "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))  #The parameter file
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", 
             "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
@@ -18,7 +18,7 @@ source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis 
 #---- Generating one cohort ----
 data_gen(500000) %>%
   saveRDS(here("Data", "quadratic_model",
-               "dataset_C_highUonSurv_male_AllDem_500000_20191126"))
+               "dataset_B_male_AllDem_500000_20191128"))
 
 #---- Running the simulation in parallel----
 # #Function to run simulation in batches
@@ -55,7 +55,7 @@ clusterEvalQ(cl, {
   
   source(
     here("RScripts", "quadratic_model", 
-         "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))  #The parameter file
+         "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))  #The parameter file
   source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
   source(here("RScripts", "quadratic_model", 
               "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
@@ -67,7 +67,7 @@ sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>%
 
 write_csv(sim_results, 
           here("Results", "quadratic_model", "Scenario_B", 
-               paste0("sim_C_highUonSurv_male_AllDem_", runs, "_20191126.csv")))
+               paste0("sim_B_highUonSurv_male_AllDem_", runs, "_20191128.csv")))
 
 #stop the cluster
 stopCluster(cl)
