@@ -17,7 +17,7 @@ options(warnings = -1)
 #---- Specify source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "US_life_table_calcs.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "create_ages.R"))
@@ -135,7 +135,7 @@ opt_lambdas <- function(cp_unexposed, lambdas, exp_g1s, start, sim_data){
   #Begin search
   for(i in 1:length(lambdas)){
     if(i == 1){
-      warm_start = 0.008
+      warm_start = 0.011
       
       lambdas[i:length(lambdas)] =
         optim(warm_start, sim_cp_surv, method = "L-BFGS-B",
@@ -153,7 +153,7 @@ opt_lambdas <- function(cp_unexposed, lambdas, exp_g1s, start, sim_data){
       lambdas[i:length(lambdas)] =
         optim(warm_start, sim_cp_surv, method = "L-BFGS-B",
               lower = lambdas[i - 1],
-              upper = 3*lambdas[i - 1],
+              upper = 5*lambdas[i - 1],
               obs = sim_data,
               cp_unexposed = cp_unexposed, exp_g1s = exp(g1), j = i)$par
       
@@ -192,11 +192,11 @@ opt_exp_g1s <- function(hr, opt_lambdas, exp_g1s, start, sim_data){
   
   for(i in start:length(exp_g1s)){
     if(i == 1){
-      warm_start = 1.75
+      warm_start = 1
       
       exp_g1s[i:length(exp_g1s)] = 
         optim(warm_start, sim_hr, method = "L-BFGS-B",
-              lower = 1,
+              lower = 0.005,
               upper = 2,
               obs = sim_data, hr = hr, 
               opt_lambdas = opt_lambdas, 
@@ -239,7 +239,7 @@ lambda_optimization <- function(cp_unexposed, lambdas, exp_g1s, start){
 start <- Sys.time()
 plan(multiprocess, workers = 0.5*availableCores())
 lambda_runs <- 
-  future_replicate(2, lambda_optimization(cp_unexposed, lambda, exp(g1), 
+  future_replicate(10, lambda_optimization(cp_unexposed, lambda, exp(g1), 
                                            start = 1))
 opt_lambdas <- rowMeans(lambda_runs)
 plan(sequential)
