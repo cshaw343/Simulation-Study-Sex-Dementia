@@ -60,10 +60,10 @@ b11 <- 0        #Effect of female on cognitive linear term
 b12 <- 0        #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
 b13 <- 0        #Effect of U on cognitive linear term 
 
-b20 <- -0.003327  #Cognitive quadratic term for males 
-b21 <- 0          #Effect of female on cognitive quadratic term
-b22 <- 0          #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
-b23 <- 0          #Effect of U on cognitive quadratic term
+b20 <- -0.0033  #Cognitive quadratic term for males 
+b21 <- 0        #Effect of female on cognitive quadratic term
+b22 <- 0        #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
+b23 <- 0        #Effect of U on cognitive quadratic term
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
