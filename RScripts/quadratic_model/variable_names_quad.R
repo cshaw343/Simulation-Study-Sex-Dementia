@@ -162,10 +162,10 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
   unite("prop_dem_Cij_by_age", 
         c(prop_dem_Cij, interval_ages), sep = "_", remove = FALSE) %>%
   unite("prop_dem_Cij_W_by_age", 
-        c(prop_dem_random, females, interval_ages), sep = "_", 
+        c(prop_dem_Cij, females, interval_ages), sep = "_", 
         remove = FALSE) %>%
   unite("prop_dem_Cij_M_by_age", 
-        c(prop_dem_random, males, interval_ages), sep = "_", remove = FALSE) %>%
+        c(prop_dem_Cij, males, interval_ages), sep = "_", remove = FALSE) %>%
   unite("prop_dem_both_by_age", 
         c(prop_dem_both, interval_ages), sep = "_", remove = FALSE) %>%
   unite("prop_dem_both_W_by_age", 
