@@ -46,11 +46,13 @@ ACT_inc_rates <- tibble("Low_Age" = seq(65, 90, by = 5),
                             "Male_AD_1000PY" = 
                               1000*M_AD/M_Person_Years) %>% 
   mutate("Female_AD_IR" = F_AD/F_Person_Years, 
-         "Male_AD_IR" = M_AD/M_Person_Years, 
+         "Male_AD_IR" = M_AD/M_Person_Years,
          "AD_IRR_F:M" = Female_AD_IR/Male_AD_IR, 
          "SE_IRR" = sqrt(1/F_AD + 1/M_AD), 
          "95CI_upper" = exp(log(`AD_IRR_F:M`) + 1.96*SE_IRR), 
-         "95CI_lower" = exp(log(`AD_IRR_F:M`) - 1.96*SE_IRR))
+         "95CI_lower" = exp(log(`AD_IRR_F:M`) - 1.96*SE_IRR), 
+         "All_Dem_IRR_F:M" = Female_All_Dementia_1000PY/
+           Male_All_Dementia_1000PY)
 
 # #---- Plots ----
 # ACT_plot_data <- 
