@@ -416,10 +416,16 @@ kable(dem_table, caption =
 
 ```{r IRR-table}
 IRR_table <- 
-  tibble("Simulation Scenario B" = " ", 
+  tibble("ACT" = " ", 
+         "IRR (Women:Men)_ACT" = c(rep("NA", 3), 
+                                   round(ACT_inc_rates$`All_Dem_IRR_F:M`, 3)),
+         "Simulation Scenario B" = " ", 
          "IRR (Women:Men)" = exp(
            mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
-  t() %>% set_colnames(age_labels$formatted_age_intervals)
+  t() %>% 
+  set_colnames(age_labels$formatted_age_intervals) %>% 
+  set_rownames(c("ACT", "IRR (Women:Men)", "Simulation Scenario B", 
+                 "IRR (Women:Men)"))
 
 kable(IRR_table, caption = paste("Average incidence rate ratios for dementia (exponentiated mean of the observed ln(dementia IRR) across", runs, "simulated samples).")) %>% kable_styling()
 ```
@@ -844,6 +850,7 @@ ggplot(aes(Age, IRR), data = IRRs_by_year) +
   labs(subtitle = 
          "Age x represents the age at the end of the interval [x-1, x)") +
   scale_x_continuous(breaks = seq(66, 95, by = 5)) + 
+  ylim(0.990, 1.25) +
   geom_hline(yintercept = 1)
 ```
 
