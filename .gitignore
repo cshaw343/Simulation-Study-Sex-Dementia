@@ -35,7 +35,7 @@ Results/Scenario_A_no_bias/one_demcut*
 #Debugging files
 RScripts/debugging*
 #DAGs
-RScripts/DAGs/sex*
+DAGs/*
 #Plots
 Plots/*
 #Search results and other data files
