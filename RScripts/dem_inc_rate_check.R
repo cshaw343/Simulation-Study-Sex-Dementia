@@ -12,7 +12,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 source(here(
   "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_highUonInt_onedemcut_nodemkill_male_AllDem_quad.R"))
+  "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -24,8 +24,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.04780
-opt_quadratic_term <- -0.0033273
+opt_linear_term <- 0.04777
+opt_quadratic_term <- -0.0033
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
