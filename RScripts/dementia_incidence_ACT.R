@@ -48,17 +48,22 @@ ACT_inc_rates <- tibble("Low_Age" = seq(65, 90, by = 5),
   mutate("Female_AD_IR" = F_AD/F_Person_Years, 
          "Male_AD_IR" = M_AD/M_Person_Years,
          "AD_IRR_F:M" = Female_AD_IR/Male_AD_IR, 
-         "SE_IRR" = sqrt(1/F_AD + 1/M_AD), 
-         "95CI_upper" = exp(log(`AD_IRR_F:M`) + 1.96*SE_IRR), 
-         "95CI_lower" = exp(log(`AD_IRR_F:M`) - 1.96*SE_IRR), 
+         "AD_SE_IRR" = sqrt(1/F_AD + 1/M_AD), 
+         "AD_95CI_upper" = exp(log(`AD_IRR_F:M`) + 1.96*AD_SE_IRR), 
+         "AD_95CI_lower" = exp(log(`AD_IRR_F:M`) - 1.96*AD_SE_IRR), 
          "All_Dem_IRR_F:M" = Female_All_Dementia_1000PY/
-           Male_All_Dementia_1000PY)
+           Male_All_Dementia_1000PY, 
+         "All_Dem_SE_IRR" = sqrt(1/F_All_Dementia + 1/M_All_Dementia), 
+         "All_Dem_95CI_upper" = exp(log(`All_Dem_IRR_F:M`) + 
+                                      1.96*All_Dem_SE_IRR), 
+         "All_Dem_95CI_lower" = exp(log(`All_Dem_IRR_F:M`) - 
+                                      1.96*All_Dem_SE_IRR))
 
 # #---- Plots ----
 # ACT_plot_data <- 
 #   tibble("Age" = seq(69, 94, by = 5), 
-#          "Men" = ACT_inc_rates$Male_AD_1000PY, 
-#          "Women" = ACT_inc_rates$Female_AD_1000PY) %>%
+#          "Men" = ACT_inc_rates$Male_All_Dementia_1000PY, 
+#          "Women" = ACT_inc_rates$Female_All_Dementia_1000PY) %>%
 #   gather(key = "Sex/Gender", value = "value", c("Men", "Women")) %>% 
 #   mutate_at("Sex/Gender", as.factor)
 # ACT_plot_data$`Sex/Gender` <- 
@@ -70,4 +75,3 @@ ACT_inc_rates <- tibble("Low_Age" = seq(65, 90, by = 5),
 #   theme(axis.text = element_text(size = 12)) +
 #   #ggtitle("Dementia Incidence Rates by Sex from EURODEM Pooled Analysis ") + 
 #   ylab("Dementia Incidence Rate per 1000 Person Years")
-  
