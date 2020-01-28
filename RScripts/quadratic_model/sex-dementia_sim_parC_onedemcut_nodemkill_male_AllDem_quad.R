@@ -52,7 +52,7 @@ cij_var3 <- 1     #Variance of noise for Cij (cognitive function for person i at
 b00 <- 0      #Cognitive intercept for males 
 b01 <- 0      #Effect of female on cognitive intercept
 b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same age so there is no age effect (since baseline centered ages are 0 for everyone)
-b03 <- -0.5   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
+b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
 b10 <- 0.04777  #Cognitive linear term for males                
