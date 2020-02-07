@@ -162,33 +162,34 @@ source(here("RScripts", "quadratic_model",
             "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
-plot_data_A <- sample_A %>% 
-  dplyr::select(c("female", "U", "death0", 
-                  head(variable_names$deathij_varnames, -1))) %>%
-  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>%
-  mutate("Scenario" = "A") %>%
-  dplyr::select(-one_of("female")) %>% 
-  dplyr::select("U", "death0", everything()) %>% 
-  set_colnames(c("U", seq(1:10), "Sex/Gender", "Scenario")) %>% 
-  gather(-contains(c("U", "Sex/Gender", "Scenario")), key = "Visit", 
-         value = "death_indicator") %>%
-  filter(death_indicator == 0) %>% 
-  mutate_at("Sex/Gender", as.factor) %>% 
-  mutate_at("Visit", as.factor)
+#Format data for plotting
+plot_data_A <- format_plot_data(sample_A, "A") 
+plot_data_B1 <- format_plot_data(sample_B1, "B1") 
+plot_data_B2 <- format_plot_data(sample_B2, "B2") 
+plot_data_C1 <- format_plot_data(sample_C1, "C1") 
+plot_data_C2 <- format_plot_data(sample_C2, "C2") 
 
+figure3_data <- do.call("rbind", 
+                        list(plot_data_A, plot_data_B1, plot_data_B2, 
+                             plot_data_C1, plot_data_C2))
 
 #Plot
-ggplot(data = plot_data_A, 
-       aes(x = factor(Visit) , y = U, fill = `Sex/Gender`)) + 
+figure3 <- ggplot(data = figure3_data, 
+                  aes(x = `Age Band` , y = U, 
+                      fill = `Sex/Gender`, color = `Sex/Gender`)) + 
   geom_boxplot() + 
-  geom_hline(yintercept = 0, linetype="dashed", color = "black")  
+  geom_hline(yintercept = 0, linetype="dashed", color = "black") + 
+  theme_minimal() + 
+  theme(panel.spacing = unit(1, "lines")) +
+  facet_grid(. ~Scenario) + 
+  coord_flip()
+
+#Saving figure
+ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
+       device = "jpeg", dpi = 300)
+  
 
 
-ggplot(dfmelt, aes(x=factor(round_any(x,0.5)), y=value,fill=variable))+
-  geom_boxplot()+
-  facet_grid(.~variable)+
-  labs(x="X (binned)")+
-  theme(axis.text.x=element_text(angle=-90, vjust=0.4,hjust=1))
 
 
 
