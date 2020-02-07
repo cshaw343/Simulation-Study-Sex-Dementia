@@ -4,8 +4,9 @@ if (!require("pacman"))
 
 p_load("here", "tidyverse")
 
-#---- Load ACT data ----
+#---- Source scripts ----
 source(here("RScripts", "dementia_incidence_ACT.R"))
+source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here(
@@ -41,6 +42,19 @@ mean_results_C1 <- results_C1 %>% colMeans()
 mean_results_C2 <- results_C2 %>% colMeans()
 
 #---- Figure 2 ----
+figure2_data <- 
+  data.frame("Ages" = c(80, 85, 90), 
+             "ACT" = ACT_inc_rates$`All_Dem_IRR_F:M`[
+               which(ACT_inc_rates$Low_Age == 80):
+                 which(ACT_inc_rates$Low_Age == 90)], 
+             "A" = )
+
+
+
+
+
+
++ scale_x_continuous(name = "Age range", breaks = c(70,80,90,100), labels=c("65-74", "75-84","85-94","95-104"))+"
 IRR_table <- 
   tibble("ACT" = " ", 
          "IRR (Women:Men)_ACT" = c(rep("NA", 3), 
