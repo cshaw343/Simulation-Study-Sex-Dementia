@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse")
+p_load("here", "tidyverse", "latex2exp")
 
 #---- Source scripts ----
 source(here("RScripts", "dementia_incidence_ACT.R"))
@@ -42,27 +42,57 @@ mean_results_C1 <- results_C1 %>% colMeans()
 mean_results_C2 <- results_C2 %>% colMeans()
 
 #---- Figure 2 ----
-figure2_data <- 
+IRR_ages <- c("logIRR_80-85", "logIRR_85-90", "logIRR_90-95")
+IRR_upper <- c("logIRR_CI_95_Upper_80-85", "logIRR_CI_95_Upper_85-90", 
+               "logIRR_CI_95_Upper_90-95")
+IRR_lower <- c("logIRR_CI_95_Lower_80-85", "logIRR_CI_95_Lower_85-90", 
+               "logIRR_CI_95_Lower_90-95")
+
+point_estimates <- 
   data.frame("Ages" = c(80, 85, 90), 
              "ACT" = ACT_inc_rates$`All_Dem_IRR_F:M`[
                which(ACT_inc_rates$Low_Age == 80):
-                 which(ACT_inc_rates$Low_Age == 90)], 
-             "A" = )
+                 which(ACT_inc_rates$Low_Age == 90)],
+             "A" = exp(mean_results_A[IRR_ages]), 
+             "B1" = exp(mean_results_B1[IRR_ages]), 
+             "B2" = exp(mean_results_B2[IRR_ages]), 
+             "C1" = exp(mean_results_C1[IRR_ages]), 
+             "C2" = exp(mean_results_C2[IRR_ages])) %>% 
+  pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
+               names_to = "Scenario", values_to = "IRR")
+                            
+
+LB <- data.frame("Ages" = c(80, 85, 90), 
+                 "ACT" = ACT_inc_rates$`All_Dem_95CI_lower`[
+                   which(ACT_inc_rates$Low_Age == 80):
+                     which(ACT_inc_rates$Low_Age == 90)], 
+                 "A" = exp(mean_results_A[IRR_lower]), 
+                 "B1" = exp(mean_results_B1[IRR_lower]), 
+                 "B2" = exp(mean_results_B2[IRR_lower]), 
+                 "C1" = exp(mean_results_C1[IRR_lower]), 
+                 "C2" = exp(mean_results_C2[IRR_lower])) %>% 
+  pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
+               names_to = "Scenario", values_to = "LB")
+
+UB <- data.frame("Ages" = c(80, 85, 90), 
+                 "ACT" = ACT_inc_rates$`All_Dem_95CI_upper`[
+                   which(ACT_inc_rates$Low_Age == 80):
+                     which(ACT_inc_rates$Low_Age == 90)], 
+                 "A" = exp(mean_results_A[IRR_upper]), 
+                 "B1" = exp(mean_results_B1[IRR_upper]), 
+                 "B2" = exp(mean_results_B2[IRR_upper]), 
+                 "C1" = exp(mean_results_C1[IRR_upper]), 
+                 "C2" = exp(mean_results_C2[IRR_upper])) %>% 
+  pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
+               names_to = "Scenario", values_to = "UB")
+
+figure2_data <- left_join(point_estimates, LB, by = c("Ages", "Scenario")) %>%
+  left_join(., UB, by = c("Ages", "Scenario"))
 
 
+ggplot(figure2_data, aes(x = Ages, y = IRR, colour = Scenario)) + 
+  #geom_errorbar(aes(ymin = A_LB, ymax = A_UB), width = .5) +
+  geom_line() + geom_point() + theme_minimal() + 
+  scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
+  labels = c("[80-85)", "[85-90)","[90-95)"))
 
-
-
-
-+ scale_x_continuous(name = "Age range", breaks = c(70,80,90,100), labels=c("65-74", "75-84","85-94","95-104"))+"
-IRR_table <- 
-  tibble("ACT" = " ", 
-         "IRR (Women:Men)_ACT" = c(rep("NA", 3), 
-                                   round(ACT_inc_rates$`All_Dem_IRR_F:M`, 3)),
-         "Simulation Scenario A" = " ", 
-         "IRR (Women:Men)" = exp(
-           mean_sim_results[na.omit(variable_names$logIRR_varnames)])) %>% 
-  t() %>% 
-  set_colnames(age_labels$formatted_age_intervals) %>% 
-  set_rownames(c("ACT", "IRR (Women:Men)", "Simulation Scenario A", 
-                 "IRR (Women:Men)"))
