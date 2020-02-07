@@ -2,11 +2,12 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse", "latex2exp")
+p_load("here", "tidyverse", "latex2exp", "magrittr")
 
 #---- Source scripts ----
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
+source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here(
@@ -138,4 +139,46 @@ ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
 
 ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
        device = "jpeg", dpi = 300)
+
+#---- Figure 3 ----
+#Create one sample of size 100,000 for each simulation scenario
+source(here("RScripts", "quadratic_model",
+            "sex-dementia_sim_parA_onedemcut_nodemkill_male_AllDem_quad.R"))
+sample_A <- data_gen(num_obs = 100000)
+
+source(here("RScripts", "quadratic_model",
+            "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))
+sample_B1 <- data_gen(num_obs = 100000)
+
+source(here("RScripts", "quadratic_model",
+            "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+sample_B2 <- data_gen(num_obs = 100000)
+
+source(here("RScripts", "quadratic_model",
+            "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))
+sample_C1 <- data_gen(num_obs = 100000)
+
+source(here("RScripts", "quadratic_model",
+            "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+sample_C2 <- data_gen(num_obs = 100000)
+
+test <- sample_A %>% 
+  dplyr::select(c("female", "U", "death0", 
+                  head(variable_names$deathij_varnames, -1))) %>%
+  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>% 
+  dplyr::select(-one_of("female")) %>% 
+  dplyr::select("U", "death0", everything()) %>% 
+  set_colnames(c("U", "Age 50", age_labels$Age_interval, 
+                 "Sex/Gender")) %>%
+  gather(contains("Age"), 
+         key = "Age", value = "death_indicator") %>%
+  filter(death_indicator == 0) %>% 
+  mutate_at("Sex/Gender", as.factor)
+
+#Plot
+
+
+
+
+
 
