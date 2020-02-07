@@ -162,22 +162,33 @@ source(here("RScripts", "quadratic_model",
             "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
-test <- sample_A %>% 
+plot_data_A <- sample_A %>% 
   dplyr::select(c("female", "U", "death0", 
                   head(variable_names$deathij_varnames, -1))) %>%
-  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>% 
+  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>%
+  mutate("Scenario" = "A") %>%
   dplyr::select(-one_of("female")) %>% 
   dplyr::select("U", "death0", everything()) %>% 
-  set_colnames(c("U", "Age 50", age_labels$Age_interval, 
-                 "Sex/Gender")) %>%
-  gather(contains("Age"), 
-         key = "Age", value = "death_indicator") %>%
+  set_colnames(c("U", seq(1:10), "Sex/Gender", "Scenario")) %>% 
+  gather(-contains(c("U", "Sex/Gender", "Scenario")), key = "Visit", 
+         value = "death_indicator") %>%
   filter(death_indicator == 0) %>% 
-  mutate_at("Sex/Gender", as.factor)
+  mutate_at("Sex/Gender", as.factor) %>% 
+  mutate_at("Visit", as.factor)
+
 
 #Plot
+ggplot(data = plot_data_A, 
+       aes(x = factor(Visit) , y = U, fill = `Sex/Gender`)) + 
+  geom_boxplot() + 
+  geom_hline(yintercept = 0, linetype="dashed", color = "black")  
 
 
+ggplot(dfmelt, aes(x=factor(round_any(x,0.5)), y=value,fill=variable))+
+  geom_boxplot()+
+  facet_grid(.~variable)+
+  labs(x="X (binned)")+
+  theme(axis.text.x=element_text(angle=-90, vjust=0.4,hjust=1))
 
 
 
