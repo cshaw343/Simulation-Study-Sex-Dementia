@@ -115,6 +115,7 @@ figure2_option1 <- ggplot(figure2_data_all_error,
                 position = position_dodge(width = 0.5)) +
   geom_line(position = position_dodge(width = 0.5)) + 
   geom_point(position = position_dodge(width = 0.5)) + 
+  geom_hline(yintercept = 1, linetype="dashed", color = "black") +
   theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
                      labels = c("[80-85)", "[85-90)","[90-95)")) + 
@@ -124,7 +125,9 @@ figure2_option1 <- ggplot(figure2_data_all_error,
 figure2_option2 <- ggplot(figure2_data_ACT_error, 
                           aes(x = Ages, y = IRR, colour = Scenario)) + 
   geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.5) +
-  geom_line() + geom_point() + theme_minimal() + 
+  geom_line() + geom_point() + 
+  geom_hline(yintercept = 1, linetype="dashed", color = "black") + 
+  theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
   labels = c("[80-85)", "[85-90)","[90-95)")) + 
   ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) 
