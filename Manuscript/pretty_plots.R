@@ -133,9 +133,9 @@ figure2_option2 <- ggplot(figure2_data_ACT_error,
   ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) 
 
 #Saving figures
-ggsave(here("Manuscript", "figure2_option1"), plot = figure2_option1,
+ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
        device = "jpeg", dpi = 300)
 
-ggsave(here("Manuscript", "figure2_option2"), plot = figure2_option2,
+ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
        device = "jpeg", dpi = 300)
 
