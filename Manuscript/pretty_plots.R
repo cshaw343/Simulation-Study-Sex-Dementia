@@ -42,12 +42,14 @@ mean_results_C1 <- results_C1 %>% colMeans()
 mean_results_C2 <- results_C2 %>% colMeans()
 
 #---- Figure 2 ----
+#Defining the column names that I want to pull
 IRR_ages <- c("logIRR_80-85", "logIRR_85-90", "logIRR_90-95")
 IRR_upper <- c("logIRR_CI_95_Upper_80-85", "logIRR_CI_95_Upper_85-90", 
                "logIRR_CI_95_Upper_90-95")
 IRR_lower <- c("logIRR_CI_95_Lower_80-85", "logIRR_CI_95_Lower_85-90", 
                "logIRR_CI_95_Lower_90-95")
 
+#Making a table of point estimates
 point_estimates <- 
   data.frame("Ages" = c(80, 85, 90), 
              "ACT" = ACT_inc_rates$`All_Dem_IRR_F:M`[
@@ -61,7 +63,7 @@ point_estimates <-
   pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
                names_to = "Scenario", values_to = "IRR")
                             
-
+#Making a table of the lower bounds for the 95%CI
 LB <- data.frame("Ages" = c(80, 85, 90), 
                  "ACT" = ACT_inc_rates$`All_Dem_95CI_lower`[
                    which(ACT_inc_rates$Low_Age == 80):
@@ -74,6 +76,7 @@ LB <- data.frame("Ages" = c(80, 85, 90),
   pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
                names_to = "Scenario", values_to = "LB")
 
+#Making a table of the upper bounds for the 95%CI
 UB <- data.frame("Ages" = c(80, 85, 90), 
                  "ACT" = ACT_inc_rates$`All_Dem_95CI_upper`[
                    which(ACT_inc_rates$Low_Age == 80):
@@ -86,13 +89,50 @@ UB <- data.frame("Ages" = c(80, 85, 90),
   pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
                names_to = "Scenario", values_to = "UB")
 
-figure2_data <- left_join(point_estimates, LB, by = c("Ages", "Scenario")) %>%
-  left_join(., UB, by = c("Ages", "Scenario"))
+#Data frame with error bar data for all simulation scenarios
+figure2_data_all_error <- 
+  left_join(point_estimates, LB, 
+            by = c("Ages", "Scenario")) %>%
+  left_join(., UB, by = c("Ages", "Scenario")) %>% 
+  mutate_at("Scenario", as.factor)
+figure2_data_all_error$Scenario <- 
+  relevel(figure2_data_all_error$Scenario, "ACT")
 
+#Data frame with error bar data for only the ACT study
+figure2_data_ACT_error <- 
+  left_join(point_estimates, LB, 
+            by = c("Ages", "Scenario")) %>%
+  left_join(., UB, by = c("Ages", "Scenario")) %>% 
+  mutate_at("Scenario", as.factor) 
+figure2_data_ACT_error$UB[figure2_data_ACT_error$Scenario != "ACT"] <- NA
+figure2_data_ACT_error$Scenario <- 
+  relevel(figure2_data_ACT_error$Scenario, "ACT")
 
-ggplot(figure2_data, aes(x = Ages, y = IRR, colour = Scenario)) + 
-  #geom_errorbar(aes(ymin = A_LB, ymax = A_UB), width = .5) +
+#Plot with error bars for all scenarios
+figure2_option1 <- ggplot(figure2_data_all_error, 
+                          aes(x = Ages, y = IRR, colour = Scenario)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = 1, 
+                position = position_dodge(width = 0.5)) +
+  geom_line(position = position_dodge(width = 0.5)) + 
+  geom_point(position = position_dodge(width = 0.5)) + 
+  theme_minimal() + 
+  scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
+                     labels = c("[80-85)", "[85-90)","[90-95)")) + 
+  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$"))
+
+#Plot with error bars only for the ACT study
+figure2_option2 <- ggplot(figure2_data_ACT_error, 
+                          aes(x = Ages, y = IRR, colour = Scenario)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.5) +
   geom_line() + geom_point() + theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
-  labels = c("[80-85)", "[85-90)","[90-95)"))
+  labels = c("[80-85)", "[85-90)","[90-95)")) + 
+  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) 
+
+#Saving figures
+ggsave(here("Manuscript", "figure2_option1"), plot = figure2_option1,
+       device = "jpeg", dpi = 300)
+
+ggsave(here("Manuscript", "figure2_option2"), plot = figure2_option2,
+       device = "jpeg", dpi = 300)
 
