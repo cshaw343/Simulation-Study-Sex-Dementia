@@ -43,8 +43,31 @@ ggplot(aes(Age, value), data = IRR_data) +
   scale_color_manual(values = c("ACT" = "Black", "A" = "#F8766D", 
                                 "B1" = "#C77CFF", "B2" = "Blue", 
                                 "C1" = "#00BFC4", "C2" = "#7CAE00")) + 
-  geom_hline(yintercept = 1, lty = 2, color = "black", size = 0.75)
+  geom_hline(yintercept = 1, lty = 2, color = "black", size = 0.75)  
   
+#---- Alternative IRR plot ----
+IRR_data <- tibble("Age" = seq(69, 94, by = 5), 
+                   #"ACT" = ACT_inc_rates$`All_Dem_IRR_F:M`,
+                   "A" = c(1.002, 1.001, 1.003, 1.002, 1.003, 0.999), 
+                   "B1" = c(1, 1, 1, 1, 1, 1), 
+                   "B2" = c(0.999, 1.007, 1.017, 1.012, 1.015, 1.002), 
+                   "C1" = c(1, 1.08, 1.16, 1.16, 1.15, 1.17), 
+                   "C2" = c(1.01, 1.12, 1.23, 1.21, 1.20, 1.22)) %>%
+  gather(key = "Scenario", value = "value", 
+         c("A", "B1", "B2", "C1", "C2")) %>% 
+  mutate_at("Scenario", as.factor)
+
+ggplot(aes(Age, value), data = IRR_data) + 
+  geom_point(aes(colour = `Scenario`)) + theme_minimal() + 
+  theme(text = element_text(size = 24)) +
+  geom_line(aes(color = `Scenario`)) + 
+  scale_color_manual(values = c("ACT" = "Black", "A" = "#F8766D", 
+                                "B1" = "#C77CFF", "B2" = "Blue", 
+                                "C1" = "#00BFC4", "C2" = "#7CAE00")) + 
+  geom_hline(yintercept = 1, lty = 2, color = "black", size = 0.75) + 
+  xlim(84, 94) + 
+  geom_rect(aes(xmin = 84, xmax = 94, ymin = 1.1, ymax = 1.27), alpha = 0.015, 
+            color = "lightgray")
 
 #---- ACT All Dem incidence matching plot (men) ----
 dem_match_plot_data <- 
