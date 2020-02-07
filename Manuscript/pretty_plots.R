@@ -18,11 +18,27 @@ results_B1 <- read_csv(here(
   "sim_B_male_AllDem_1000_20191128.csv")) %>% 
   results_65_plus()
 
+results_B2 <- read_csv(here(
+  "Results", "quadratic_model", "Scenario_B", 
+  "sim_B_highUonSurv_male_AllDem_1000_20191126.csv")) %>% 
+  results_65_plus()
+
+results_C1 <- read_csv(here(
+  "Results", "quadratic_model", "Scenario_C", 
+  "sim_C_male_AllDem_1000_20191129.csv")) %>% 
+  results_65_plus()
+
+results_C2 <- read_csv(here(
+  "Results", "quadratic_model", "Scenario_C", 
+  "sim_C_highUonSurv_male_AllDem_1000_20191126.csv")) %>% 
+  results_65_plus()
 
 #---- Calculate mean and sd of results ----
 mean_results_A <- results_A %>% colMeans()
 mean_results_B1 <- results_B1 %>% colMeans()
-
+mean_results_B2 <- results_B2 %>% colMeans()
+mean_results_C1 <- results_C1 %>% colMeans()
+mean_results_C2 <- results_C2 %>% colMeans()
 
 #---- Figure 2 ----
 IRR_table <- 
