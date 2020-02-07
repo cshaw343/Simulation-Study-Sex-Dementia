@@ -12,7 +12,7 @@ format_plot_data <- function(sample, scenario){
     filter(death_indicator == 0) %>% 
     mutate_at("Sex/Gender", as.factor) %>% 
     mutate_at("Visit", as.factor)
-  sample$Visit <- fct_relevel(sample$Visit, "10", after = Inf)
+  plot_data$Visit <- fct_relevel(plot_data$Visit, "10", after = Inf)
   
   return(plot_data)
 }
