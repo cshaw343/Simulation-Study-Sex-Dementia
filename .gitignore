@@ -72,5 +72,7 @@ Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut.Rmd
 Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut_all_match.Rmd
 RScripts/linear_model/test*.R
 RScripts/quadratic_model/test*.R
+#Misc files
+Manuscript/*.DS_Store
 #Trash folder
 To Delete/*
