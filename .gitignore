@@ -38,6 +38,7 @@ RScripts/debugging*
 DAGs/*
 #Plots
 Plots/*
+Manuscript/*.jpeg
 #Search results and other data files
 Data/*
 #Markdown .html files
