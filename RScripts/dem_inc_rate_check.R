@@ -24,8 +24,8 @@ source(here("RScripts", "US_life_table_calcs.R"))
 # cij_var1 <- opt_cij_var1
 
 #Quadratic model
-opt_linear_term <- 0.04777
-opt_quadratic_term <- -0.0033
+opt_linear_term <- 0.0425
+opt_quadratic_term <- -0.002875
 
 #Fixed values for now ----------
 opt_baseline_var <- 0.05
