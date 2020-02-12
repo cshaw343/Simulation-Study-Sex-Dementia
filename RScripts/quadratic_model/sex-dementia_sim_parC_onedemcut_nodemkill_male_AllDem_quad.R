@@ -55,15 +55,15 @@ b02 <- 0      #Effect of age on cognitive intercept; Note: Everyone is the same 
 b03 <- -0.1   #Effect of U (unmeasured/underlying variable) on cognitive intercept (taken from Marden et. al. 2017)
 
 
-b10 <- 0.04777  #Cognitive linear term for males                
-b11 <- 0        #Effect of female on cognitive linear term
-b12 <- 0        #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
-b13 <- 0        #Effect of U on cognitive linear term 
+b10 <- 0.0425 #Cognitive linear term for males                
+b11 <- 0      #Effect of female on cognitive linear term
+b12 <- 0      #Effect of age on cognitive linear term; Note: Everyone is the same age so there is no age effect
+b13 <- 0      #Effect of U on cognitive linear term 
 
-b20 <- -0.0033  #Cognitive quadratic term for males 
-b21 <- 0        #Effect of female on cognitive quadratic term
-b22 <- 0        #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
-b23 <- 0        #Effect of U on cognitive quadratic term
+b20 <- -0.002875 #Cognitive quadratic term for males 
+b21 <- 0         #Effect of female on cognitive quadratic term
+b22 <- 0         #Effect of age on cognitive quadratic term; Note: Everyone is the same age so there is no age effect 
+b23 <- 0         #Effect of U on cognitive quadratic term
 
 #---- Parameters for Sij (survival for person i at time j) ----
 #Effect of sex (being female) on log hazard of death; 
