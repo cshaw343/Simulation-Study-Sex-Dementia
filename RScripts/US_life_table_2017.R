@@ -23,17 +23,6 @@ cond_prob <- function(x){
   return(probs)
 }
 
-#---- Recursive subtraction function ----
-sub_recurse <- function(x){
-  diffs <- vector(length = length(x))
-  for(i in 2:length(diffs)){
-    diffs[i] = x[i] - x[i - 1]
-  }
-  diffs[1] <- x[1]
-  return(diffs)
-}
-
-
 #---- Hazard Function ----
 haz <- function(age, logprobs){
   HZ <- vector(length = length(age))
