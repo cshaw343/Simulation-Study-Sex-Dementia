@@ -4,10 +4,8 @@ if (!require("pacman"))
 
 p_load("tidyverse", "magrittr", "here")
 
-#---- Read in data ----
-US_total <- read_csv(here("Data", "US_cohort_table_white_MF_calcs.csv"))
-US_F <- read_csv(here("Data", "US_cohort_table_white_F_calcs.csv"))
-US_M <- read_csv(here("Data", "US_cohort_table_white_M_calcs.csv"))
+#---- Source files ----
+source(here("RScripts", "US_life_table_2017.R"))
 
 #---- Selected life table subsets ----
 #Add computations for cumulative survival conditional on survival to age 50
