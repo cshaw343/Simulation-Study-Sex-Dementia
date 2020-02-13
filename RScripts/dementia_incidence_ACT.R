@@ -59,20 +59,3 @@ ACT_inc_rates <- tibble("Low_Age" = seq(65, 90, by = 5),
                                       1.96*All_Dem_SE_IRR), 
          "All_Dem_95CI_lower" = exp(log(`All_Dem_IRR_F:M`) - 
                                       1.96*All_Dem_SE_IRR))
-
-# #---- Plots ----
-# ACT_plot_data <- 
-#   tibble("Age" = seq(69, 94, by = 5), 
-#          "Men" = ACT_inc_rates$Male_All_Dementia_1000PY, 
-#          "Women" = ACT_inc_rates$Female_All_Dementia_1000PY) %>%
-#   gather(key = "Sex/Gender", value = "value", c("Men", "Women")) %>% 
-#   mutate_at("Sex/Gender", as.factor)
-# ACT_plot_data$`Sex/Gender` <- 
-#   fct_relevel(ACT_plot_data$`Sex/Gender`, "Men", after = 1)
-# 
-# ggplot(aes(Age, value), data = ACT_plot_data) + 
-#   geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
-#   geom_line(aes(color = `Sex/Gender`)) + 
-#   theme(axis.text = element_text(size = 12)) +
-#   #ggtitle("Dementia Incidence Rates by Sex from EURODEM Pooled Analysis ") + 
-#   ylab("Dementia Incidence Rate per 1000 Person Years")
