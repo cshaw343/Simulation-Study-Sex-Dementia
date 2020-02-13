@@ -31,8 +31,7 @@ life <- tibble("Birth cohort" = "1919-1921",
                "CP" = cond_prob(Survivors), 
                "Haz" = haz(age = Age, logprobs = logProb), 
                "Country" = "US", 
-               "Sex" = "both") %>% 
-  write_csv("Data/US_cohort_table_all_race_MF_calcs.csv")
+               "Sex" = "both") 
 
 male_life <- tibble("Birth cohort" = "1919-1921",
                     "Age" = ages, 
@@ -45,8 +44,7 @@ male_life <- tibble("Birth cohort" = "1919-1921",
                     "CP" = cond_prob(Survivors), 
                     "Haz" = haz(age = Age, logprobs = logProb), 
                     "Country" = "US", 
-                    "Sex" = "Male") %>% 
-  write_csv("Data/US_cohort_table_all_race_M_calcs.csv")
+                    "Sex" = "Male") 
 
 female_life <- tibble("Birth cohort" = "1919-1921",
                       "Age" = ages, 
@@ -59,8 +57,7 @@ female_life <- tibble("Birth cohort" = "1919-1921",
                       "CP" = cond_prob(Survivors), 
                       "Haz" = haz(age = Age, logprobs = logProb), 
                       "Country" = "US", 
-                      "Sex" = "Female") %>% 
-  write_csv("Data/US_cohort_table_all_race_F_calcs.csv")
+                      "Sex" = "Female") 
 
 #---- Life Table Data-- White ----
 #"Survivors" represents number surviving out of 100,000 born alive
@@ -74,8 +71,7 @@ white_life <- tibble("Birth cohort" = "1919-1921",
                "CP" = cond_prob(Survivors), 
                "Haz" = haz(age = Age, logprobs = logProb), 
                "Country" = "US", 
-               "Sex" = "both") %>% 
-  write_csv("Data/US_cohort_table_white_MF_calcs.csv")
+               "Sex" = "both") 
 
 white_male_life <- tibble("Birth cohort" = "1919-1921",
                     "Age" = ages, 
@@ -88,8 +84,7 @@ white_male_life <- tibble("Birth cohort" = "1919-1921",
                     "CP" = cond_prob(Survivors), 
                     "Haz" = haz(age = Age, logprobs = logProb), 
                     "Country" = "US", 
-                    "Sex" = "Male") %>% 
-  write_csv("Data/US_cohort_table_white_M_calcs.csv")
+                    "Sex" = "Male") 
 
 white_female_life <- tibble("Birth cohort" = "1919-1921",
                       "Age" = ages, 
@@ -102,6 +97,5 @@ white_female_life <- tibble("Birth cohort" = "1919-1921",
                       "CP" = cond_prob(Survivors), 
                       "Haz" = haz(age = Age, logprobs = logProb), 
                       "Country" = "US", 
-                      "Sex" = "Female") %>% 
-  write_csv("Data/US_cohort_table_white_F_calcs.csv")
+                      "Sex" = "Female") 
 
