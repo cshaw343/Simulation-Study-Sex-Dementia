@@ -9,28 +9,27 @@ source(here("RScripts", "US_life_table_2017.R"))
 
 #---- Selected life table subsets ----
 #Add computations for cumulative survival conditional on survival to age 50
-all_life_US <- US_total %>% 
+all_life_US <- white_life %>% 
   filter(`Birth cohort` == "1919-1921" & Age %in% seq(50, 95, by = 5)) 
 all_life_US %<>% 
   mutate("cum_surv_cond50" = Survivors/all_life_US$Survivors[1])
 
-female_life_US <- US_F %>% 
+female_life_US <- white_female_life %>% 
   filter(`Birth cohort` == "1919-1921" & Age %in% seq(50, 95, by = 5)) 
 female_life_US %<>%
   mutate("cum_surv_cond50" = Survivors/female_life_US$Survivors[1])
 
-male_life_US <- US_M %>% 
+male_life_US <- white_male_life %>% 
   filter(`Birth cohort` == "1919-1921" & Age %in% seq(50, 95, by = 5)) 
 male_life_US %<>%
   mutate("cum_surv_cond50" = Survivors/male_life_US$Survivors[1])
 
 #---- Hazard ratios ----
-#US
-male_haz_US <- US_M %>% 
+male_haz_US <- white_male_life %>% 
   filter(`Birth cohort` == "1919-1921" & Age %in% seq(50, 95, by = 5)) %>% 
   dplyr::select("Birth cohort", "Haz")
 
-female_haz_US <- US_F %>% 
+female_haz_US <- white_female_life %>% 
   filter(`Birth cohort` == "1919-1921" & Age %in% seq(50, 95, by = 5)) %>% 
   dplyr::select("Birth cohort", "Haz")
 
