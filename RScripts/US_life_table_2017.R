@@ -13,24 +13,9 @@ if (!require("pacman"))
 
 p_load("tidyverse", "here")
 
-#---- Conditional probabilities function ----
-cond_prob <- function(x){
-  probs <- vector(length = length(x))
-  for(i in 2:length(probs)){
-    probs[i] = x[i]/x[i - 1]
-  }
-  probs[1] <- 1
-  return(probs)
-}
-
-#---- Hazard Function ----
-haz <- function(age, logprobs){
-  HZ <- vector(length = length(age))
-  for(i in 2:length(HZ)){
-    HZ[i] = -(logprobs[i] - logprobs[i - 1])/(age[i] - age[i - 1])
-  }
-  return(HZ)
-}
+#---- Source Files ----
+source(here("RScripts", "cond_prob.R"))
+source(here("RScripts", "haz.R"))
 
 #---- Life Table Data-- Race-aggregated ----
 #"Survivors" represents number surviving out of 100,000 born alive
