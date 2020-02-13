@@ -34,8 +34,6 @@ Results/Scenario_A_no_bias/sim_results*
 Results/Scenario_A_no_bias/one_demcut*
 #Debugging files
 RScripts/debugging*
-#DAGs
-DAGs/*
 #Plots
 Plots/*
 Manuscript/*.jpeg
