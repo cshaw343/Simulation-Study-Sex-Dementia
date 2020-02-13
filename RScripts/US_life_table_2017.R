@@ -17,10 +17,10 @@ p_load("tidyverse", "here")
 source(here("RScripts", "cond_prob.R"))
 source(here("RScripts", "haz.R"))
 
-#---- Life Table Data-- Race-aggregated ----
-#"Survivors" represents number surviving out of 100,000 born alive
 ages <- seq(from = 0, to = 100, by = 5)
 
+#---- Life Table Data-- Race-aggregated ----
+#"Survivors" represents number surviving out of 100,000 born alive
 life <- tibble("Birth cohort" = "1919-1921",
                "Age" = ages, 
                "Survivors" = c(100000, 83389, 88129, 87144, 85441, 83146, 80642, 
@@ -32,7 +32,7 @@ life <- tibble("Birth cohort" = "1919-1921",
                "Haz" = haz(age = Age, logprobs = logProb), 
                "Country" = "US", 
                "Sex" = "both") %>% 
-  write_csv("Data/US_cohort_table_MF_calcs.csv")
+  write_csv("Data/US_cohort_table_all_race_MF_calcs.csv")
 
 male_life <- tibble("Birth cohort" = "1919-1921",
                     "Age" = ages, 
@@ -46,7 +46,7 @@ male_life <- tibble("Birth cohort" = "1919-1921",
                     "Haz" = haz(age = Age, logprobs = logProb), 
                     "Country" = "US", 
                     "Sex" = "Male") %>% 
-  write_csv("Data/US_cohort_table_M_calcs.csv")
+  write_csv("Data/US_cohort_table_all_race_M_calcs.csv")
 
 female_life <- tibble("Birth cohort" = "1919-1921",
                       "Age" = ages, 
@@ -60,12 +60,10 @@ female_life <- tibble("Birth cohort" = "1919-1921",
                       "Haz" = haz(age = Age, logprobs = logProb), 
                       "Country" = "US", 
                       "Sex" = "Female") %>% 
-  write_csv("Data/US_cohort_table_F_calcs.csv")
+  write_csv("Data/US_cohort_table_all_race_F_calcs.csv")
 
 #---- Life Table Data-- White ----
 #"Survivors" represents number surviving out of 100,000 born alive
-ages <- seq(from = 0, to = 100, by = 5)
-
 white_life <- tibble("Birth cohort" = "1919-1921",
                "Age" = ages, 
                "Survivors" = c(100000, 89771, 88536, 87633, 86159, 84106, 
