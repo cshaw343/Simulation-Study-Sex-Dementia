@@ -1,9 +1,10 @@
 #***************************************************************
-# 2017 Life Table
+# 2017 US Life Table
 # Source: National Vital Statistics Reports, Vol. 68, No. 7, 
-# June 24, 2019 (pg 49-50)
+# June 24, 2019 (pg 49-52)
 # Birth cohort: 1919 - 1921
-# **Use data for Whites in simulation**
+# 
+# Note: We calibrate to data for Whites in the simulation
 #***************************************************************
 
 #---- Package Loading and Options ----
