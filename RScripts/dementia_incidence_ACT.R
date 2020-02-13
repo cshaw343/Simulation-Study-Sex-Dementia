@@ -1,10 +1,10 @@
 #*******************************************************************************
-# Dementia Incidence Rates 
+# Dementia Incidence Rates from the Adult Changes in Thought (ACT) Study
 # Source: Characterization of Dementia and Alzheimer’s Disease 
 # in an Older Population: Updated Incidence and Life Expectancy 
 # With and Without Dementia. Tom et al. Am J Public Health 2015
 # 
-# Life Table birth cohort: US 1919-1921
+# Life table birth cohort: US 1919-1921
 #*******************************************************************************
 
 #---- Package Loading ----
