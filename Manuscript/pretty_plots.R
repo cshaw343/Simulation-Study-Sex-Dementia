@@ -142,24 +142,19 @@ ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
 
 #---- Figure 3 ----
 #Create one sample of size 100,000 for each simulation scenario
-source(here("RScripts", "quadratic_model",
-            "sex-dementia_sim_parA_onedemcut_nodemkill_male_AllDem_quad.R"))
+source(here("RScripts","Scenario_A_pars.R"))
 sample_A <- data_gen(num_obs = 100000)
 
-source(here("RScripts", "quadratic_model",
-            "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))
+source(here("RScripts","Scenario_B1_pars.R"))
 sample_B1 <- data_gen(num_obs = 100000)
 
-source(here("RScripts", "quadratic_model",
-            "sex-dementia_sim_parB_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+source(here("RScripts","Scenario_B2_pars.R"))
 sample_B2 <- data_gen(num_obs = 100000)
 
-source(here("RScripts", "quadratic_model",
-            "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))
+source(here("RScripts","Scenario_C1_pars.R"))
 sample_C1 <- data_gen(num_obs = 100000)
 
-source(here("RScripts", "quadratic_model",
-            "sex-dementia_sim_parC_highUonSurv_onedemcut_nodemkill_male_AllDem_quad.R"))
+source(here("RScripts","Scenario_C2_pars.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
 #Format data for plotting
