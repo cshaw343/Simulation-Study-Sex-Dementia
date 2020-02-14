@@ -6,8 +6,8 @@ p_load("here", "tidyverse", "latex2exp", "magrittr")
 
 #---- Source scripts ----
 source(here("RScripts", "dementia_incidence_ACT.R"))
-source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
-source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
+source(here("RScripts", "variable_names_quad.R"))
+source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here(
