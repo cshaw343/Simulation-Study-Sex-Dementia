@@ -10,19 +10,13 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here(
-  "RScripts", "quadratic_model",
-  "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))
-source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
-source(here("RScripts", "quadratic_model", "sex-dementia_sim_data_gen_quad.R"))
+#Choose the simulation scenario that you want to input here
+source(here("RScripts", "scenario_A_pars.R"))
+source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
-source(here("RScripts", "US_life_table_calcs.R"))
+source(here("RScripts", "life_table_calcs.R"))
 
 #---- Set values ----
-# #linear splines model
-# cij_slopes <- opt_cij_slopes
-# cij_var1 <- opt_cij_var1
-
 #Quadratic model
 opt_linear_term <- 0.0425
 opt_quadratic_term <- -0.002875
@@ -32,9 +26,6 @@ opt_baseline_var <- 0.05
 opt_cij_cov02 <- 0
 opt_cij_cov12 <- 0
 #-------------------------------
-opt_linear_var <- 0.001
-opt_quadratic_var <- 0.000009
-opt_cij_cov01 <- -0.0009
 
 opt_dem_cut <- -6.5
 # 
