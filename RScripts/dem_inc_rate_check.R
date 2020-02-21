@@ -181,11 +181,6 @@ male_Cij <- Cij_check %>% filter(female == 0)
 female_meanCij<- female_Cij %>% colMeans(., na.rm = TRUE)
 male_mean_Cij <- male_Cij %>% colMeans(., na.rm = TRUE)
 
-# #Checking the mean slopes by sex
-# slopes_check <- obs %>% dplyr::select(female, contains("slope"))
-# female_slopes_check <- slopes_check %>% filter(female == 1) %>% colMeans()
-# male_slopes_check <- slopes_check %>% filter(female == 0) %>% colMeans()
-
 female_mean_plot <- tibble("Age" = c(seq(50, 95, by = 5)), 
                            "variable" = "Women", 
                            "value" = female_meanCij[-1])
@@ -236,7 +231,6 @@ ggplot(samp_Cij, aes(Age, value)) +
   guides(color = guide_legend(reverse = TRUE))
 
 #---- Checking values ----
-#head(EURODEM_inc_rates$Total_All_Dementia_1000PY, -1)
 #all_sim_inc_rates
 head(ACT_inc_rates$Male_All_Dementia_1000PY)
 scenario_A_rates <- c(7.046, 8.864, 21.173, 45.525, 71.635, 96.946)
@@ -256,37 +250,12 @@ for(i in 1:length(simulated_mortality_logHRs)){
 Hratio_US[-1, ]
 exp(simulated_mortality_logHRs)
 
-# #male_life_netherlands$cum_surv_cond50
-# male_life_US$cum_surv_cond50[-1]
-# p_alive_males
-# 
-# #female_life_netherlands$cum_surv_cond50
-# female_life_US$cum_surv_cond50[-1]
-# p_alive_females
-
 #conditional survival
 male_life_US$CP[-1]
 cond_p_alive_males
 
 female_life_US$CP[-1]
 cond_p_alive_females
-
-# #Linear splines model
-# #Calculate observed slopes
-# Cij_check <- obs %>% group_by(female) %>%
-#   dplyr::select(c("female", variable_names$Cij_varnames)) %>%
-#   summarise_all(mean, na.rm = TRUE)
-# 
-# slopes_check <- matrix(nrow = 2, ncol = (length(visit_times)))
-# colnames(slopes_check) = c("female", variable_names$interval_ages[1:9])
-# slopes_check[, "female"] = Cij_check$female
-# 
-# for(i in 2:ncol(slopes_check)){
-#   slopes_check[, i] <- as.matrix((Cij_check[, i + 1] - Cij_check[, i])/int_time)
-# }
-
-# slopes_check
-# colMeans(slopes_check)
 
 #---- U plots ----
 #Interval labels i.e. [50, 55)
