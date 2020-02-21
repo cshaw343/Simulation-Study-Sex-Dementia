@@ -8,6 +8,7 @@ p_load("here", "tidyverse", "latex2exp", "magrittr")
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "variable_names_quad.R"))
 source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
+source(here("RScripts", "format_plot_data.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here(
@@ -167,6 +168,12 @@ plot_data_C2 <- format_plot_data(sample_C2, "C2")
 figure3_data <- do.call("rbind", 
                         list(plot_data_A, plot_data_B1, plot_data_B2, 
                              plot_data_C1, plot_data_C2))
+
+#Manuscript calculation (Results section)
+mean_U_last <- figure3_data %>% 
+  filter(`Age Band` == "[90-95)") %>% 
+  group_by(Scenario, `Sex/Gender`) %>% 
+  summarise_at("U", mean)
 
 #Plot
 figure3 <- ggplot(data = figure3_data, 
