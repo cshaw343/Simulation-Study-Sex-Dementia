@@ -1,9 +1,9 @@
 #*******************************************************************************
 # Simulation Senario A
-# XXXX% cumulative incidence of mortality
+# 99.1% cumulative incidence of mortality
 # Exposure = male gender
 # Based on US lifetables, sample is 51% F / 49% M at age 50
-# Remaining LE at age 50:  XXXXX years for F and XXXXX years for M
+# Remaining LE (median) at age 50:  23.5 years for F and 22.5 years for M
 #*******************************************************************************
 
 #---- Number of simulation runs ----
