@@ -6,13 +6,6 @@
 # Remaining LE (median) at age 50:  23.5 years for F and 22.5 years for M
 #*******************************************************************************
 
-#---- Number of simulation runs ----
-runs = 1000
-
-#---- Number of observations ----
-#Multiples of 1000
-num_obs <- 100000
-
 #---- Baseline age ----
 age0 <- 50
 

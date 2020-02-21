@@ -20,25 +20,12 @@ data_gen(500000) %>%
   saveRDS(here("Data", "quadratic_model",
                "dataset_C_male_AllDem_500000_20200212"))
 
-#---- Running the simulation in parallel----
-# #Function to run simulation in batches
-# batch_runs <- function(){
-#   plan(multiprocess, 
-#        workers = (floor(0.5*detectCores())), 
-#        gc = TRUE)
-#   sim_results <- future_replicate(2, sex_dem_sim(num_obs)) %>% t() %>% 
-#     as.data.frame()
-#   
-#   return(sim_results)
-# 
-#   future:::ClusterRegistry("stop")
-# }
+#---- Running the full simulation ----
+#Simulation settings
+runs = 1000         #Number of simulation runs
+num_obs <- 100000   #Size of each simulated cohort
 
-# #---- Test Code ----
-# if(runs%%5 != 0){
-#   stop("Number of runs must be a multiple of 5.")
-# }
-#  
+
 gc()
 Start <- Sys.time()
 
