@@ -12,7 +12,7 @@ options(warn = -1)    #Suppress warnings
 #---- Source files ----
 #Choose the simulation scenario that you want to input here
 source(here("RScripts", "scenario_A_pars.R"))
-source(here("RScripts", "sex-dementia_sim_data_gen_quad.R"))
+source(here("RScripts", "data_gen.R"))
 source(here("RScripts", "dementia_incidence_ACT.R"))
 source(here("RScripts", "life_table_calcs.R"))
 
