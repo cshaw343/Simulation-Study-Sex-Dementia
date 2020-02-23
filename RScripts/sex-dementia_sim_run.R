@@ -43,7 +43,7 @@ sim_results <- future_replicate(runs, sex_dem_sim(num_obs)) %>% t() %>%
 
 write_csv(sim_results, here("Results", simulation_output))
 
-#stop the cluster
+#stop the multiprocess-- do this or else things will be SO slow after
 plan(sequential)
 
 #How long did it take
