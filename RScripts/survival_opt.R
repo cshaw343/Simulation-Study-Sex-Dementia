@@ -1,7 +1,7 @@
 #***************************************************************
 # Performs a search for baseline hazards and 
 # log(g1) (effect of female sex on survival)
-# Reference data found in US_life_table_calcs.R 
+# Reference data found in life_table_calcs.R 
 #***************************************************************
 
 #---- Package Loading and Options ----
