@@ -50,7 +50,7 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                          "mean_U" = rep("mean_U", num_tests + 1), 
                          "prop_dem_random" = rep("prop_dem_random", 
                                                  num_tests + 1), 
-                         "prop_dem_Cij" = rep("prop_dem_Cij", num_tests + 1), 
+                         "prop_dem_Ci" = rep("prop_dem_Ci", num_tests + 1), 
                          "prop_dem_both" = rep("prop_dem_both", 
                                                num_tests + 1)) %>% 
   #Interval timepoints
@@ -159,13 +159,13 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
         remove = FALSE) %>%
   unite("prop_dem_random_M_by_age", 
         c(prop_dem_random, males, interval_ages), sep = "_", remove = FALSE) %>%
-  unite("prop_dem_Cij_by_age", 
-        c(prop_dem_Cij, interval_ages), sep = "_", remove = FALSE) %>%
-  unite("prop_dem_Cij_W_by_age", 
-        c(prop_dem_Cij, females, interval_ages), sep = "_", 
+  unite("prop_dem_Ci_by_age", 
+        c(prop_dem_Ci, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_Ci_W_by_age", 
+        c(prop_dem_Ci, females, interval_ages), sep = "_", 
         remove = FALSE) %>%
-  unite("prop_dem_Cij_M_by_age", 
-        c(prop_dem_Cij, males, interval_ages), sep = "_", remove = FALSE) %>%
+  unite("prop_dem_Ci_M_by_age", 
+        c(prop_dem_Ci, males, interval_ages), sep = "_", remove = FALSE) %>%
   unite("prop_dem_both_by_age", 
         c(prop_dem_both, interval_ages), sep = "_", remove = FALSE) %>%
   unite("prop_dem_both_W_by_age", 
@@ -197,8 +197,8 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
                 "prop_dem_males_varnames", "mean_U_at_risk_females_varnames", 
                 "mean_U_at_risk_males_varnames", 
                 "prop_dem_random_by_age", "prop_dem_random_W_by_age", 
-                "prop_dem_random_M_by_age", "prop_dem_Cij_by_age", 
-                "prop_dem_Cij_W_by_age", "prop_dem_Cij_M_by_age", 
+                "prop_dem_random_M_by_age", "prop_dem_Ci_by_age", 
+                "prop_dem_Ci_W_by_age", "prop_dem_Ci_M_by_age", 
                 "prop_dem_both_by_age", "prop_dem_both_W_by_age",
                 "prop_dem_both_M_by_age")
 
@@ -271,7 +271,7 @@ variable_names[nrow(variable_names),
 #---- Define column names for simulation dataset ----
 column_names <- c(na.omit(variable_names$exo_var), 
                   variable_names$age_varnames, variable_names$agec_varnames, 
-                  "z_0i", "z_1i", "z_2i", "eps_ij", 
+                  "z_0i", "z_1i", "z_2i", "eps_i", 
                   "a0", "a1", "a2", variable_names$Ci_varnames, "last_Ci",
                   variable_names$r1ij_varnames[1:num_tests], 
                   variable_names$Sij_varnames[1:num_tests],
@@ -279,7 +279,7 @@ column_names <- c(na.omit(variable_names$exo_var),
                   variable_names$random_timetodem_varnames[4:num_tests],
                   "death0", variable_names$deathij_varnames[1:num_tests], 
                   "study_death", "survtime", "age_death", 
-                  variable_names$dem_varnames, "dem_wave", "dem", "dem_Cij", 
+                  variable_names$dem_varnames, "dem_wave", "dem", "dem_Ci", 
                   "dem_random", "timetodem", "ageatdem", "dem_death", 
                   "timetodem_death", "ageatdem_death", "dem_alive", 
                   variable_names$contributed_varnames[1:num_tests], 
