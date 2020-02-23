@@ -71,7 +71,6 @@ data_gen <- function(num_obs){
   obs <- obs[obs[, "Ci0"] > dem_cut, ]
   
   #---- Generate survival time for each person ----
-  #Refer to Manuscript/manuscript_equations.pdf for equation
   
   #---- Generating uniform random variables ----
   #For Sij and random time to dementia models
@@ -110,42 +109,23 @@ data_gen <- function(num_obs){
   #Set all indicators to 0 first
   obs[variable_names$dem_varnames, ] <- 0
   
-  #Based on Cij value
+  #Based on Ci value
   for(i in 1:ncol(obs)){
-    below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
+    below_dem <- min(which(obs[variable_names$Ci_varnames, i] < dem_cut))
     if(is.finite(below_dem)){
       obs["dem_wave", i] <- (below_dem - 1)
       obs["dem", i] <- 1
-      obs["dem_Cij", i] <- 1
+      obs["dem_Ci", i] <- 1
     } else{
       obs["dem", i] <- 0
-      obs["dem_Cij", i] <- 0
+      obs["dem_Ci", i] <- 0
     }
   }
   
-  #---- BEGIN OLD CODE THAT INCLUDES CENSORING----
-  #max_dem <- length(variable_names$dem_varnames)
-  
-  # for(i in 1:ncol(obs)){
-  #   below_dem <- min(which(obs[variable_names$Cij_varnames, i] < dem_cut))
-  #   if(is.finite(below_dem)){
-  #     obs[variable_names$dem_varnames[1:(below_dem - 1)], i] <- 0
-  #     obs[variable_names$dem_varnames[below_dem:max_dem], i] <- 1
-  #     obs["dem_wave", i] <- (below_dem - 1)
-  #     obs["dem", i] <- 1
-  #     obs["dem_Cij", i] <- 1
-  #   } else{
-  #     obs[variable_names$dem_varnames[1:max_dem], i] <- 0
-  #     obs["dem", i] <- 0
-  #     obs["dem_Cij", i] <- 0
-  #   }
-  # }
-  #---- END OLD CODE THAT INCLUDES CENSORING ----
-  
-  #Calculate quadratic time to dementia
+  #Calculate time to dementia
   obs["timetodem", ] <- dem_onset(obs, dem_cut)
   
-  #Based on random time to dementia model
+  #Based on random/shock time to dementia model
   obs["dem_random", ] <- 0
   
   for(i in 1:ncol(obs)){
@@ -167,7 +147,7 @@ data_gen <- function(num_obs){
         obs["timetodem", i] <- timeto_random_dem
         
         if(obs["dem_wave", i] != random_dem){
-          obs["dem_Cij", i] <- 0
+          obs["dem_Ci", i] <- 0
           obs["dem_wave", i] <- random_dem
         }
         
@@ -182,37 +162,15 @@ data_gen <- function(num_obs){
     }
   }
   
-  #---- BEGIN OLD CODE THAT INCLUDES CENSORING----
-  # for(i in 1:ncol(obs)){
-  #   random_dem <- 3 + min(which(
-  #     obs[variable_names$random_timetodem_varnames[4:num_tests], i] < 
-  #       obs[variable_names$Sij_varnames[4:num_tests], i]))
-  #   if(is.finite(random_dem)){
-  #     obs["dem_random", i] <- 1
-  #     obs["dem", i] <- 1
-  #     timeto_random_dem <- 5*(random_dem - 1) + 
-  #       obs[variable_names$random_timetodem_varnames[random_dem], i]
-  #     if(timeto_random_dem <= obs["timetodem", i]){
-  #       obs[variable_names$dem_varnames[1:random_dem], i] <- 0
-  #       obs[variable_names$dem_varnames[(random_dem + 1):max_dem], i] <- 1
-  #       obs["dem_wave", i] <- random_dem
-  #       obs["timetodem", i] <- timeto_random_dem 
-  #     }
-  #   } else{
-  #     obs["dem_random", i] <- 0
-  #   }
-  # }
-  #---- END OLD CODE THAT INCLUDES CENSORING ----
-  
   #---- Dementia calculations ----
   obs <- compare_survtime_timetodem(obs)
   obs["ageatdem", ] <- obs["age0", ] + obs["timetodem", ] #Age at dementia diagnosis
 
-  #---- Censor Cij and dem data ----
+  #---- Censor Ci and dem data ----
   obs <- survival_censor(obs)
   
-  #---- Last Cij value ----
-  obs["last_Cij", ] <- last_Cij(obs)
+  #---- Last Ci value ----
+  obs["last_Ci", ] <- last_Ci(obs)
   
   #Dementia status at death
   for(i in 1:ncol(obs)){
@@ -299,28 +257,6 @@ data_gen <- function(num_obs){
       obs[variable_names_1year$dem_varnames[index], i] <- 1
     }
   }
-  
-  #---- BEGIN OLD CODE THAT FILLS IN 1s FOR WHOLE INTERVAL ----
-  # for(i in 1:ncol(obs)){
-  #   for(j in 2:(num_tests + 1)){
-  #     dem_var <- variable_names$dem_varnames[j]
-  #     if(is.na(obs[dem_var, i])){
-  #       break
-  #     } else if(obs[dem_var, i] == 0){
-  #       dem_vars_1year_block <-
-  #         variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-  #       obs[dem_vars_1year_block, i] <- 0
-  #     } else{
-  #       dem_vars_1year_block <-
-  #         variable_names_1year$dem_varnames[(5*(j-2) + 1):(5*(j-1))]
-  #       contributed_vars_1year_block <-
-  #         variable_names_1year$contributed_varnames[(5*(j-2) + 1):(5*(j-1))]
-  #       obs[dem_vars_1year_block, i] <-
-  #         (obs[contributed_vars_1year_block, i] < 1)*1
-  #     }
-  #   }
-  # }
-  #---- END OLD CODE ----
   
   #---- Values to return ----
   return(as.data.frame(t(obs)))
