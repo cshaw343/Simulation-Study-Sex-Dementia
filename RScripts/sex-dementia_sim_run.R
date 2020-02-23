@@ -2,34 +2,35 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("parallel", "here", "magrittr")
+p_load("future.apply", "here", "magrittr")
 
 set.seed(20200113)
 
 #---- Source Files ----
-source(
-  here("RScripts", "quadratic_model", 
-       "sex-dementia_sim_parC_onedemcut_nodemkill_male_AllDem_quad.R"))  #The parameter file
-source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
-source(here("RScripts", "quadratic_model", 
-            "sex-dementia_sim_data_gen_quad.R"))      #The data generation script
-source(here("RScripts", "sex-dementia_sim_data_analysis.R")) #The data analysis script
+#Specify the parameter file
+source(here("RScripts", "scenario_A_pars.R"))  #The parameter file
+source(here("RScripts", "var_names.R"))
+source(here("RScripts", "data_gen.R"))         #The data generation script
+source(here("RScripts", "data_analysis.R"))    #The data analysis script
 
 #---- Generating one cohort ----
-data_gen(500000) %>%
-  saveRDS(here("Data", "quadratic_model",
-               "dataset_C_male_AllDem_500000_20200212"))
+#Use this to get one cohort for cohort specific checks and plots 
+#(like the U plots)
+#Set the desired number of people in the data_gen function
+#Set the desired file name in the here function where it says "filename" 
+data_gen(num_obs = 1000) %>%
+  saveRDS(here("Data", "filename"))
 
 #---- Running the full simulation ----
 #Simulation settings
-runs = 1000         #Number of simulation runs
-num_obs <- 100000   #Size of each simulated cohort
+runs = 2         #Number of simulation runs
+num_obs <- 1000   #Size of each simulated cohort
 
-
-gc()
+gc()                #Clear the environment of unecessary junk
 Start <- Sys.time()
 
-#sim_results <- replicate(runs/5, batch_runs())
+start <- Sys.time()
+plan(multiprocess, workers = 0.5*availableCores())
 
 cl <- makeCluster(0.5*detectCores())  
 
@@ -60,20 +61,3 @@ write_csv(sim_results,
 stopCluster(cl)
 
 Sys.time() - Start
-
-# #---- Output column names ----
-# output_column_names <- rownames(sim_results)
-# 
-# #---- Create results matrix ----
-# results_matrix <- 
-#   as.data.frame(matrix(NA, ncol = length(output_column_names), nrow = runs)) %>% 
-#   set_colnames(output_column_names)
-# 
-# for(i in output_column_names){
-#   results_matrix[, i] <- unlist(sim_results[i, ])
-# }
-
-# write_csv(results_matrix, 
-#           here("Results", "Scenario_A_no_bias", 
-#                "one_demcut_nodemkill_1000_20190814.csv"))
-
