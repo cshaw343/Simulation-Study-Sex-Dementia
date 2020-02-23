@@ -68,8 +68,8 @@ variable_names <- tibble("exo_var" = c("id", "female", "U",
   #Dementia labels
   unite("dem_varnames", c(dem, interval_times_base), sep = "", 
         remove = FALSE) %>% 
-  #Cij labels
-  unite("Cij_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
+  #Ci labels
+  unite("Ci_varnames", c(Ci, timepoints), sep = "", remove = FALSE) %>%
   #Uniform survival noise labels
   unite("r1ij_varnames", c(r1ij, interval_times), sep = "", remove = FALSE) %>%
   #Uniform random dementia noise labels
@@ -272,7 +272,7 @@ variable_names[nrow(variable_names),
 column_names <- c(na.omit(variable_names$exo_var), 
                   variable_names$age_varnames, variable_names$agec_varnames, 
                   "z_0i", "z_1i", "z_2i", "eps_ij", 
-                  "a0", "a1", "a2", variable_names$Cij_varnames, "last_Cij",
+                  "a0", "a1", "a2", variable_names$Ci_varnames, "last_Ci",
                   variable_names$r1ij_varnames[1:num_tests], 
                   variable_names$Sij_varnames[1:num_tests],
                   variable_names$r2ij_varnames[4:num_tests], 
