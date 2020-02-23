@@ -41,13 +41,13 @@ data_gen <- function(num_obs){
   obs[, variable_names$agec_varnames] <- 
     obs[, variable_names$age_varnames] - mean(age0)
   
-  #---- Generating "true" cognitive function Cij ----
+  #---- Generating "true" cognitive function Ci ----
   #Generating random terms for quadratic model
   
   #Defining the covariance matrix for intercept and linear term
-  quad_coeff_cov <- matrix(c(cij_var0, cij_cov01, cij_cov02, 
-                             cij_cov01, cij_var1, cij_cov12, 
-                             cij_cov02, cij_cov12, cij_var2), 
+  quad_coeff_cov <- matrix(c(ci_var0, ci_cov01, ci_cov02, 
+                             ci_cov01, ci_var1, ci_cov12, 
+                             ci_cov02, ci_cov12, ci_var2), 
                            nrow = 3, byrow = TRUE)
   
   #Generate random terms for each individual
@@ -58,14 +58,14 @@ data_gen <- function(num_obs){
   #from a negative half normal distribution
   obs[, "z_2i"] <- -abs(obs[, "z_2i"])
   
-  #Generating noise term (unexplained variance in Cij) 
-  obs[, "eps_ij"] <- rnorm(n = num_obs, mean = 0, sd = sqrt(cij_var3))
+  #Generating noise term (unexplained variance in Ci) 
+  obs[, "eps_i"] <- rnorm(n = num_obs, mean = 0, sd = sqrt(ci_var3))
   
   #Calculating quadratic coefficients for each individual
   obs[, c("a0", "a1", "a2")] <- calc_coeff(obs)
   
-  #Calculating Cij at each time point for each individual
-  obs[, variable_names$Cij_varnames] <- compute_Cij(obs)
+  #Calculating Ci at each time point for each individual
+  obs[, variable_names$Ci_varnames] <- compute_Ci(obs)
   
   #---- Check for dementia at baseline ----
   obs <- obs[obs[, "Ci0"] > dem_cut, ]
