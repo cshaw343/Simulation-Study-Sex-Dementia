@@ -9,17 +9,16 @@ options(digits = 6)   #Round to 6 decimal places
 options(warn = -1)    #Suppress warnings
 
 #---- Source files ----
-source(here("RScripts", "variable_names_quad.R"))
+source(here("RScripts", "var_names.R"))
 source(here("RScripts", "create_ages.R"))
 source(here("RScripts", "calc_coeff.R"))
-source(here("RScripts", "compute_Cij.R"))
-source(here("RScripts", "last_Cij.R"))
-source(here("RScripts", "survival_times_quad.R"))
-source(here("RScripts", "random_timetodem_quad.R"))
+source(here("RScripts", "compute_Ci.R"))
+source(here("RScripts", "last_Ci.R"))
+source(here("RScripts", "survival_times.R"))
+source(here("RScripts", "random_timetodem.R"))
 source(here("RScripts", "survival_censor.R"))
-source(here("RScripts", "dementia_onset_quad.R"))
-source(here("RScripts", "compare_survtime_timetodem_quad.R"))
-
+source(here("RScripts", "dementia_onset.R"))
+source(here("RScripts", "compare_survtime_timetodem.R"))
 
 #---- The data generation function ----
 data_gen <- function(num_obs){
