@@ -17,22 +17,27 @@ source(here("RScripts", "dem_inc_ACT.R"))
 source(here("RScripts", "life_table_calcs.R"))
 
 #---- Set values ----
-#Quadratic model
+#You set the values to test in this section
 opt_linear_term <- 0.0425
 opt_quadratic_term <- -0.002875
 
-#Fixed values for now ----------
+#Fixed values ------------------
 opt_baseline_var <- 0.05
-opt_cij_cov02 <- 0
-opt_cij_cov12 <- 0
+opt_ci_cov02 <- 0
+opt_ci_cov12 <- 0
 #-------------------------------
 
+opt_ci_cov01 <- -0.00009
+opt_linear_var <- 0.001 
+opt_quadratic_var <- 0.000009 
+
 opt_dem_cut <- -6.5
-# 
+ 
 #---- Check PD matrix ----
-quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_cij_cov01, opt_cij_cov02,
-                                opt_cij_cov01, opt_linear_var, opt_cij_cov12,
-                                opt_cij_cov02, opt_cij_cov12,
+#PD is necessary for calculation in data_gen.R script
+quad_coeff_cov_test <- matrix(c(opt_baseline_var, opt_ci_cov01, opt_ci_cov02,
+                                opt_ci_cov01, opt_linear_var, opt_ci_cov12,
+                                opt_ci_cov02, opt_ci_cov12,
                                 opt_quadratic_var),
                               nrow = 3, byrow = TRUE)
 
@@ -52,15 +57,16 @@ if(!is.positive.definite(quad_coeff_cov_test)){
   quad_coeff_cov_test
 }
 
-
+#Assigns the test values to these variables so original code for data_gen can
+#be used
 b10 <- opt_linear_term
 b20 <- opt_quadratic_term
 cij_var0 <- opt_baseline_var
 cij_var1 <- opt_linear_var
 cij_var2 <- opt_quadratic_var
-cij_cov01 <- opt_cij_cov01
-cij_cov02 <- opt_cij_cov02
-cij_cov12 <- opt_cij_cov12
+cij_cov01 <- opt_ci_cov01
+cij_cov02 <- opt_ci_cov02
+cij_cov12 <- opt_ci_cov12
 dem_cut <- opt_dem_cut
 
 #---- Generate the data ----
@@ -75,21 +81,17 @@ female_data <- obs %>% filter(female == 1)
 all_inc_cases <- colSums(obs[, variable_names$dem_varnames])
 all_PY <- colSums(obs[, variable_names$contributed_varnames[1:9]])
 all_sim_inc_rates <- all_inc_cases[-1]/all_PY*1000
-
-colnames(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
-rownames(all_sim_inc_rates) <- c("")
+names(all_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 
 male_inc_cases <- colSums(male_data[, variable_names$dem_varnames])
 male_PY <- colSums(male_data[, variable_names$contributed_varnames[1:9]])
 male_sim_inc_rates <- male_inc_cases[-1]/male_PY*1000
-colnames(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
-rownames(male_sim_inc_rates) <- c("")
+names(male_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 
 female_inc_cases <- colSums(female_data[, variable_names$dem_varnames])
 female_PY <- colSums(female_data[, variable_names$contributed_varnames[1:9]])
 female_sim_inc_rates <- female_inc_cases[-1]/male_PY*1000
-colnames(female_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
-rownames(female_sim_inc_rates) <- c("")
+names(female_sim_inc_rates) <- variable_names$interval_ages[1:num_tests]
 
 #---- Compute survival data ----
 
@@ -171,7 +173,7 @@ for(i in 1:length(cond_p_alive)){
 
 #---- Visualize Cij data ----
 Cij_check <- obs %>% 
-  dplyr::select("female", variable_names$Cij_varnames)
+  dplyr::select("female", variable_names$Ci_varnames)
 
 #Getting Cij by sex
 female_Cij <- Cij_check %>% filter(female == 1) 
@@ -190,15 +192,15 @@ male_mean_plot <- tibble("Age" = seq(50, 95, by = 5),
                          "value" = male_mean_Cij[-1])
 
 Cij_plot_data <- obs %>% 
-  dplyr::select("id", "female", variable_names$Cij_varnames, "survtime", 
-                "last_Cij") %>% sample_n(100) %>% 
+  dplyr::select("id", "female", variable_names$Ci_varnames, "survtime", 
+                "last_Ci") %>% sample_n(100) %>% 
   mutate("Age" = survtime + 50) %>% 
   dplyr::select(-c(survtime, female)) %>% 
-  set_colnames(c("id", variable_names$Cij_varnames, "Cij", "Age")) 
+  set_colnames(c("id", variable_names$Ci_varnames, "Cij", "Age")) 
 
 
 #Plot data
-samp_Cij <- Cij_plot_data[, c("id", variable_names$Cij_varnames)] %>%
+samp_Cij <- Cij_plot_data[, c("id", variable_names$Ci_varnames)] %>%
   set_colnames(c("id", seq(50, 95, by = 5))) %>% 
   gather(as.character(seq(50, 95, by = 5)), key = "Age", value = "Cij") %>% 
   mutate_at("Age", as.numeric) %>% 
@@ -231,7 +233,6 @@ ggplot(samp_Cij, aes(Age, value)) +
   guides(color = guide_legend(reverse = TRUE))
 
 #---- Checking values ----
-#all_sim_inc_rates
 head(ACT_inc_rates$Male_All_Dementia_1000PY)
 scenario_A_rates <- c(7.046, 8.864, 21.173, 45.525, 71.635, 96.946)
 scenario_A_rates
@@ -257,65 +258,5 @@ cond_p_alive_males
 female_life_US$CP[-1]
 cond_p_alive_females
 
-#---- U plots ----
-#Interval labels i.e. [50, 55)
-age_labels <- tibble("Age" = c("Age ", rep("", (num_tests - 1))), 
-                     "Age_rep" = rep("Age ", num_tests),
-                     "left_brack" = "[", 
-                     "interval_ages" = na.omit(variable_names$interval_ages), 
-                     "right_pren" = ")") %>%
-  unite("formatted_age_intervals", 
-        c("Age", "left_brack", "interval_ages", "right_pren"), sep = "", 
-        remove = FALSE) %>%
-  unite("Age_interval", 
-        c("Age_rep", "left_brack", "interval_ages", "right_pren"), sep = "", 
-        remove = FALSE)
-
-mean_U <- rep(0, 10)
-
-dem_data <- obs %>% 
-  dplyr::select(c("female", "U", "death0", 
-                  head(variable_names$deathij_varnames, -1))) %>%
-  mutate("Sex" = if_else(female == 0, "Men", "Women")) %>% 
-  dplyr::select(-one_of("female")) %>% 
-  dplyr::select("U", "death0", everything()) %>% 
-  set_colnames(c("U", "Age 50", age_labels$Age_interval, 
-                 "Sex/Gender")) %>%
-  gather(contains("Age"), 
-         key = "Age", value = "death_indicator") %>%
-  filter(death_indicator == 0) %>% 
-  mutate_at("Sex/Gender", as.factor)
-
-dem_data$Age <- fct_relevel(dem_data$Age, "Age 50")
-dem_data$`Sex/Gender` <- fct_relevel(dem_data$`Sex/Gender`, "Men")
-
-y <- data.frame(key = levels(dem_data$Age), cutoff = mean_U)
-
-dem_data %>% ggplot(aes(x = U)) + 
-  geom_vline(data = y, aes(xintercept = 0), color = "black", size = 1) + 
-  geom_histogram(data = dem_data %>% filter(`Sex/Gender` == "Women"), 
-                 aes(y = ..density.., fill = "Women"),
-                 binwidth = 0.01) +
-  geom_histogram(data = dem_data %>% filter(`Sex/Gender` == "Men"), 
-                 aes(y = ..density.., fill = "Men"), alpha = 0.5,
-                 binwidth = 0.01) + 
-  #xlim(-2.5, 2.5) + ylim(0, 0.6) + 
-  labs(x = "U", 
-       y = "Density") + 
-  facet_wrap(~ Age, scales = "free") + theme_minimal() + 
-  theme(legend.title = element_blank()) +  
-  #theme(text = element_text(size = 20)) + 
-  guides(fill = guide_legend(reverse = TRUE))
-
-#numerical summaries of U
-mean_U_summary <- dem_data %>% group_by(`Sex/Gender`, Age) %>% 
-  summarise_at("U", mean)
-
-#plot of numerical summary
-mean_U_summary$Age <- rep(seq(50, 95, by = 5), 2)
-ggplot(aes(Age, U), data = mean_U_summary) + 
-  geom_point(aes(colour = `Sex/Gender`)) + theme_minimal() + 
-  geom_line(aes(color = `Sex/Gender`)) + 
-  ylab("Mean U") 
 
 
