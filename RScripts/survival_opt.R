@@ -15,14 +15,12 @@ options(warnings = -1)
 
 #---- Specify source files ----
 #You need to specify the Scenario you want to calibrate
-source(here(
-  "RScripts", "quadratic_model",
-  "sex-dementia_sim_parB_onedemcut_nodemkill_male_AllDem_quad.R"))
-source(here("RScripts", "US_life_table_calcs.R"))
-source(here("RScripts", "quadratic_model", "variable_names_quad.R"))
-source(here("RScripts", "quadratic_model", "create_ages.R"))
-source(here("RScripts", "quadratic_model", "calc_coeff.R"))
-source(here("RScripts", "quadratic_model", "compute_Cij.R"))
+source(here("RScripts", "scenario_A_pars.R"))
+source(here("RScripts", "life_table_calcs.R"))
+source(here("RScripts", "var_names.R"))
+source(here("RScripts", "create_ages.R"))
+source(here("RScripts", "calc_coeff.R"))
+source(here("RScripts", "compute_Ci.R"))
 
 #---- Create datasets for the search ----
 pre_survival_data_gen <- function(num_obs){
