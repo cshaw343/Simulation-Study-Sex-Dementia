@@ -16,7 +16,7 @@ source(here("RScripts", "data_analysis.R"))    #The data analysis script
 #---- Set filenames for output ----
 #Paths are taken care of with the here package
 #Specify string for filename
-one_cohort_output <- "one_cohort_A"
+one_cohort_output <- "dataset_A_500000_20200223"
 simulation_output <- "sim_run_A.csv"
 
 #---- Generating one cohort ----
@@ -24,8 +24,7 @@ simulation_output <- "sim_run_A.csv"
 #(like the U plots)
 #Set the desired number of people in the data_gen function
 #Set the desired file name in the here function where it says "filename" 
-data_gen(num_obs = 1000) %>%
-  saveRDS(here("Data", one_cohort_output))
+data_gen(num_obs = 500000) %>% saveRDS(here("Data", one_cohort_output))
 
 #---- Running the full simulation ----
 #Simulation settings
