@@ -51,7 +51,7 @@ dataset <- readRDS(here("Data", "dataset_A_500000_20200223")) %>%
 
 #Data Analyses
 sim_results <- read_csv(here("Results", "Scenario_A_no_bias", 
-                             "sim_A_male_1000_20191125.csv")) 
+                             "sim_A_1000_20191125.csv")) 
 
 #Restrict results to 65+
 sim_results_65_plus <- results_65_plus(sim_results) 
