@@ -5,8 +5,12 @@ if (!require("pacman"))
 p_load("here", "tidyverse", "latex2exp", "magrittr")
 
 #---- Source scripts ----
+source(here("RScripts", "scenario_A_pars.R")) #Need for parameters
+source(here("RScripts", "var_names.R"))
+source(here("RScripts", "data_gen.R"))
 source(here("RScripts", "dem_inc_ACT.R"))
 source(here("RScripts", "format_plot_data.R"))
+source(here("RScripts", "results_65_plus.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here("Results", "Scenario_A_no_bias", 
@@ -131,21 +135,18 @@ ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
 
 #---- Figure 3 ----
 #Create one sample of size 100,000 for each simulation scenario
-source(here("RScripts","Scenario_A_pars.R"))
-source(here("RScripts", "var_names.R"))
-source(here("RScripts", "data_gen.R"))
 sample_A <- data_gen(num_obs = 100000)
 
-source(here("RScripts","Scenario_B1_pars.R"))
+source(here("RScripts","scenario_B1_pars.R"))
 sample_B1 <- data_gen(num_obs = 100000)
 
-source(here("RScripts","Scenario_B2_pars.R"))
+source(here("RScripts","scenario_B2_pars.R"))
 sample_B2 <- data_gen(num_obs = 100000)
 
-source(here("RScripts","Scenario_C1_pars.R"))
+source(here("RScripts","scenario_C1_pars.R"))
 sample_C1 <- data_gen(num_obs = 100000)
 
-source(here("RScripts","Scenario_C2_pars.R"))
+source(here("RScripts","scenario_C2_pars.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
 #Format data for plotting
