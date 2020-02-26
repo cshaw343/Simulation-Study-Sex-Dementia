@@ -10,7 +10,7 @@ set.seed(20200113)
 #Paths are taken care of with the here package
 #Specify string for filename
 one_cohort_output <- "dataset_A_500000_20200223"
-simulation_output <- "sim_run_B1_20200225.csv"
+simulation_output <- "sim_run_B1_20200226.csv"
 
 #Simulation settings
 runs = 1000         #Number of simulation runs
@@ -30,10 +30,10 @@ clusterEvalQ(cl, {
   if (!require("pacman")) 
     install.packages("pacman", repos='http://cran.us.r-project.org')
   
-  p_load("here", "magrittr")
+  p_load("here", "magrittr", "tidyverse")
   
   #Specify the parameter file
-  source(here("RScripts", "scenario_A_pars.R"))  #The parameter file
+  source(here("RScripts", "scenario_B1_pars.R"))  #The parameter file
   source(here("RScripts", "var_names.R"))
   source(here("RScripts", "data_gen.R"))         #The data generation script
   source(here("RScripts", "data_analysis.R"))    #The data analysis script
