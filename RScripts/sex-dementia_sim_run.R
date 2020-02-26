@@ -8,7 +8,7 @@ set.seed(20200113)
 
 #---- Source Files ----
 #Specify the parameter file
-source(here("RScripts", "scenario_A_pars.R"))  #The parameter file
+source(here("RScripts", "scenario_B1_pars.R"))  #The parameter file
 source(here("RScripts", "var_names.R"))
 source(here("RScripts", "data_gen.R"))         #The data generation script
 source(here("RScripts", "data_analysis.R"))    #The data analysis script
@@ -17,7 +17,7 @@ source(here("RScripts", "data_analysis.R"))    #The data analysis script
 #Paths are taken care of with the here package
 #Specify string for filename
 one_cohort_output <- "dataset_A_500000_20200223"
-simulation_output <- "sim_run_A.csv"
+simulation_output <- "sim_run_B1_20200225.csv"
 
 #---- Generating one cohort ----
 #Use this to get one cohort for cohort specific checks and plots 
@@ -28,8 +28,8 @@ data_gen(num_obs = 500000) %>% saveRDS(here("Data", one_cohort_output))
 
 #---- Running the full simulation ----
 #Simulation settings
-runs = 2              #Number of simulation runs
-num_obs <- 100000     #Size of each simulated cohort
+runs = 1000         #Number of simulation runs
+num_obs <- 100000   #Size of each simulated cohort
 
 gc()                  #Clear the environment of unecessary junk
 start <- Sys.time()   #Start timing the code
