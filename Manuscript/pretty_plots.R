@@ -11,6 +11,7 @@ source(here("RScripts", "data_gen.R"))
 source(here("RScripts", "dem_inc_ACT.R"))
 source(here("RScripts", "format_plot_data.R"))
 source(here("RScripts", "results_65_plus.R"))
+source(here("RScripts", "life_table_calcs.R"))
 
 #---- Load results data ----
 results_A <- read_csv(here("Results", "Scenario_A_no_bias", 
@@ -180,7 +181,81 @@ figure3 <- ggplot(data = figure3_data,
 #Saving figure
 ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
        device = "jpeg", dpi = 300)
+
+#---- Figure e1 ----
+#(a)
+#Survival plot data
+female_cp_survival <- 
+  c(mean_results_A[variable_names$cp_alive_females_varnames[1:num_tests]])
+male_cp_survival <- 
+  c(mean_results_A[variable_names$cp_alive_males_varnames[1:num_tests]])
+
+cp_surv_plot_data <- tibble("age" = seq(55, 95, by = 5), 
+                            "Published_Women_survival" = female_life_US$CP[-1], 
+                            "Published_Men_survival" = male_life_US$CP[-1], 
+                            "Simulated_Women_survival" = female_cp_survival, 
+                            "Simulated_Men_survival" = male_cp_survival) %>% 
+  pivot_longer(cols = -age, 
+               names_to = c("Data Type", "Gender"),
+               names_pattern = "(.*)_(.*)?_survival",
+               values_to = "prob")
+
+figure_e1a <- ggplot(cp_surv_plot_data, 
+                     aes(age, prob, group = `Data Type`, color = `Data Type`)) + 
+  geom_line(size = 1.25) + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  labs(title = "", 
+       y = "Conditional Survival Probability from age 50", 
+       x = "Age") + 
+  facet_grid(. ~Gender) + 
+  theme_minimal() 
+
+ggsave(here("Manuscript", "figure_e1a.jpeg"), plot = figure_e1a,
+       device = "jpeg", dpi = 300)
+
+#(b)
+HR_plot_data <- 
+  cbind(Hratio_US[-1, ], 
+        exp(mean_results_A[na.omit(variable_names$mortality_logHR_varnames)]), 
+        exp(mean_results_B1[na.omit(variable_names$mortality_logHR_varnames)]), 
+        exp(mean_results_B2[na.omit(variable_names$mortality_logHR_varnames)]), 
+        exp(mean_results_C1[na.omit(variable_names$mortality_logHR_varnames)]), 
+        exp(mean_results_C2[na.omit(
+          variable_names$mortality_logHR_varnames)])) %>% 
+  set_colnames(c("Published", "A", "B1", "B2", "C1", "C2")) %>% 
+  as.data.frame() %>%
+  mutate("Age" = seq(50, 90, by = 5)) %>%
+  pivot_longer(cols = -Age, 
+               names_to = "Scenario", 
+               values_to = "HR") %>% 
+  mutate_at("Scenario", as.factor)
+HR_plot_data$Scenario <- fct_relevel(HR_plot_data$Scenario,"Published", 
+                                     after = 0)
+
+figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
+  geom_point(aes(color = Scenario, group = Scenario), size = 1.75) + 
+  geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
+            alpha = 0.6) + 
+  scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
+                     labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
+                                "[70-75)","[75-80)", "[80-85)", "[85-90)",
+                                "[90-95)")) + 
+  #ylim(0, 1) +
+  #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
+  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
+       color = "") + theme_minimal() + 
+  #theme(text = element_text(size = 40)) + 
+  ggtitle("")
+
+ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
+       device = "jpeg", dpi = 300)
+        
+        
   
+  
+
+
+
 
 
 
