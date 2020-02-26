@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("parallel", "tidyverse")
+p_load("parallel", "tidyverse", "here")
 
 set.seed(20200113)
 
@@ -54,7 +54,9 @@ gc()
 start <- Sys.time()
 
 sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>% 
-  t() %>% as.data.frame() 
+  t() %>% as.data.frame()
+
+write_csv(sim_results, here("Results", simulation_output))
 
 #stop the cluster-- do this or else things will be SO slow after
 stopCluster(cl)
