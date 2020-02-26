@@ -1,17 +1,10 @@
-#---- Package Loading, Options, and Seed ----
+#---- Seed setting + package loading ----
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("future.apply", "here", "magrittr")
+p_load("parallel")
 
 set.seed(20200113)
-
-#---- Source Files ----
-#Specify the parameter file
-source(here("RScripts", "scenario_A_pars.R"))  #The parameter file
-source(here("RScripts", "var_names.R"))
-source(here("RScripts", "data_gen.R"))         #The data generation script
-source(here("RScripts", "data_analysis.R"))    #The data analysis script
 
 #---- Set filenames for output ----
 #Paths are taken care of with the here package
@@ -19,31 +12,52 @@ source(here("RScripts", "data_analysis.R"))    #The data analysis script
 one_cohort_output <- "dataset_A_500000_20200223"
 simulation_output <- "sim_run_A.csv"
 
-#---- Generating one cohort ----
-#Use this to get one cohort for cohort specific checks and plots 
-#(like the U plots)
-#Set the desired number of people in the data_gen function
-#Set the desired file name in the here function where it says "filename" 
-data_gen(num_obs = 500000) %>% saveRDS(here("Data", one_cohort_output))
-
-#---- Running the full simulation ----
 #Simulation settings
 runs = 2              #Number of simulation runs
 num_obs <- 100000     #Size of each simulated cohort
 
-gc()                  #Clear the environment of unecessary junk
-start <- Sys.time()   #Start timing the code
+#---- Create the cluster for parallel computing ----
+#We run these simulations in parallel because each run is incredibly 
+#computationally intensive
 
-#Run in parallel using half of the available cores
-plan(multiprocess, workers = 0.5*availableCores()) 
+cl <- makeCluster(0.5*detectCores())  
 
-sim_results <- future_replicate(runs, sex_dem_sim(num_obs)) %>% t() %>% 
-  as.data.frame() 
+#Export variables in this environment to cluster nodes
+clusterExport(cl = cl, list("runs", "num_obs"))
 
-write_csv(sim_results, here("Results", simulation_output))
+#Evaluate code on cluster nodes
+clusterEvalQ(cl, {
+  if (!require("pacman")) 
+    install.packages("pacman", repos='http://cran.us.r-project.org')
+  
+  p_load("here", "magrittr")
+  
+  #Specify the parameter file
+  source(here("RScripts", "scenario_A_pars.R"))  #The parameter file
+  source(here("RScripts", "var_names.R"))
+  source(here("RScripts", "data_gen.R"))         #The data generation script
+  source(here("RScripts", "data_analysis.R"))    #The data analysis script
+})
 
-#stop the multiprocess-- do this or else things will be SO slow after
-plan(sequential)
+#---- Generating one cohort ----
+#Use this to get one cohort for cohort specific checks and plots 
+#(like the U plots)
+#Set the desired number of people in the data_gen function
+
+parSapply(cl, 1:1, function(i) {data_gen(num_obs = 500000)}) %>% 
+  saveRDS(here("Data", one_cohort_output))
+
+#---- Running the full simulation ----
+#Clear the environment of unecessary junk
+gc()
+#Start timing the code
+start <- Sys.time()
+
+sim_results <- parSapply(cl, 1:runs, function(i) {sex_dem_sim(num_obs)}) %>% 
+  t() %>% as.data.frame() 
+
+#stop the cluster-- do this or else things will be SO slow after
+stopCluster(cl)
 
 #How long did it take
 Sys.time() - start
