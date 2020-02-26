@@ -32,7 +32,7 @@ ci_cov01 <- -0.00009  #Covariance between random intercept and random linear ter
 ci_cov12 <- 0         #Covariance between random linear and random quadratic term
 ci_cov02 <- 0         #Covariance between random intercept and random quadratic term 
                          
-cij_var3 <- 1     #Variance of noise for Ci model (cognitive function for person i)
+ci_var3 <- 1     #Variance of noise for Ci model (cognitive function for person i)
 
 #---- Parameters for Ci ----
 #Cognitive function for person i
