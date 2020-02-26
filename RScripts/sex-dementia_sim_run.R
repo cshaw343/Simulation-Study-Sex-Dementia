@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("parallel")
+p_load("parallel", "tidyverse")
 
 set.seed(20200113)
 
