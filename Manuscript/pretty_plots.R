@@ -1,9 +1,8 @@
-#---- Package Loading, Options, and Seed ----
+#---- Package Loading, Options ----
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
 p_load("here", "tidyverse", "latex2exp", "magrittr")
-
 #---- Source scripts ----
 source(here("RScripts", "scenario_A_pars.R")) #Need for parameters
 source(here("RScripts", "var_names.R"))
@@ -28,6 +27,9 @@ results_C1 <- read_csv(here("Results", "Scenario_C",
 
 results_C2 <- read_csv(here("Results", "Scenario_C", 
                             "sim_C2_1000_20191126.csv")) %>% results_65_plus()
+
+#---- Load single runs ----
+
 
 #---- Calculate mean and sd of results ----
 mean_results_A <- results_A %>% colMeans()
@@ -135,6 +137,7 @@ ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
        device = "jpeg", dpi = 300)
 
 #---- Figure 3 ----
+set.seed(20200226)
 #Create one sample of size 100,000 for each simulation scenario
 sample_A <- data_gen(num_obs = 100000)
 
@@ -182,7 +185,7 @@ figure3 <- ggplot(data = figure3_data,
 ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
        device = "jpeg", dpi = 300)
 
-#---- Figure e1 ----
+#---- eFigure 1 ----
 #(a)
 #Survival plot data
 female_cp_survival <- 
@@ -250,9 +253,110 @@ figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) +
 ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
        device = "jpeg", dpi = 300)
         
-        
-  
-  
+#---- eFigure 2 ----
+set.seed(20200226)
+#Create one sample of size 100,000 for each simulation scenario
+sample_A <- data_gen(num_obs = 100000)
+
+source(here("RScripts","scenario_B1_pars.R"))
+sample_B1 <- data_gen(num_obs = 100000)
+
+source(here("RScripts","scenario_B2_pars.R"))
+sample_B2 <- data_gen(num_obs = 100000)
+
+source(here("RScripts","scenario_C1_pars.R"))
+sample_C1 <- data_gen(num_obs = 100000)
+
+source(here("RScripts","scenario_C2_pars.R"))
+sample_C2 <- data_gen(num_obs = 100000)
+
+#Create plot data
+Ci_data <- 
+  rbind(sample_A %>% 
+          dplyr::select("id", "female", variable_names$Ci_varnames, 
+                        "survtime", "last_Ci") %>% 
+          mutate("Gender" = case_when(female == 0 ~ "Men", 
+                                      TRUE ~ "Women"), 
+                 "Scenario" = "A") %>% 
+          dplyr::select(-one_of("female")), 
+        sample_B1 %>% 
+          dplyr::select("id", "female", variable_names$Ci_varnames, 
+                        "survtime", "last_Ci") %>% 
+          mutate("Gender" = case_when(female == 0 ~ "Men", 
+                                      TRUE ~ "Women"), 
+                 "Scenario" = "B1") %>% 
+          dplyr::select(-one_of("female")), 
+        sample_B2 %>% 
+          dplyr::select("id", "female", variable_names$Ci_varnames, 
+                        "survtime", "last_Ci") %>% 
+          mutate("Gender" = case_when(female == 0 ~ "Men", 
+                                      TRUE ~ "Women"), 
+                 "Scenario" = "B2") %>% 
+          dplyr::select(-one_of("female")), 
+        sample_C1 %>% 
+          dplyr::select("id", "female", variable_names$Ci_varnames, 
+                        "survtime", "last_Ci") %>% 
+          mutate("Gender" = case_when(female == 0 ~ "Men", 
+                                      TRUE ~ "Women"), 
+                 "Scenario" = "C1") %>% 
+          dplyr::select(-one_of("female")), 
+        sample_C2 %>% 
+          dplyr::select("id", "female", variable_names$Ci_varnames, 
+                        "survtime", "last_Ci") %>% 
+          mutate("Gender" = case_when(female == 0 ~ "Men", 
+                                      TRUE ~ "Women"), 
+                 "Scenario" = "C2") %>% 
+          dplyr::select(-one_of("female")))
+
+#Getting mean Ci by sex
+mean_Ci_data <- Ci_data %>% group_by(Gender, Scenario) %>% 
+  summarise_at(variable_names$Ci_varnames, ~mean(., na.rm = TRUE)) %>% 
+  mutate("Cij" = NA, 
+         "Age" = NA) %>%
+  dplyr::select("Gender", variable_names$Ci_varnames, "Scenario", "Age") %>% 
+  set_colnames(c("id", seq(50, 95, by = 5), "Scenario", "Age"))
+
+#Sample data 
+Ci_plot_data <- Ci_data %>% group_by(Scenario) %>% sample_n(100) %>% 
+  mutate("Age" = survtime + 50) %>% 
+  dplyr::select(-c(survtime, Gender)) %>% 
+  set_colnames(c("id", seq(50, 95, by = 5), 
+                 "Cij", "Scenario", "Age")) %>% 
+  mutate_at("id", as.character) %>%
+  rbind(mean_Ci_data) 
+
+
+#Plot data
+samp_Ci <- Ci_plot_data[, c("id", seq(50, 95, by = 5), "Scenario")] %>%
+  gather(as.character(seq(50, 95, by = 5)), key = "Age", value = "Cij") %>% 
+  mutate_at("Age", as.numeric) %>% 
+  rbind(., Ci_plot_data[, c("id", "Scenario", "Age", "Cij")]) %>% 
+  set_colnames(c("variable", "Scenario", "Age", "value")) 
+
+#Creating a plot with random sample in the background
+figure_e2 <- ggplot(samp_Ci, aes(Age, value)) + 
+  geom_line(data = 
+              subset(samp_Ci, variable != "Women" & variable != "Men"), 
+            aes(group = variable), color = "gray") +
+  geom_line(data = subset(samp_Ci, variable == "Women"), 
+            aes(color = variable), size = 1.25) + 
+  geom_line(data = subset(samp_Ci, variable == "Men"), 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  geom_hline(yintercept = dem_cut, size = 1.25) + 
+  labs(y = "Cognitive Function", 
+       x = "Age", 
+       color = "Sex/Gender") + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  ggtitle("Mean Cognitive Trajectories") +
+  facet_grid(. ~Scenario) +
+  theme_minimal() +  
+  #theme(text = element_text(size = 28)) + 
+  coord_cartesian(ylim = c(-10, 10)) + 
+  #guides(color = guide_legend(reverse = TRUE)) +
+  geom_hline(yintercept = dem_cut) 
+
+ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
+       device = "jpeg", dpi = 300)
 
 
 
