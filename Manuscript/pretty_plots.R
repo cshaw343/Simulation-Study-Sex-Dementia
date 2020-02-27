@@ -358,8 +358,69 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
 ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
        device = "jpeg", dpi = 300)
 
+#---- eFigure 3 ----
+male_inc_data <- 
+  data.frame("Ages" = seq(50, 90, by = 5), 
+             "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
+             "A" = 1000*
+               mean_results_A[na.omit(
+                 variable_names$inc_cases_males_varnames)]/
+               mean_results_A[na.omit(variable_names$PY_males_varnames)], 
+             "B1" = 1000*
+               mean_results_B1[na.omit(
+                 variable_names$inc_cases_males_varnames)]/
+               mean_results_B1[na.omit(variable_names$PY_males_varnames)], 
+             "B2" = 1000*
+               mean_results_B2[na.omit(
+                 variable_names$inc_cases_males_varnames)]/
+               mean_results_B2[na.omit(variable_names$PY_males_varnames)], 
+             "C1" = 1000*
+               mean_results_C1[na.omit(
+                 variable_names$inc_cases_males_varnames)]/
+               mean_results_C1[na.omit(variable_names$PY_males_varnames)], 
+             "C2" = 1000*
+               mean_results_C2[na.omit(
+                 variable_names$inc_cases_males_varnames)]/
+               mean_results_C2[na.omit(variable_names$PY_males_varnames)]) %>% 
+  pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
+               names_to = "Scenario", values_to = "rates") %>% 
+  filter(Ages >= 65) %>% mutate_at("Scenario", as.factor)
+male_inc_data$Scenario <- relevel(male_inc_data$Scenario, "ACT")
 
 
+#Make the plot
+figure_e3 <- ggplot(male_inc_data, 
+                    aes(x = Ages, y = rates, colour = Scenario)) + 
+  geom_line() + geom_point() + theme_minimal() + 
+  scale_x_continuous(name = "Age bands", breaks = seq(65, 90, by = 5), 
+                     labels = c("[65-70)", "[70-75)","[75-80)", 
+                                "[80-85)", "[85-90)","[90-95)")) + 
+  ylab(TeX("Dementia incidence rates per 1000 PY")) + 
+  ggtitle("Dementia incidence rates for men")
+
+ggsave(here("Manuscript", "figure_e3.jpeg"), plot = figure_e3,
+       device = "jpeg", dpi = 300)
+
+#---- eTable 4 ----
+exp(mean_results_A[variable_names$logIRR_varnames])
+exp(mean_results_A[variable_names$logIRR_95CI_Lower_varnames])
+exp(mean_results_A[variable_names$logIRR_95CI_Upper_varnames])
+
+exp(mean_results_B1[variable_names$logIRR_varnames])
+exp(mean_results_B1[variable_names$logIRR_95CI_Lower_varnames])
+exp(mean_results_B1[variable_names$logIRR_95CI_Upper_varnames])
+
+exp(mean_results_B2[variable_names$logIRR_varnames])
+exp(mean_results_B2[variable_names$logIRR_95CI_Lower_varnames])
+exp(mean_results_B2[variable_names$logIRR_95CI_Upper_varnames])
+
+exp(mean_results_C1[variable_names$logIRR_varnames])
+exp(mean_results_C1[variable_names$logIRR_95CI_Lower_varnames])
+exp(mean_results_C1[variable_names$logIRR_95CI_Upper_varnames])
+
+exp(mean_results_C2[variable_names$logIRR_varnames])
+exp(mean_results_C2[variable_names$logIRR_95CI_Lower_varnames])
+exp(mean_results_C2[variable_names$logIRR_95CI_Upper_varnames])
 
 
 
