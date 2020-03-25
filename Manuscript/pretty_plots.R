@@ -380,6 +380,8 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
   theme_minimal() +  
   theme(text = element_text(size = 14)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
+  scale_colour_manual(name = "Sex/Gender",
+                      values = c("#039FBE", "#A2D5C6")) + 
   #guides(color = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = dem_cut) 
 
@@ -419,12 +421,18 @@ male_inc_data$Scenario <- relevel(male_inc_data$Scenario, "ACT")
 #Make the plot
 figure_e3 <- ggplot(male_inc_data, 
                     aes(x = Ages, y = rates, colour = Scenario)) + 
-  geom_line() + geom_point() + theme_minimal() + 
+  geom_line() + geom_point(aes(shape = Scenario)) + theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = seq(65, 90, by = 5), 
                      labels = c("[65-70)", "[70-75)","[75-80)", 
                                 "[80-85)", "[85-90)","[90-95)")) + 
   ylab(TeX("Dementia incidence rates per 1000 PY")) + 
-  ggtitle("Dementia incidence rates for men")
+  ggtitle("Dementia incidence rates for men") + 
+  scale_colour_manual(name = "Scenario",
+                      values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6",
+                                 "#039FBE", "#039FBE"), 
+                      labels = levels(male_inc_data$Scenario)) + 
+  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  theme(text = element_text(size = 14)) 
 
 ggsave(here("Manuscript", "figure_e3.jpeg"), plot = figure_e3,
        device = "jpeg", dpi = 300)
