@@ -105,36 +105,45 @@ figure2_data_ACT_error$UB[figure2_data_ACT_error$Scenario != "ACT"] <- NA
 figure2_data_ACT_error$Scenario <- 
   relevel(figure2_data_ACT_error$Scenario, "ACT")
 
-#Plot with error bars for all scenarios
-figure2_option1 <- ggplot(figure2_data_all_error, 
-                          aes(x = Ages, y = IRR, colour = Scenario)) + 
-  geom_errorbar(aes(ymin = LB, ymax = UB), width = 1, 
-                position = position_dodge(width = 0.5)) +
-  geom_line(position = position_dodge(width = 0.5)) + 
-  geom_point(position = position_dodge(width = 0.5)) + 
-  geom_hline(yintercept = 1, linetype="dashed", color = "black") +
-  theme_minimal() + 
-  scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
-                     labels = c("[80-85)", "[85-90)","[90-95)")) + 
-  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$"))
+# #Plot with error bars for all scenarios
+# figure2_option1 <- ggplot(figure2_data_all_error, 
+#                           aes(x = Ages, y = IRR, colour = Scenario)) + 
+#   geom_errorbar(aes(ymin = LB, ymax = UB), width = 1, 
+#                 position = position_dodge(width = 0.5)) +
+#   geom_line(position = position_dodge(width = 0.5)) + 
+#   geom_point(position = position_dodge(width = 0.5)) + 
+#   geom_hline(yintercept = 1, linetype = "solid", color = "black") +
+#   theme_minimal() + 
+#   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
+#                      labels = c("[80-85)", "[85-90)","[90-95)")) + 
+#   ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$"))
 
 #Plot with error bars only for the ACT study
 figure2_option2 <- ggplot(figure2_data_ACT_error, 
                           aes(x = Ages, y = IRR, colour = Scenario)) + 
-  geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.5) +
-  geom_line() + geom_point() + 
-  geom_hline(yintercept = 1, linetype="dashed", color = "black") + 
-  theme_minimal() + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.25, size = 1) +
+  geom_line(aes(color = Scenario), size = 1) + 
+  geom_point(aes(color = Scenario, shape = Scenario), size = 3) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
   labels = c("[80-85)", "[85-90)","[90-95)")) + 
-  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) 
+  scale_colour_manual(name = "Scenario",
+    values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6","#039FBE", "#039FBE"), 
+    labels = levels(figure2_data_ACT_error$Scenario)) + 
+  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  # scale_linetype_manual(name = "Scenario", 
+  #                       values = c(rep("solid", 3), rep("twodash", 3)), 
+  #                       labels = levels(figure2_data_ACT_error$Scenario)) + 
+  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) +
+  theme_minimal() + 
+  theme(text = element_text(size = 14))
 
 #Saving figures
-ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
-       device = "jpeg", dpi = 300)
+# ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
+#        device = "jpeg", dpi = 300, width = 6.5, height = 5.5, units = "in")
 
-ggsave(here("Manuscript", "figure2_option2.jpeg"), plot = figure2_option2,
-       device = "jpeg", dpi = 300)
+ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
+       device = "pdf", dpi = 300)
 
 #---- Figure 3 ----
 set.seed(20200226)
@@ -164,6 +173,7 @@ figure3_data <- do.call("rbind",
                         list(plot_data_A, plot_data_B1, plot_data_B2, 
                              plot_data_C1, plot_data_C2))
 
+
 #Manuscript calculation (Results section)
 mean_U_last <- figure3_data %>% 
   filter(`Age Band` == "[90-95)") %>% 
@@ -171,19 +181,27 @@ mean_U_last <- figure3_data %>%
   summarise_at("U", mean)
 
 #Plot
-figure3 <- ggplot(data = figure3_data, 
-                  aes(x = `Age Band` , y = U, 
-                      fill = `Sex/Gender`, color = `Sex/Gender`)) + 
-  geom_boxplot() + 
-  geom_hline(yintercept = 0, linetype="dashed", color = "black") + 
+figure3 <- ggplot(data = figure3_data) + 
+  geom_boxplot(aes(x = `Age Band` , y = U, 
+                   fill = `Sex/Gender`, color = `Sex/Gender`)) + 
+  geom_hline(yintercept = 0, linetype = "dashed", color = "black") + 
   theme_minimal() + 
   theme(panel.spacing = unit(1, "lines")) +
   facet_grid(. ~Scenario) + 
-  coord_flip()
+  coord_flip() + 
+  scale_colour_manual(name = "Sex/Gender",
+                      values = c("#039FBE", "#A2D5C6"),
+                      labels = levels(figure3_data$`Sex/Gender`)) +
+  scale_fill_manual(name = "Sex/Gender",
+                    values = c("#039FBE", "#A2D5C6"),
+                    labels = levels(figure3_data$`Sex/Gender`)) +
+  theme(text = element_text(size = 14)) + 
+  guides(fill = guide_legend(reverse = TRUE)) + 
+  guides(color = guide_legend(reverse = TRUE))
 
 #Saving figure
-ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
-       device = "jpeg", dpi = 300)
+ggsave(here("Manuscript", "figure3.pdf"), plot = figure3,
+       device = "pdf", dpi = 300)
 
 #---- eFigure 1 ----
 #(a)
@@ -207,14 +225,18 @@ figure_e1a <- ggplot(cp_surv_plot_data,
                      aes(age, prob, group = `Data Type`, color = `Data Type`)) + 
   geom_line(size = 1.25) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  scale_colour_manual(name = "Data Type",
+                      values = c("#A2D5C6", "#039FBE")) +
   labs(title = "", 
        y = "Conditional Survival Probability from age 50", 
        x = "Age") + 
   facet_grid(. ~Gender) + 
-  theme_minimal() 
+  theme_minimal() + 
+  ggtitle("Simulation Scenario A") +
+  theme(text = element_text(size = 14))
 
-ggsave(here("Manuscript", "figure_e1a.jpeg"), plot = figure_e1a,
-       device = "jpeg", dpi = 300)
+ggsave(here("Manuscript", "figure_e1a.pdf"), plot = figure_e1a,
+       device = "pdf", dpi = 300)
 
 #(b)
 HR_plot_data <- 
@@ -236,22 +258,28 @@ HR_plot_data$Scenario <- fct_relevel(HR_plot_data$Scenario,"Published",
                                      after = 0)
 
 figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_point(aes(color = Scenario, group = Scenario), size = 1.75) + 
+  geom_point(aes(color = Scenario, group = Scenario, shape = Scenario), 
+             size = 1.75) + 
   geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
             alpha = 0.6) + 
   scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
                      labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
                                 "[70-75)","[75-80)", "[80-85)", "[85-90)",
                                 "[90-95)")) + 
+  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
   #ylim(0, 1) +
   #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
+  scale_colour_manual(name = "Scenario",
+                      values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6",
+                                 "#039FBE", "#039FBE"), 
+                      labels = levels(HR_plot_data$Scenario)) + 
   labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
        color = "") + theme_minimal() + 
-  #theme(text = element_text(size = 40)) + 
+  theme(text = element_text(size = 14)) + 
   ggtitle("")
 
-ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
-       device = "jpeg", dpi = 300)
+ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
+       device = "pdf", dpi = 300)
         
 #---- eFigure 2 ----
 set.seed(20200226)
@@ -350,7 +378,7 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
   ggtitle("Mean Cognitive Trajectories") +
   facet_grid(. ~Scenario) +
   theme_minimal() +  
-  #theme(text = element_text(size = 28)) + 
+  theme(text = element_text(size = 14)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
   #guides(color = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = dem_cut) 
