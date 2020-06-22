@@ -28,9 +28,6 @@ results_C1 <- read_csv(here("Results", "Scenario_C",
 results_C2 <- read_csv(here("Results", "Scenario_C", 
                             "sim_C2_1000_20191126.csv")) %>% results_65_plus()
 
-#---- Load single runs ----
-
-
 #---- Calculate mean and sd of results ----
 mean_results_A <- results_A %>% colMeans()
 mean_results_B1 <- results_B1 %>% colMeans()
@@ -206,15 +203,19 @@ source(here("RScripts","scenario_C2_pars.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
 #Format data for plotting
-plot_data_A <- format_plot_data(sample_A, "A") 
-plot_data_B1 <- format_plot_data(sample_B1, "B1") 
-plot_data_B2 <- format_plot_data(sample_B2, "B2") 
-plot_data_C1 <- format_plot_data(sample_C1, "C1") 
-plot_data_C2 <- format_plot_data(sample_C2, "C2") 
+plot_data_A <- format_plot_data(sample_A, "No Selection") 
+plot_data_B1 <- format_plot_data(sample_B1, "HOM1") 
+plot_data_B2 <- format_plot_data(sample_B2, "HOM2") 
+plot_data_C1 <- format_plot_data(sample_C1, "HET1") 
+plot_data_C2 <- format_plot_data(sample_C2, "HET2") 
 
 figure3_data <- do.call("rbind", 
                         list(plot_data_A, plot_data_B1, plot_data_B2, 
                              plot_data_C1, plot_data_C2))
+
+figure3_data$Scenario <- 
+  factor(figure3_data$Scenario, levels = 
+           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Manuscript calculation (Results section)
@@ -232,12 +233,8 @@ figure3 <- ggplot(data = figure3_data) +
   theme(panel.spacing = unit(1, "lines")) +
   facet_grid(. ~Scenario) + 
   coord_flip() + 
-  scale_colour_manual(name = "Sex/Gender",
-                      values = c("#039FBE", "#A2D5C6"),
-                      labels = levels(figure3_data$`Sex/Gender`)) +
-  scale_fill_manual(name = "Sex/Gender",
-                    values = c("#039FBE", "#A2D5C6"),
-                    labels = levels(figure3_data$`Sex/Gender`)) +
+  scale_fill_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
   theme(text = element_text(size = 14)) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
   guides(color = guide_legend(reverse = TRUE))
