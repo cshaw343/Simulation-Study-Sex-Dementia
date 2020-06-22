@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse", "latex2exp", "magrittr")
+p_load("here", "tidyverse", "latex2exp", "magrittr", "harrypotter")
 #---- Source scripts ----
 source(here("RScripts", "scenario_A_pars.R")) #Need for parameters
 source(here("RScripts", "var_names.R"))
@@ -106,43 +106,86 @@ figure2_data_ACT_error$Scenario <-
   relevel(figure2_data_ACT_error$Scenario, "ACT")
 
 # #Plot with error bars for all scenarios
-# figure2_option1 <- ggplot(figure2_data_all_error, 
-#                           aes(x = Ages, y = IRR, colour = Scenario)) + 
-#   geom_errorbar(aes(ymin = LB, ymax = UB), width = 1, 
+# figure2_option1 <- ggplot(figure2_data_all_error,
+#                           aes(x = Ages, y = IRR, colour = Scenario)) +
+#   geom_errorbar(aes(ymin = LB, ymax = UB), width = 1,
 #                 position = position_dodge(width = 0.5)) +
-#   geom_line(position = position_dodge(width = 0.5)) + 
-#   geom_point(position = position_dodge(width = 0.5)) + 
+#   geom_line(position = position_dodge(width = 0.5)) +
+#   geom_point(position = position_dodge(width = 0.5)) +
 #   geom_hline(yintercept = 1, linetype = "solid", color = "black") +
-#   theme_minimal() + 
-#   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
-#                      labels = c("[80-85)", "[85-90)","[90-95)")) + 
+#   theme_minimal() +
+#   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90),
+#                      labels = c("[80-85)", "[85-90)","[90-95)")) +
 #   ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$"))
 
-#Plot with error bars only for the ACT study
-figure2_option2 <- ggplot(figure2_data_ACT_error, 
-                          aes(x = Ages, y = IRR, colour = Scenario)) + 
-  geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.25, size = 1) +
-  geom_line(aes(color = Scenario), size = 1) + 
-  geom_point(aes(color = Scenario, shape = Scenario), size = 3) + 
-  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
-  scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
-  labels = c("[80-85)", "[85-90)","[90-95)")) + 
-  scale_colour_manual(name = "Scenario",
-    values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6","#039FBE", "#039FBE"), 
-    labels = levels(figure2_data_ACT_error$Scenario)) + 
-  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
-  # scale_linetype_manual(name = "Scenario", 
-  #                       values = c(rep("solid", 3), rep("twodash", 3)), 
-  #                       labels = levels(figure2_data_ACT_error$Scenario)) + 
-  ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) +
-  theme_minimal() + 
-  theme(text = element_text(size = 14))
+# #Plot with error bars only for the ACT study
+# figure2_option2 <- ggplot(figure2_data_ACT_error, 
+#                           aes(x = Ages, y = IRR, colour = Scenario)) + 
+#   geom_errorbar(aes(ymin = LB, ymax = UB), width = 0.25, size = 1) +
+#   geom_line(aes(color = Scenario), size = 1) + 
+#   geom_point(aes(color = Scenario, shape = Scenario), size = 3) + 
+#   geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+#   scale_x_continuous(name = "Age bands", breaks = c(80, 85, 90), 
+#   labels = c("[80-85)", "[85-90)","[90-95)")) + 
+#   scale_colour_manual(name = "Scenario",
+#     values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6","#039FBE", "#039FBE"), 
+#     labels = levels(figure2_data_ACT_error$Scenario)) + 
+#   scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+#   # scale_linetype_manual(name = "Scenario", 
+#   #                       values = c(rep("solid", 3), rep("twodash", 3)), 
+#   #                       labels = levels(figure2_data_ACT_error$Scenario)) + 
+#   ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) +
+#   theme_minimal() + 
+#   theme(text = element_text(size = 14))
+
+#edit data for this plot
+#Age data
+figure2_data_all_error$Ages <- as.character(figure2_data_all_error$Ages)
+figure2_data_all_error[which(figure2_data_all_error$Ages == "80"), "Ages"] <- 
+  "[80, 85)"
+figure2_data_all_error[which(figure2_data_all_error$Ages == "85"), "Ages"] <- 
+  "[85, 90)"
+figure2_data_all_error[which(figure2_data_all_error$Ages == "90"), "Ages"] <- 
+  "[90, 95)"
+#Scenario data
+figure2_data_all_error$Scenario <- as.character(figure2_data_all_error$Scenario)
+figure2_data_all_error[which(figure2_data_all_error$Scenario == "A"), 
+                       "Scenario"] <- "No Selection"
+figure2_data_all_error[which(figure2_data_all_error$Scenario == "B1"), 
+                       "Scenario"] <- "HOM1"
+figure2_data_all_error[which(figure2_data_all_error$Scenario == "B2"), 
+                       "Scenario"] <- "HOM2"
+figure2_data_all_error[which(figure2_data_all_error$Scenario == "C1"), 
+                       "Scenario"] <- "HET1"
+figure2_data_all_error[which(figure2_data_all_error$Scenario == "C2"), 
+                       "Scenario"] <- "HET2"
+figure2_data_all_error$Scenario <- as.factor(figure2_data_all_error$Scenario)
+figure2_data_all_error$Scenario <- 
+  factor(figure2_data_all_error$Scenario, levels = 
+          c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+
+
+#plot
+figure2_option3 <- ggplot(figure2_data_all_error, 
+                          aes(x = Ages, y = IRR, fill = Scenario)) +
+  stat_summary(fun.y = identity, geom = "bar", 
+               position = position_dodge(width = 0.9), size = 3) +
+  geom_errorbar(aes(ymin = LB, ymax = UB),
+                width = .2, position = position_dodge(0.9)) + 
+  scale_fill_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+  theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 14)) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black")
+
 
 #Saving figures
 # ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
 #        device = "jpeg", dpi = 300, width = 6.5, height = 5.5, units = "in")
 
-ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
+# ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
+#        device = "pdf", dpi = 300)
+
+ggsave(here("Manuscript", "figure2_option3.pdf"), plot = figure2_option3,
        device = "pdf", dpi = 300)
 
 #---- Figure 3 ----
