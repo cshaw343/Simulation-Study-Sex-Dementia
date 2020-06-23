@@ -247,32 +247,46 @@ ggsave(here("Manuscript", "figure3.pdf"), plot = figure3,
 #(a)
 #Survival plot data
 female_cp_survival <- 
-  c(mean_results_A[variable_names$cp_alive_females_varnames[1:num_tests]])
+  cbind(mean_results_A[variable_names$cp_alive_females_varnames[1:num_tests]], 
+        mean_results_B1[variable_names$cp_alive_females_varnames[1:num_tests]], 
+        mean_results_B2[variable_names$cp_alive_females_varnames[1:num_tests]], 
+        mean_results_C1[variable_names$cp_alive_females_varnames[1:num_tests]], 
+        mean_results_C2[variable_names$cp_alive_females_varnames[1:num_tests]],
+        female_life_US$CP[-1]) %>% as.data.frame() %>%
+  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+               ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
+  pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
+  mutate("Sex/Gender" = "Women")
+  
 male_cp_survival <- 
-  c(mean_results_A[variable_names$cp_alive_males_varnames[1:num_tests]])
+  cbind(mean_results_A[variable_names$cp_alive_males_varnames[1:num_tests]], 
+        mean_results_B1[variable_names$cp_alive_males_varnames[1:num_tests]], 
+        mean_results_B2[variable_names$cp_alive_males_varnames[1:num_tests]], 
+        mean_results_C1[variable_names$cp_alive_males_varnames[1:num_tests]], 
+        mean_results_C2[variable_names$cp_alive_males_varnames[1:num_tests]],
+        male_life_US$CP[-1]) %>% as.data.frame() %>%
+  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+               ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
+  pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
+  mutate("Sex/Gender" = "Men")
 
-cp_surv_plot_data <- tibble("age" = seq(55, 95, by = 5), 
-                            "Published_Women_survival" = female_life_US$CP[-1], 
-                            "Published_Men_survival" = male_life_US$CP[-1], 
-                            "Simulated_Women_survival" = female_cp_survival, 
-                            "Simulated_Men_survival" = male_cp_survival) %>% 
-  pivot_longer(cols = -age, 
-               names_to = c("Data Type", "Gender"),
-               names_pattern = "(.*)_(.*)?_survival",
-               values_to = "prob")
+cp_surv_plot_data <- rbind(female_cp_survival, male_cp_survival) %>% 
+  mutate_at("Scenario", as.factor)
+cp_surv_plot_data$Scenario <- 
+  factor(cp_surv_plot_data$Scenario, levels = 
+           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+
 
 figure_e1a <- ggplot(cp_surv_plot_data, 
-                     aes(age, prob, group = `Data Type`, color = `Data Type`)) + 
+                     aes(Age, prob, group = Scenario, color = Scenario)) + 
   geom_line(size = 1.25) + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
-  scale_colour_manual(name = "Data Type",
-                      values = c("#A2D5C6", "#039FBE")) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
   labs(title = "", 
        y = "Conditional Survival Probability from age 50", 
        x = "Age") + 
-  facet_grid(. ~Gender) + 
+  facet_grid(. ~`Sex/Gender`) + 
   theme_minimal() + 
-  ggtitle("Simulation Scenario A") +
   theme(text = element_text(size = 14))
 
 ggsave(here("Manuscript", "figure_e1a.pdf"), plot = figure_e1a,
@@ -287,36 +301,31 @@ HR_plot_data <-
         exp(mean_results_C1[na.omit(variable_names$mortality_logHR_varnames)]), 
         exp(mean_results_C2[na.omit(
           variable_names$mortality_logHR_varnames)])) %>% 
-  set_colnames(c("Published", "A", "B1", "B2", "C1", "C2")) %>% 
-  as.data.frame() %>%
+  set_colnames(c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2")
+               ) %>% as.data.frame() %>%
   mutate("Age" = seq(50, 90, by = 5)) %>%
   pivot_longer(cols = -Age, 
                names_to = "Scenario", 
                values_to = "HR") %>% 
   mutate_at("Scenario", as.factor)
-HR_plot_data$Scenario <- fct_relevel(HR_plot_data$Scenario,"Published", 
-                                     after = 0)
+HR_plot_data$Scenario <- 
+  factor(HR_plot_data$Scenario, levels = 
+           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
   geom_point(aes(color = Scenario, group = Scenario, shape = Scenario), 
-             size = 1.75) + 
+             size = 3) + 
   geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
             alpha = 0.6) + 
   scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
                      labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
                                 "[70-75)","[75-80)", "[80-85)", "[85-90)",
                                 "[90-95)")) + 
-  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
-  #ylim(0, 1) +
-  #scale_y_continuous(breaks = seq(0, 1, 0.05)) +
-  scale_colour_manual(name = "Scenario",
-                      values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6",
-                                 "#039FBE", "#039FBE"), 
-                      labels = levels(HR_plot_data$Scenario)) + 
+  #scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
   labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
        color = "") + theme_minimal() + 
-  theme(text = element_text(size = 14)) + 
-  ggtitle("")
+  theme(text = element_text(size = 14)) 
 
 ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
        device = "pdf", dpi = 300)
@@ -345,35 +354,35 @@ Ci_data <-
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "A") %>% 
+                 "Scenario" = "No Selection") %>% 
           dplyr::select(-one_of("female")), 
         sample_B1 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "B1") %>% 
+                 "Scenario" = "HOM1") %>% 
           dplyr::select(-one_of("female")), 
         sample_B2 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "B2") %>% 
+                 "Scenario" = "HOM2") %>% 
           dplyr::select(-one_of("female")), 
         sample_C1 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "C1") %>% 
+                 "Scenario" = "HET1") %>% 
           dplyr::select(-one_of("female")), 
         sample_C2 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "C2") %>% 
+                 "Scenario" = "HET2") %>% 
           dplyr::select(-one_of("female")))
 
 #Getting mean Ci by sex
@@ -399,7 +408,13 @@ samp_Ci <- Ci_plot_data[, c("id", seq(50, 95, by = 5), "Scenario")] %>%
   gather(as.character(seq(50, 95, by = 5)), key = "Age", value = "Cij") %>% 
   mutate_at("Age", as.numeric) %>% 
   rbind(., Ci_plot_data[, c("id", "Scenario", "Age", "Cij")]) %>% 
-  set_colnames(c("variable", "Scenario", "Age", "value")) 
+  set_colnames(c("variable", "Scenario", "Age", "value"))
+
+samp_Ci$Scenario <- 
+  factor(samp_Ci$Scenario, levels = 
+           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+
+
 
 #Creating a plot with random sample in the background
 figure_e2 <- ggplot(samp_Ci, aes(Age, value)) + 
@@ -415,13 +430,11 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
        x = "Age", 
        color = "Sex/Gender") + 
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
-  ggtitle("Mean Cognitive Trajectories") +
   facet_grid(. ~Scenario) +
   theme_minimal() +  
   theme(text = element_text(size = 14)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
-  scale_colour_manual(name = "Sex/Gender",
-                      values = c("#039FBE", "#A2D5C6")) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) + 
   #guides(color = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = dem_cut) 
 
@@ -432,30 +445,33 @@ ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
 male_inc_data <- 
   data.frame("Ages" = seq(50, 90, by = 5), 
              "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
-             "A" = 1000*
+             "No Selection" = 1000*
                mean_results_A[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_A[na.omit(variable_names$PY_males_varnames)], 
-             "B1" = 1000*
+             "HOM1" = 1000*
                mean_results_B1[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_B1[na.omit(variable_names$PY_males_varnames)], 
-             "B2" = 1000*
+             "HOM2" = 1000*
                mean_results_B2[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_B2[na.omit(variable_names$PY_males_varnames)], 
-             "C1" = 1000*
+             "HET1" = 1000*
                mean_results_C1[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_C1[na.omit(variable_names$PY_males_varnames)], 
-             "C2" = 1000*
+             "HET2" = 1000*
                mean_results_C2[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_C2[na.omit(variable_names$PY_males_varnames)]) %>% 
-  pivot_longer(cols = c("ACT", "A", "B1", "B2", "C1", "C2"), 
+  pivot_longer(cols = c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"), 
                names_to = "Scenario", values_to = "rates") %>% 
-  filter(Ages >= 65) %>% mutate_at("Scenario", as.factor)
-male_inc_data$Scenario <- relevel(male_inc_data$Scenario, "ACT")
+  filter(Ages >= 65) %>% mutate_at("Scenario", as.factor)  
+
+male_inc_data$Scenario <- 
+  factor(male_inc_data$Scenario, levels = 
+           c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Make the plot
