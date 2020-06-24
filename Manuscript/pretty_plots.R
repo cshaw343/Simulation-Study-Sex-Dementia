@@ -474,28 +474,26 @@ male_inc_data <-
 male_inc_data$Scenario <- 
   factor(male_inc_data$Scenario, levels = 
            c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"))
+levels(male_inc_data$Scenario)[which(levels(male_inc_data$Scenario) == 
+                                       "No.Selection")] <- "No Selection"
 
 
 #Make the plot
 figure_e3 <- ggplot(male_inc_data, 
                     aes(x = Ages, y = rates, colour = Scenario)) + 
-  geom_line() + geom_point(aes(shape = Scenario)) + theme_minimal() + 
+  geom_line(size = 1.25) + geom_point(aes(color = Scenario), size = 3) + 
+  theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = seq(65, 90, by = 5), 
                      labels = c("[65-70)", "[70-75)","[75-80)", 
                                 "[80-85)", "[85-90)","[90-95)")) + 
-  ylab(TeX("Dementia incidence rates per 1000 PY")) + 
-  ggtitle("Dementia incidence rates for men") + 
-  scale_colour_manual(name = "Scenario",
-                      values = c("darkgrey", "black", "#A2D5C6", "#A2D5C6",
-                                 "#039FBE", "#039FBE"), 
-                      labels = levels(male_inc_data$Scenario)) + 
-  scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  ylab(TeX("Dementia incidence rate per 1000 PY")) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +  
   theme(text = element_text(size = 14)) 
 
 ggsave(here("Manuscript", "figure_e3.jpeg"), plot = figure_e3,
        device = "jpeg", dpi = 300)
 
-#---- eTable 4 ----
+#---- eTable 3 ----
 exp(mean_results_A[variable_names$logIRR_varnames])
 exp(mean_results_A[variable_names$logIRR_95CI_Lower_varnames])
 exp(mean_results_A[variable_names$logIRR_95CI_Upper_varnames])
