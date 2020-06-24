@@ -321,10 +321,9 @@ figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) +
 
 ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
        device = "pdf", dpi = 300)
-        
-#---- eFigure 2----
 
-#---- eFigure 3 ----
+
+#---- eFigure 2 ----
 set.seed(20200226)
 #Create one sample of size 100,000 for each simulation scenario
 sample_A <- data_gen(num_obs = 100000)
@@ -431,7 +430,7 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
 ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
        device = "jpeg", dpi = 300)
 
-#---- eFigure 4 ----
+#---- eFigure 3 ----
 male_inc_data <- 
   data.frame("Ages" = seq(50, 90, by = 5), 
              "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
