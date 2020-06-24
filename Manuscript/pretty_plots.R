@@ -2,7 +2,7 @@
 if (!require("pacman")) 
   install.packages("pacman", repos='http://cran.us.r-project.org')
 
-p_load("here", "tidyverse", "latex2exp", "magrittr", "harrypotter")
+p_load("here", "tidyverse", "latex2exp", "magrittr", "harrypotter", "grid")
 #---- Source scripts ----
 source(here("RScripts", "scenario_A_pars.R")) #Need for parameters
 source(here("RScripts", "var_names.R"))
@@ -235,7 +235,8 @@ figure3 <- ggplot(data = figure3_data) +
   coord_flip() + 
   scale_fill_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
   scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
-  theme(text = element_text(size = 14)) + 
+  theme(text = element_text(size = 14), 
+        panel.spacing = unit(1.5, "lines")) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
   guides(color = guide_legend(reverse = TRUE))
 
@@ -321,7 +322,9 @@ figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) +
 ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
        device = "pdf", dpi = 300)
         
-#---- eFigure 2 ----
+#---- eFigure 2----
+
+#---- eFigure 3 ----
 set.seed(20200226)
 #Create one sample of size 100,000 for each simulation scenario
 sample_A <- data_gen(num_obs = 100000)
@@ -428,7 +431,7 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
 ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
        device = "jpeg", dpi = 300)
 
-#---- eFigure 3 ----
+#---- eFigure 4 ----
 male_inc_data <- 
   data.frame("Ages" = seq(50, 90, by = 5), 
              "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
