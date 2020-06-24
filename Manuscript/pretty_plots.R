@@ -314,10 +314,10 @@ HR_plot_data$Scenario <-
            c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_point(aes(color = Scenario, group = Scenario, shape = Scenario), 
-             size = 3) + 
+  geom_point(aes(color = Scenario, group = Scenario), 
+             size = 3, alpha = rep(c(1, rep(0.3, 5)), 9)) + 
   geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
-            alpha = 0.6) + 
+            alpha = rep(c(1, rep(0.3, 5)), each = 9)) + 
   scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
                      labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
                                 "[70-75)","[75-80)", "[80-85)", "[85-90)",
