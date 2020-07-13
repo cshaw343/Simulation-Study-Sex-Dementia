@@ -174,6 +174,17 @@ figure2_option3 <- ggplot(figure2_data_all_error,
   theme(text = element_text(size = 14)) + 
   geom_hline(yintercept = 1, linetype = "dashed", color = "black")
 
+#plot for MELODEM presentation
+ACT_only <- ggplot(figure2_data_all_error %>% filter(Scenario == "ACT"), 
+                          aes(x = Ages, y = IRR, fill = Scenario)) +
+  stat_summary(fun.y = identity, geom = "bar", width = 0.5) +
+  geom_errorbar(aes(ymin = LB, ymax = UB),
+                width = .2, position = position_dodge(0.9)) + 
+  scale_fill_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+  theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 14)) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black")
+
 
 #Saving figures
 # ggsave(here("Manuscript", "figure2_option1.jpeg"), plot = figure2_option1,
@@ -184,6 +195,7 @@ figure2_option3 <- ggplot(figure2_data_all_error,
 
 ggsave(here("Manuscript", "figure2_option3.pdf"), plot = figure2_option3,
        device = "pdf", dpi = 300)
+
 
 #---- Figure 3 ----
 set.seed(20200226)
