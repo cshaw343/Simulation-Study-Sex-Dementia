@@ -164,26 +164,28 @@ figure2_data_all_error$Scenario <-
 
 #plot
 figure2_option3 <- ggplot(figure2_data_all_error, 
-                          aes(x = Ages, y = IRR, fill = Scenario)) +
-  stat_summary(fun.y = identity, geom = "bar", 
-               position = position_dodge(width = 0.9), size = 3) +
-  geom_errorbar(aes(ymin = LB, ymax = UB),
-                width = .2, position = position_dodge(0.9)) + 
-  scale_fill_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+                          aes(x = Ages, y = IRR, color = Scenario)) +
+  geom_point(size = 4, shape = "square", position = position_dodge(0.70)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .2, 
+                position = position_dodge(0.70)) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
   theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
   theme(text = element_text(size = 14)) + 
-  geom_hline(yintercept = 1, linetype = "dashed", color = "black")
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "bottom", legend.direction = "horizontal")
+  
 
 #plot for MELODEM presentation
 ACT_only <- ggplot(figure2_data_all_error %>% filter(Scenario == "ACT"), 
-                          aes(x = Ages, y = IRR, fill = Scenario)) +
-  stat_summary(fun.y = identity, geom = "bar", width = 0.5) +
-  geom_errorbar(aes(ymin = LB, ymax = UB),
-                width = .2, position = position_dodge(0.9)) + 
-  scale_fill_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+                          aes(x = Ages, y = IRR, color = Scenario)) +
+  geom_point(size = 4, shape = "square") + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .1) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
   theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
   theme(text = element_text(size = 14)) + 
-  geom_hline(yintercept = 1, linetype = "dashed", color = "black")
+  #element_text(margin = ) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "none")
 
 
 #Saving figures
@@ -454,6 +456,31 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
 
 ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
        device = "jpeg", dpi = 300)
+
+#MELODEM plot
+ggplot(samp_Ci %>% filter(Scenario == "HET2"), aes(Age, value)) + 
+  geom_line(data = 
+              subset(samp_Ci, variable != "Women" & variable != "Men") %>% 
+              filter(Scenario == "HET2"), 
+            aes(group = variable), color = "gray") +
+  geom_line(data = subset(samp_Ci, variable == "Women") %>% 
+              filter(Scenario == "HET2"), 
+            aes(color = variable), size = 1.25) + 
+  geom_line(data = subset(samp_Ci, variable == "Men") %>% 
+              filter(Scenario == "HET2"), 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  geom_hline(yintercept = dem_cut, size = 1.25) + 
+  labs(y = "Cognitive Function", 
+       x = "Age", 
+       color = "Sex/Gender") + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  theme_minimal() +  
+  theme(text = element_text(size = 14)) + 
+  coord_cartesian(ylim = c(-10, 10)) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) + 
+  #guides(color = guide_legend(reverse = TRUE)) +
+  geom_hline(yintercept = dem_cut) 
+
 
 #---- eFigure 3 ----
 male_inc_data <- 
