@@ -164,18 +164,20 @@ figure2_data_all_error$Scenario <-
 
 #plot
 figure2_option3 <- ggplot(figure2_data_all_error, 
-                          aes(x = Ages, y = IRR, color = Scenario)) +
-  geom_point(size = 4, shape = "square", position = position_dodge(0.70)) + 
+                          aes(x = Ages, y = IRR, color = Scenario, 
+                              shape = Scenario)) +
+  geom_point(size = 4, position = position_dodge(0.70)) + 
   geom_errorbar(aes(ymin = LB, ymax = UB), width = .2, 
                 position = position_dodge(0.70)) +
-  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
   theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
   theme(text = element_text(size = 14)) + 
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
-  theme(legend.position = "bottom", legend.direction = "horizontal")
+  theme(legend.position = "bottom", legend.direction = "horizontal")  
   
 
-#plot for MELODEM presentation
+#---- MELODEM presentation ----
 ACT_only <- ggplot(figure2_data_all_error %>% filter(Scenario == "ACT"), 
                           aes(x = Ages, y = IRR, color = Scenario)) +
   geom_point(size = 4, shape = "square") + 
@@ -186,6 +188,21 @@ ACT_only <- ggplot(figure2_data_all_error %>% filter(Scenario == "ACT"),
   #element_text(margin = ) +
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
   theme(legend.position = "none")
+
+ggplot(figure2_data_all_error, 
+       aes(x = Ages, y = IRR, color = Scenario, 
+           shape = Scenario)) +
+  geom_point(size = 4, position = position_dodge(0.70), 
+             alpha = rep(c(1, rep(0.3, 3), rep(1, 2)), 3)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .2, 
+                position = position_dodge(0.70), 
+                alpha = rep(c(1, rep(0.3, 3), rep(1, 2)), 3)) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
+  theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 14)) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "bottom", legend.direction = "horizontal")  
 
 
 #Saving figures
