@@ -536,18 +536,22 @@ levels(male_inc_data$Scenario)[which(levels(male_inc_data$Scenario) ==
 
 #Make the plot
 figure_e3 <- ggplot(male_inc_data, 
-                    aes(x = Ages, y = rates, colour = Scenario)) + 
-  geom_line(size = 1.25) + geom_point(aes(color = Scenario), size = 3) + 
+                    aes(x = Ages, y = rates, colour = Scenario, 
+                        shape = Scenario)) + 
+  geom_line(size = 1.25, lty = rep(c("dashed", rep("solid", 5)), each = 6)) + 
+  geom_point(aes(color = Scenario, shape = Scenario), size = 4) + 
   theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = seq(65, 90, by = 5), 
                      labels = c("[65-70)", "[70-75)","[75-80)", 
                                 "[80-85)", "[85-90)","[90-95)")) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
   ylab(TeX("Dementia incidence rate per 1000 PY")) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +  
   theme(text = element_text(size = 14)) 
 
 ggsave(here("Manuscript", "figure_e3.jpeg"), plot = figure_e3,
        device = "jpeg", dpi = 300)
+
 
 #---- eTable 3 ----
 exp(mean_results_A[variable_names$logIRR_varnames])
