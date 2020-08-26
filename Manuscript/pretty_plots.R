@@ -166,13 +166,13 @@ figure2_data_all_error$Scenario <-
 figure2_option3 <- ggplot(figure2_data_all_error, 
                           aes(x = Ages, y = IRR, color = Scenario, 
                               shape = Scenario)) +
-  geom_point(size = 4, position = position_dodge(0.70)) + 
-  geom_errorbar(aes(ymin = LB, ymax = UB), width = .2, 
+  geom_point(size = 5, position = position_dodge(0.70)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .4, 
                 position = position_dodge(0.70)) +
   scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
   scale_shape_manual(values = c("circle", rep("square", 5))) +
-  theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
-  theme(text = element_text(size = 14)) + 
+  theme_minimal() + ylab(TeX("$\\bar{\\widehat{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 18)) + 
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
   theme(legend.position = "bottom", legend.direction = "horizontal")  
   
@@ -212,8 +212,8 @@ ggplot(figure2_data_all_error,
 # ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
 #        device = "pdf", dpi = 300)
 
-ggsave(here("Manuscript", "figure2_option3.pdf"), plot = figure2_option3,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure2_option3.jpeg"), plot = figure2_option3,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- Figure 3 ----
