@@ -6,11 +6,9 @@ format_plot_data <- function(sample, scenario){
     mutate("Scenario" = scenario) %>%
     dplyr::select(-one_of("female")) %>% 
     dplyr::select("U", "death0", everything()) %>% 
-    set_colnames(c("U", "Baseline", "[50-55)", "[55-60)","[60-65)", 
-                   "[65-70)", "[70-75)","[75-80)", 
-                   "[80-85)", "[85-90)","[90-95)", 
+    set_colnames(c("U", "50", seq(55, 95, by = 5), 
                    "Sex/Gender", "Scenario")) %>% 
-    gather(-contains(c("U", "Sex/Gender", "Scenario")), key = "Age Band", 
+    gather(-contains(c("U", "Sex/Gender", "Scenario")), key = "Age", 
            value = "death_indicator") %>%
     filter(death_indicator == 0) %>% 
     mutate_at("Sex/Gender", as.factor) %>% 
