@@ -12,10 +12,10 @@ format_plot_data <- function(sample, scenario){
            value = "death_indicator") %>%
     filter(death_indicator == 0) %>% 
     mutate_at("Sex/Gender", as.factor) %>% 
-    mutate_at("Age Band", as.factor)
-  plot_data$`Age Band` <- relevel(plot_data$`Age Band`, "Baseline")
-  plot_data$`Age Band` <- fct_relevel(plot_data$`Age Band`, 
-                                      rev(levels(plot_data$`Age Band`)))
+    mutate_at("Age", as.factor)
+  plot_data$`Age` <- relevel(plot_data$`Age`, "50")
+  plot_data$`Age` <- fct_relevel(plot_data$`Age`, 
+                                      rev(levels(plot_data$`Age`)))
   
   return(plot_data)
 }
