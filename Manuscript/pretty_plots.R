@@ -366,6 +366,7 @@ ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
 #---- eFigure 2 ----
 set.seed(20200226)
 #Create one sample of size 100,000 for each simulation scenario
+source(here("RScripts","scenario_A_pars.R"))
 sample_A <- data_gen(num_obs = 100000)
 
 source(here("RScripts","scenario_B1_pars.R"))
@@ -448,7 +449,6 @@ samp_Ci$Scenario <-
            c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
-
 #Creating a plot with random sample in the background
 figure_e2 <- ggplot(samp_Ci, aes(Age, value)) + 
   geom_line(data = 
@@ -465,14 +465,16 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   facet_grid(. ~Scenario) +
   theme_minimal() +  
-  theme(text = element_text(size = 14)) + 
-  coord_cartesian(ylim = c(-10, 10)) + 
+  theme(text = element_text(size = 22)) + 
+  coord_cartesian(ylim = c(-10, 6)) + 
+  scale_y_continuous(breaks = seq(-10, 6, by = 2)) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) + 
   #guides(color = guide_legend(reverse = TRUE)) +
-  geom_hline(yintercept = dem_cut) 
+  geom_hline(yintercept = dem_cut) + 
+  theme(legend.position = c(0.95, 0.80))
 
 ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
-       device = "jpeg", dpi = 300)
+       device = "jpeg", dpi = 300, width = 20, height = 7.2, units = "in")
 
 #MELODEM plot
 ggplot(samp_Ci %>% filter(Scenario == "HET2"), aes(Age, value)) + 
