@@ -251,13 +251,13 @@ figure3_data$Scenario <-
 
 #Manuscript calculation (Results section)
 mean_U_last <- figure3_data %>% 
-  filter(`Age Band` == "[90-95)") %>% 
+  filter(`Age` == "95") %>% 
   group_by(Scenario, `Sex/Gender`) %>% 
   summarise_at("U", mean)
 
 #Plot
 figure3 <- ggplot(data = figure3_data) + 
-  geom_boxplot(aes(x = `Age Band` , y = U, 
+  geom_boxplot(aes(x = `Age` , y = U, 
                    fill = `Sex/Gender`, color = `Sex/Gender`)) + 
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") + 
   theme_minimal() + 
@@ -266,14 +266,14 @@ figure3 <- ggplot(data = figure3_data) +
   coord_flip() + 
   scale_fill_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
   scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
-  theme(text = element_text(size = 14), 
+  theme(text = element_text(size = 18), 
         panel.spacing = unit(1.5, "lines")) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
   guides(color = guide_legend(reverse = TRUE))
 
 #Saving figure
-ggsave(here("Manuscript", "figure3.pdf"), plot = figure3,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
+       device = "pdf", dpi = 300, height = 7.25, width = 13, units = "in")
 
 #---- eFigure 1 ----
 #(a)
@@ -304,6 +304,15 @@ male_cp_survival <-
 
 cp_surv_plot_data <- rbind(female_cp_survival, male_cp_survival) %>% 
   mutate_at("Scenario", as.factor)
+
+surv_at_50 <- 
+  data.frame("Age" = rep(50, 12), 
+             "Scenario" = rep(c("Lifetable", "No Selection", "HOM1", "HOM2", 
+                                "HET1", "HET2"), 2),  
+             "prob" = 1) %>% 
+  mutate("Sex/Gender" = rep(c("Women", "Men"), each = 6))
+
+cp_surv_plot_data <- rbind(surv_at_50, cp_surv_plot_data)
 cp_surv_plot_data$Scenario <- 
   factor(cp_surv_plot_data$Scenario, levels = 
            c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
@@ -319,10 +328,10 @@ figure_e1a <- ggplot(cp_surv_plot_data,
        x = "Age") + 
   facet_grid(. ~`Sex/Gender`) + 
   theme_minimal() + 
-  theme(text = element_text(size = 14))
+  theme(text = element_text(size = 18))
 
-ggsave(here("Manuscript", "figure_e1a.pdf"), plot = figure_e1a,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure_e1a.jpeg"), plot = figure_e1a,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
 
 #(b)
 HR_plot_data <- 
@@ -344,23 +353,23 @@ HR_plot_data$Scenario <-
   factor(HR_plot_data$Scenario, levels = 
            c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
-figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_point(aes(color = Scenario, group = Scenario), 
-             size = 3, alpha = rep(c(1, rep(0.3, 5)), 9)) + 
+figure_e1b <- ggplot(HR_plot_data, aes(Age, HR, colour = Scenario, 
+                                       shape = Scenario)) + 
+  geom_point(aes(color = Scenario, shape = Scenario), 
+             size = 4, alpha = rep(c(1, rep(0.45, 5)), 9)) + 
   geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
             alpha = rep(c(1, rep(0.3, 5)), each = 9)) + 
   scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
                      labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
                                 "[70-75)","[75-80)", "[80-85)", "[85-90)",
                                 "[90-95)")) + 
-  #scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
-  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
-       color = "") + theme_minimal() + 
-  theme(text = element_text(size = 14)) 
+  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age") + theme_minimal() + 
+  theme(text = element_text(size = 18)) 
 
-ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- eFigure 2 ----
