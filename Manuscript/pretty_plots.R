@@ -147,7 +147,7 @@ figure2_data_all_error[which(figure2_data_all_error$Ages == "90"), "Ages"] <-
 #Scenario data
 figure2_data_all_error$Scenario <- as.character(figure2_data_all_error$Scenario)
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "A"), 
-                       "Scenario"] <- "No Selective Survival"
+                       "Scenario"] <- "No Selection"
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "B1"), 
                        "Scenario"] <- "HOM1"
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "B2"), 
@@ -159,20 +159,50 @@ figure2_data_all_error[which(figure2_data_all_error$Scenario == "C2"),
 figure2_data_all_error$Scenario <- as.factor(figure2_data_all_error$Scenario)
 figure2_data_all_error$Scenario <- 
   factor(figure2_data_all_error$Scenario, levels = 
-          c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
+          c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #plot
 figure2_option3 <- ggplot(figure2_data_all_error, 
-                          aes(x = Ages, y = IRR, fill = Scenario)) +
-  stat_summary(fun.y = identity, geom = "bar", 
-               position = position_dodge(width = 0.9), size = 3) +
-  geom_errorbar(aes(ymin = LB, ymax = UB),
-                width = .2, position = position_dodge(0.9)) + 
-  scale_fill_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
+                          aes(x = Ages, y = IRR, color = Scenario, 
+                              shape = Scenario)) +
+  geom_point(size = 5, position = position_dodge(0.70)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .4, 
+                position = position_dodge(0.70)) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
+  theme_minimal() + ylab(TeX("$\\bar{\\widehat{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 18)) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "bottom", legend.direction = "horizontal")  
+  
+
+#---- MELODEM presentation ----
+ACT_only <- ggplot(figure2_data_all_error %>% filter(Scenario == "ACT"), 
+                          aes(x = Ages, y = IRR, color = Scenario)) +
+  geom_point(size = 4, shape = "square") + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .1) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +
   theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
   theme(text = element_text(size = 14)) + 
-  geom_hline(yintercept = 1, linetype = "dashed", color = "black")
+  #element_text(margin = ) +
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "none")
+
+ggplot(figure2_data_all_error, 
+       aes(x = Ages, y = IRR, color = Scenario, 
+           shape = Scenario)) +
+  geom_point(size = 4, position = position_dodge(0.70), 
+             alpha = rep(c(1, rep(0.3, 3), rep(1, 2)), 3)) + 
+  geom_errorbar(aes(ymin = LB, ymax = UB), width = .2, 
+                position = position_dodge(0.70), 
+                alpha = rep(c(1, rep(0.3, 3), rep(1, 2)), 3)) +
+  scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
+  theme_minimal() + ylab(TeX("$\\widehat{\\bar{IRR}}_{women:men}$")) + 
+  theme(text = element_text(size = 14)) + 
+  geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
+  theme(legend.position = "bottom", legend.direction = "horizontal")  
 
 
 #Saving figures
@@ -182,8 +212,9 @@ figure2_option3 <- ggplot(figure2_data_all_error,
 # ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
 #        device = "pdf", dpi = 300)
 
-ggsave(here("Manuscript", "figure2_option3.pdf"), plot = figure2_option3,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure2_option3.jpeg"), plot = figure2_option3,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
+
 
 #---- Figure 3 ----
 set.seed(20200226)
@@ -203,7 +234,7 @@ source(here("RScripts","scenario_C2_pars.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
 #Format data for plotting
-plot_data_A <- format_plot_data(sample_A, "No Selective Survival") 
+plot_data_A <- format_plot_data(sample_A, "No Selection") 
 plot_data_B1 <- format_plot_data(sample_B1, "HOM1") 
 plot_data_B2 <- format_plot_data(sample_B2, "HOM2") 
 plot_data_C1 <- format_plot_data(sample_C1, "HET1") 
@@ -215,18 +246,18 @@ figure3_data <- do.call("rbind",
 
 figure3_data$Scenario <- 
   factor(figure3_data$Scenario, levels = 
-           c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
+           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Manuscript calculation (Results section)
 mean_U_last <- figure3_data %>% 
-  filter(`Age Band` == "[90-95)") %>% 
+  filter(`Age` == "95") %>% 
   group_by(Scenario, `Sex/Gender`) %>% 
   summarise_at("U", mean)
 
 #Plot
 figure3 <- ggplot(data = figure3_data) + 
-  geom_boxplot(aes(x = `Age Band` , y = U, 
+  geom_boxplot(aes(x = `Age` , y = U, 
                    fill = `Sex/Gender`, color = `Sex/Gender`)) + 
   geom_hline(yintercept = 0, linetype = "dashed", color = "black") + 
   theme_minimal() + 
@@ -235,14 +266,14 @@ figure3 <- ggplot(data = figure3_data) +
   coord_flip() + 
   scale_fill_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
   scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) +
-  theme(text = element_text(size = 14), 
+  theme(text = element_text(size = 18), 
         panel.spacing = unit(1.5, "lines")) + 
   guides(fill = guide_legend(reverse = TRUE)) + 
   guides(color = guide_legend(reverse = TRUE))
 
 #Saving figure
-ggsave(here("Manuscript", "figure3.pdf"), plot = figure3,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
+       device = "pdf", dpi = 300, height = 7.25, width = 13, units = "in")
 
 #---- eFigure 1 ----
 #(a)
@@ -254,7 +285,7 @@ female_cp_survival <-
         mean_results_C1[variable_names$cp_alive_females_varnames[1:num_tests]], 
         mean_results_C2[variable_names$cp_alive_females_varnames[1:num_tests]],
         female_life_US$CP[-1]) %>% as.data.frame() %>%
-  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
                ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
   pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
   mutate("Sex/Gender" = "Women")
@@ -266,16 +297,25 @@ male_cp_survival <-
         mean_results_C1[variable_names$cp_alive_males_varnames[1:num_tests]], 
         mean_results_C2[variable_names$cp_alive_males_varnames[1:num_tests]],
         male_life_US$CP[-1]) %>% as.data.frame() %>%
-  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
                ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
   pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
   mutate("Sex/Gender" = "Men")
 
 cp_surv_plot_data <- rbind(female_cp_survival, male_cp_survival) %>% 
   mutate_at("Scenario", as.factor)
+
+surv_at_50 <- 
+  data.frame("Age" = rep(50, 12), 
+             "Scenario" = rep(c("Lifetable", "No Selection", "HOM1", "HOM2", 
+                                "HET1", "HET2"), 2),  
+             "prob" = 1) %>% 
+  mutate("Sex/Gender" = rep(c("Women", "Men"), each = 6))
+
+cp_surv_plot_data <- rbind(surv_at_50, cp_surv_plot_data)
 cp_surv_plot_data$Scenario <- 
   factor(cp_surv_plot_data$Scenario, levels = 
-           c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
+           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 figure_e1a <- ggplot(cp_surv_plot_data, 
@@ -288,10 +328,10 @@ figure_e1a <- ggplot(cp_surv_plot_data,
        x = "Age") + 
   facet_grid(. ~`Sex/Gender`) + 
   theme_minimal() + 
-  theme(text = element_text(size = 14))
+  theme(text = element_text(size = 18))
 
-ggsave(here("Manuscript", "figure_e1a.pdf"), plot = figure_e1a,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure_e1a.jpeg"), plot = figure_e1a,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
 
 #(b)
 HR_plot_data <- 
@@ -302,7 +342,7 @@ HR_plot_data <-
         exp(mean_results_C1[na.omit(variable_names$mortality_logHR_varnames)]), 
         exp(mean_results_C2[na.omit(
           variable_names$mortality_logHR_varnames)])) %>% 
-  set_colnames(c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2")
+  set_colnames(c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2")
                ) %>% as.data.frame() %>%
   mutate("Age" = seq(50, 90, by = 5)) %>%
   pivot_longer(cols = -Age, 
@@ -311,30 +351,31 @@ HR_plot_data <-
   mutate_at("Scenario", as.factor)
 HR_plot_data$Scenario <- 
   factor(HR_plot_data$Scenario, levels = 
-           c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
+           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
-figure_e1b <- ggplot(HR_plot_data, aes(Age, HR)) + 
-  geom_point(aes(color = Scenario, group = Scenario), 
-             size = 3, alpha = rep(c(1, rep(0.3, 5)), 9)) + 
+figure_e1b <- ggplot(HR_plot_data, aes(Age, HR, colour = Scenario, 
+                                       shape = Scenario)) + 
+  geom_point(aes(color = Scenario, shape = Scenario), 
+             size = 4, alpha = rep(c(1, rep(0.45, 5)), 9)) + 
   geom_line(aes(color = Scenario, group = Scenario), size = 1.25, 
             alpha = rep(c(1, rep(0.3, 5)), each = 9)) + 
   scale_x_continuous(name = "Age bands", breaks = seq(50, 90, 5), 
                      labels = c("[50-55)", "[55-60)","[60-65)", "[65-70)", 
                                 "[70-75)","[75-80)", "[80-85)", "[85-90)",
                                 "[90-95)")) + 
-  #scale_shape_manual(values = c(19, 8, 19, 17, 19, 17)) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) + 
-  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age", 
-       color = "") + theme_minimal() + 
-  theme(text = element_text(size = 14)) 
+  labs(y = "Mortality Hazard Ratio (Women:Men)", x = "Age") + theme_minimal() + 
+  theme(text = element_text(size = 18)) 
 
-ggsave(here("Manuscript", "figure_e1b.pdf"), plot = figure_e1b,
-       device = "pdf", dpi = 300)
+ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
+       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- eFigure 2 ----
 set.seed(20200226)
 #Create one sample of size 100,000 for each simulation scenario
+source(here("RScripts","scenario_A_pars.R"))
 sample_A <- data_gen(num_obs = 100000)
 
 source(here("RScripts","scenario_B1_pars.R"))
@@ -356,7 +397,7 @@ Ci_data <-
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "No Selective Survival") %>% 
+                 "Scenario" = "No Selection") %>% 
           dplyr::select(-one_of("female")), 
         sample_B1 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
@@ -414,8 +455,7 @@ samp_Ci <- Ci_plot_data[, c("id", seq(50, 95, by = 5), "Scenario")] %>%
 
 samp_Ci$Scenario <- 
   factor(samp_Ci$Scenario, levels = 
-           c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
-
+           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Creating a plot with random sample in the background
@@ -434,20 +474,47 @@ figure_e2 <- ggplot(samp_Ci, aes(Age, value)) +
   scale_x_continuous(breaks = seq(50, 95, 5)) + 
   facet_grid(. ~Scenario) +
   theme_minimal() +  
+  theme(text = element_text(size = 22)) + 
+  coord_cartesian(ylim = c(-10, 6)) + 
+  scale_y_continuous(breaks = seq(-10, 6, by = 2)) + 
+  scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) + 
+  #guides(color = guide_legend(reverse = TRUE)) +
+  geom_hline(yintercept = dem_cut) + 
+  theme(legend.position = c(0.95, 0.80))
+
+ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
+       device = "jpeg", dpi = 300, width = 20, height = 7.2, units = "in")
+
+#MELODEM plot
+ggplot(samp_Ci %>% filter(Scenario == "HET2"), aes(Age, value)) + 
+  geom_line(data = 
+              subset(samp_Ci, variable != "Women" & variable != "Men") %>% 
+              filter(Scenario == "HET2"), 
+            aes(group = variable), color = "gray") +
+  geom_line(data = subset(samp_Ci, variable == "Women") %>% 
+              filter(Scenario == "HET2"), 
+            aes(color = variable), size = 1.25) + 
+  geom_line(data = subset(samp_Ci, variable == "Men") %>% 
+              filter(Scenario == "HET2"), 
+            aes(color = variable), size = 1.25, alpha = 0.6) + 
+  geom_hline(yintercept = dem_cut, size = 1.25) + 
+  labs(y = "Cognitive Function", 
+       x = "Age", 
+       color = "Sex/Gender") + 
+  scale_x_continuous(breaks = seq(50, 95, 5)) + 
+  theme_minimal() +  
   theme(text = element_text(size = 14)) + 
   coord_cartesian(ylim = c(-10, 10)) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0.3, end = 1) + 
   #guides(color = guide_legend(reverse = TRUE)) +
   geom_hline(yintercept = dem_cut) 
 
-ggsave(here("Manuscript", "figure_e2.jpeg"), plot = figure_e2,
-       device = "jpeg", dpi = 300)
 
 #---- eFigure 3 ----
 male_inc_data <- 
   data.frame("Ages" = seq(50, 90, by = 5), 
              "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
-             "No Selective Survival" = 1000*
+             "No Selection" = 1000*
                mean_results_A[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_A[na.omit(variable_names$PY_males_varnames)], 
@@ -475,23 +542,27 @@ male_inc_data$Scenario <-
   factor(male_inc_data$Scenario, levels = 
            c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"))
 levels(male_inc_data$Scenario)[which(levels(male_inc_data$Scenario) == 
-                                       "No.Selection")] <- "No Selective Survival"
+                                       "No.Selection")] <- "No Selection"
 
 
 #Make the plot
 figure_e3 <- ggplot(male_inc_data, 
-                    aes(x = Ages, y = rates, colour = Scenario)) + 
-  geom_line(size = 1.25) + geom_point(aes(color = Scenario), size = 3) + 
+                    aes(x = Ages, y = rates, colour = Scenario, 
+                        shape = Scenario)) + 
+  geom_line(size = 1.25, lty = rep(c("dashed", rep("solid", 5)), each = 6)) + 
+  geom_point(aes(color = Scenario, shape = Scenario), size = 4) + 
   theme_minimal() + 
   scale_x_continuous(name = "Age bands", breaks = seq(65, 90, by = 5), 
                      labels = c("[65-70)", "[70-75)","[75-80)", 
                                 "[80-85)", "[85-90)","[90-95)")) + 
+  scale_shape_manual(values = c("circle", rep("square", 5))) +
   ylab(TeX("Dementia incidence rate per 1000 PY")) + 
   scale_color_hp_d(option = "LunaLovegood", begin = 0, end = 1) +  
   theme(text = element_text(size = 14)) 
 
 ggsave(here("Manuscript", "figure_e3.jpeg"), plot = figure_e3,
        device = "jpeg", dpi = 300)
+
 
 #---- eTable 3 ----
 exp(mean_results_A[variable_names$logIRR_varnames])
