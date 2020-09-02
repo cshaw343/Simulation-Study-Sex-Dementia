@@ -534,15 +534,17 @@ male_inc_data <-
                mean_results_C2[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_C2[na.omit(variable_names$PY_males_varnames)]) %>% 
-  pivot_longer(cols = c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"), 
+  pivot_longer(cols = c("ACT", "No.Selective.Survival", "HOM1", "HOM2", "HET1", 
+                        "HET2"), 
                names_to = "Scenario", values_to = "rates") %>% 
   filter(Ages >= 65) %>% mutate_at("Scenario", as.factor)  
 
 male_inc_data$Scenario <- 
   factor(male_inc_data$Scenario, levels = 
-           c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"))
+           c("ACT", "No.Selective.Survival", "HOM1", "HOM2", "HET1", "HET2"))
 levels(male_inc_data$Scenario)[which(levels(male_inc_data$Scenario) == 
-                                       "No.Selection")] <- "No Selective Survival"
+                                       "No.Selective.Survival")] <- 
+  "No Selective Survival"
 
 
 #Make the plot
