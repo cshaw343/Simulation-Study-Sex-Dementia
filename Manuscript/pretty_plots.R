@@ -147,7 +147,7 @@ figure2_data_all_error[which(figure2_data_all_error$Ages == "90"), "Ages"] <-
 #Scenario data
 figure2_data_all_error$Scenario <- as.character(figure2_data_all_error$Scenario)
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "A"), 
-                       "Scenario"] <- "No Selection"
+                       "Scenario"] <- "No Selective Survival"
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "B1"), 
                        "Scenario"] <- "HOM1"
 figure2_data_all_error[which(figure2_data_all_error$Scenario == "B2"), 
@@ -159,7 +159,7 @@ figure2_data_all_error[which(figure2_data_all_error$Scenario == "C2"),
 figure2_data_all_error$Scenario <- as.factor(figure2_data_all_error$Scenario)
 figure2_data_all_error$Scenario <- 
   factor(figure2_data_all_error$Scenario, levels = 
-          c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+          c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #plot
@@ -234,7 +234,7 @@ source(here("RScripts","scenario_C2_pars.R"))
 sample_C2 <- data_gen(num_obs = 100000)
 
 #Format data for plotting
-plot_data_A <- format_plot_data(sample_A, "No Selection") 
+plot_data_A <- format_plot_data(sample_A, "No Selective Survival") 
 plot_data_B1 <- format_plot_data(sample_B1, "HOM1") 
 plot_data_B2 <- format_plot_data(sample_B2, "HOM2") 
 plot_data_C1 <- format_plot_data(sample_C1, "HET1") 
@@ -246,7 +246,7 @@ figure3_data <- do.call("rbind",
 
 figure3_data$Scenario <- 
   factor(figure3_data$Scenario, levels = 
-           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+           c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Manuscript calculation (Results section)
@@ -285,7 +285,7 @@ female_cp_survival <-
         mean_results_C1[variable_names$cp_alive_females_varnames[1:num_tests]], 
         mean_results_C2[variable_names$cp_alive_females_varnames[1:num_tests]],
         female_life_US$CP[-1]) %>% as.data.frame() %>%
-  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
                ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
   pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
   mutate("Sex/Gender" = "Women")
@@ -297,7 +297,7 @@ male_cp_survival <-
         mean_results_C1[variable_names$cp_alive_males_varnames[1:num_tests]], 
         mean_results_C2[variable_names$cp_alive_males_varnames[1:num_tests]],
         male_life_US$CP[-1]) %>% as.data.frame() %>%
-  set_colnames(c("No Selection", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
                ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
   pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
   mutate("Sex/Gender" = "Men")
@@ -307,7 +307,7 @@ cp_surv_plot_data <- rbind(female_cp_survival, male_cp_survival) %>%
 
 surv_at_50 <- 
   data.frame("Age" = rep(50, 12), 
-             "Scenario" = rep(c("Lifetable", "No Selection", "HOM1", "HOM2", 
+             "Scenario" = rep(c("Lifetable", "No Selective Survival", "HOM1", "HOM2", 
                                 "HET1", "HET2"), 2),  
              "prob" = 1) %>% 
   mutate("Sex/Gender" = rep(c("Women", "Men"), each = 6))
@@ -315,7 +315,7 @@ surv_at_50 <-
 cp_surv_plot_data <- rbind(surv_at_50, cp_surv_plot_data)
 cp_surv_plot_data$Scenario <- 
   factor(cp_surv_plot_data$Scenario, levels = 
-           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+           c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 figure_e1a <- ggplot(cp_surv_plot_data, 
@@ -342,7 +342,7 @@ HR_plot_data <-
         exp(mean_results_C1[na.omit(variable_names$mortality_logHR_varnames)]), 
         exp(mean_results_C2[na.omit(
           variable_names$mortality_logHR_varnames)])) %>% 
-  set_colnames(c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2")
+  set_colnames(c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2")
                ) %>% as.data.frame() %>%
   mutate("Age" = seq(50, 90, by = 5)) %>%
   pivot_longer(cols = -Age, 
@@ -351,7 +351,7 @@ HR_plot_data <-
   mutate_at("Scenario", as.factor)
 HR_plot_data$Scenario <- 
   factor(HR_plot_data$Scenario, levels = 
-           c("Lifetable", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+           c("Lifetable", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
 
 figure_e1b <- ggplot(HR_plot_data, aes(Age, HR, colour = Scenario, 
                                        shape = Scenario)) + 
@@ -397,7 +397,7 @@ Ci_data <-
                         "survtime", "last_Ci") %>% 
           mutate("Gender" = case_when(female == 0 ~ "Men", 
                                       TRUE ~ "Women"), 
-                 "Scenario" = "No Selection") %>% 
+                 "Scenario" = "No Selective Survival") %>% 
           dplyr::select(-one_of("female")), 
         sample_B1 %>% 
           dplyr::select("id", "female", variable_names$Ci_varnames, 
@@ -455,7 +455,7 @@ samp_Ci <- Ci_plot_data[, c("id", seq(50, 95, by = 5), "Scenario")] %>%
 
 samp_Ci$Scenario <- 
   factor(samp_Ci$Scenario, levels = 
-           c("ACT", "No Selection", "HOM1", "HOM2", "HET1", "HET2"))
+           c("ACT", "No Selective Survival", "HOM1", "HOM2", "HET1", "HET2"))
 
 
 #Creating a plot with random sample in the background
@@ -514,7 +514,7 @@ ggplot(samp_Ci %>% filter(Scenario == "HET2"), aes(Age, value)) +
 male_inc_data <- 
   data.frame("Ages" = seq(50, 90, by = 5), 
              "ACT" = c(rep(0, 3),ACT_inc_rates$Male_All_Dementia_1000PY),
-             "No Selection" = 1000*
+             "No Selective Survival" = 1000*
                mean_results_A[na.omit(
                  variable_names$inc_cases_males_varnames)]/
                mean_results_A[na.omit(variable_names$PY_males_varnames)], 
@@ -542,7 +542,7 @@ male_inc_data$Scenario <-
   factor(male_inc_data$Scenario, levels = 
            c("ACT", "No.Selection", "HOM1", "HOM2", "HET1", "HET2"))
 levels(male_inc_data$Scenario)[which(levels(male_inc_data$Scenario) == 
-                                       "No.Selection")] <- "No Selection"
+                                       "No.Selection")] <- "No Selective Survival"
 
 
 #Make the plot
