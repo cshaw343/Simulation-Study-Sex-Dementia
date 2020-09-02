@@ -213,7 +213,7 @@ ggplot(figure2_data_all_error,
 #        device = "pdf", dpi = 300)
 
 ggsave(here("Manuscript", "figure2_option3.jpeg"), plot = figure2_option3,
-       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
+       device = "jpeg", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- Figure 3 ----
@@ -273,7 +273,7 @@ figure3 <- ggplot(data = figure3_data) +
 
 #Saving figure
 ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
-       device = "pdf", dpi = 300, height = 7.25, width = 13, units = "in")
+       device = "jpeg", dpi = 300, height = 7.25, width = 13, units = "in")
 
 #---- eFigure 1 ----
 #(a)
@@ -331,7 +331,7 @@ figure_e1a <- ggplot(cp_surv_plot_data,
   theme(text = element_text(size = 18))
 
 ggsave(here("Manuscript", "figure_e1a.jpeg"), plot = figure_e1a,
-       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
+       device = "jpeg", dpi = 300, width = 13, height = 7.25, units = "in")
 
 #(b)
 HR_plot_data <- 
@@ -369,7 +369,7 @@ figure_e1b <- ggplot(HR_plot_data, aes(Age, HR, colour = Scenario,
   theme(text = element_text(size = 18)) 
 
 ggsave(here("Manuscript", "figure_e1b.jpeg"), plot = figure_e1b,
-       device = "pdf", dpi = 300, width = 13, height = 7.25, units = "in")
+       device = "jpeg", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- eFigure 2 ----
