@@ -1,35 +1,60 @@
 # History files
 .Rhistory
 .Rapp.history
-
 # Session Data files
 .RData
-
 # Example code in package build process
 *-Ex.R
-
 # Output files from R CMD build
 /*.tar.gz
-
 # Output files from R CMD check
 /*.Rcheck/
-
 # RStudio files
 .Rproj.user/
 .Rproj
-
-# produced vignettes
-vignettes/*.html
-vignettes/*.pdf
-
-# OAuth2 token, see https://github.com/hadley/httr/releases/tag/v0.3
-.httr-oauth
-
-# knitr and R markdown default cache directories
-/*_cache/
-/cache/
-
-# Temporary files created by R markdown
-*.utf8.md
-*.knit.md
-.Rproj.user
+.RDataTmp
+# Meeting files
+Meetings/*
+#Simulation results
+Data/test_sim_results*
+Data/dataset*
+Results/Scenario_A_no_bias/*.html
+Results/Scenario_B/*.html
+Results/Scenario_C/*.html
+#Plots
+Plots/*
+Manuscript/*.jpeg
+#Search results and other data files
+Data/*
+#Markdown .html files
+Results/linear_model/Scenario_A_no_bias/*.html
+Results/quadratic_model/Scenario_A_no_bias/*.html
+Results/quadratic_model/Scenario_B/*.html
+Results/quadratic_model/Scenario_B_highU/*.html
+Results/quadratic_model/Scenario_C/*.html
+#Simulation results
+Results/*.csv
+Results/quadratic_model/Scenario_A_no_bias/*.csv
+Results/quadratic_model/Scenario_B/*.csv
+Results/quadratic_model/Scenario_B_highU/*.csv
+Results/quadratic_model/Scenario_C/*.csv
+Results/Scenario_A_no_bias/*.csv
+Results/Scenario_B/*.csv
+Results/Scenario_C/*.csv
+Results/linear_model/Scenario_B/*.csv
+Results/liner_model/Scenario_C/*.csv
+#Scratch Code
+RScripts/scratch*
+#Test methods
+RScripts/logit_transform_Cij.R
+RScripts/simple_probabilistic_method.R
+Results/Scenario_A_no_bias/uniform*
+Results/Scenario_A_no_bias/one_demcut*
+Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut.Rmd
+Results/Scenario_A_no_bias/sex-dementia_sim_parA_one_demcut_all_match.Rmd
+RScripts/linear_model/test*.R
+RScripts/quadratic_model/test*.R
+#Misc files
+Manuscript/*.DS_Store
+#Trash folder
+To Delete/*
