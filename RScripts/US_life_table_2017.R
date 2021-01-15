@@ -100,3 +100,50 @@ white_female_life <- tibble("Birth cohort" = "1919-1921",
                             "Country" = "US", 
                             "Sex" = "Female") 
 
+#---- Life Table Data-- Black ----
+#"Survivors" represents number surviving out of 100,000 born alive
+black_life <- tibble("Birth cohort" = "1919-1921",
+                     "Age" = ages, 
+                     "Survivors" = c(100000, 86174, 84690, 83180, 79641, 74973, 
+                                     70492, 65865, 61244, 56442, 51422, 45803, 
+                                     39418, 32738, 25585, 18011, 11376, 5794, 
+                                     2317, 689, 129), 
+                     "Prob" = Survivors/100000, 
+                     "logProb" = log(Prob), 
+                     "CP" = cond_prob(Survivors), 
+                     "Haz" = haz(age = Age, logprobs = logProb), 
+                     "Country" = "US", 
+                     "Sex" = "both") 
+
+black_male_life <- tibble("Birth cohort" = "1919-1921",
+                          "Age" = ages, 
+                          "Survivors" = c(100000, 85195, 83768, 82332, 79057, 
+                                          74540, 70344, 65873, 61353, 56589, 
+                                          51880, 46581, 40506, 34042, 26923, 
+                                          18854, 11615, 5605, 2040, 552, 77), 
+                          "Prob" = Survivors/100000,
+                          "logProb" = log(Prob),
+                          "CP" = cond_prob(Survivors), 
+                          "Haz" = haz(age = Age, logprobs = logProb), 
+                          "Country" = "US", 
+                          "Sex" = "Male") 
+
+black_female_life <- tibble("Birth cohort" = "1919-1921",
+                            "Age" = ages, 
+                            "Survivors" = c(100000, 87149, 85607, 83954, 80154, 
+                                            75359, 70633, 65857, 61130, 56230, 
+                                            50780, 44742, 37954, 31044, 24107, 
+                                            17216, 11151, 5972, 2579, 818, 179), 
+                            "Prob" = Survivors/100000,
+                            "logProb" = log(Prob),
+                            "CP" = cond_prob(Survivors), 
+                            "Haz" = haz(age = Age, logprobs = logProb), 
+                            "Country" = "US", 
+                            "Sex" = "Female") 
+
+#---- quick calcs ----
+#How different are sex diffs in survival between whites and blacks
+
+plot(black_female_life$Haz[12:21]/black_male_life$Haz[12:21], pch = 19, 
+     col = "black", ylab = "HR (women:men)", xlab = "Index")
+points(white_female_life$Haz[12:21]/white_male_life$Haz[12:21])
