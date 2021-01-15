@@ -174,7 +174,8 @@ figure2_option3 <- ggplot(figure2_data_all_error,
   theme_minimal() + ylab(TeX("$\\bar{\\widehat{IRR}}_{women:men}$")) + 
   theme(text = element_text(size = 18)) + 
   geom_hline(yintercept = 1, linetype = "dashed", color = "black") + 
-  theme(legend.position = "bottom", legend.direction = "horizontal")  
+  theme(legend.position = "bottom", legend.direction = "horizontal") + 
+  guides(color = guide_legend(nrow = 1))
   
 
 #---- MELODEM presentation ----
@@ -212,8 +213,8 @@ ggplot(figure2_data_all_error,
 # ggsave(here("Manuscript", "figure2_option2.pdf"), plot = figure2_option2,
 #        device = "pdf", dpi = 300)
 
-ggsave(here("Manuscript", "figure2_option3.jpeg"), plot = figure2_option3,
-       device = "jpeg", dpi = 300, width = 13, height = 7.25, units = "in")
+ggsave(here("Manuscript", "figure2_option3.eps"), plot = figure2_option3,
+       device = "eps", dpi = 300, width = 13, height = 7.25, units = "in")
 
 
 #---- Figure 3 ----
@@ -272,8 +273,8 @@ figure3 <- ggplot(data = figure3_data) +
   guides(color = guide_legend(reverse = TRUE))
 
 #Saving figure
-ggsave(here("Manuscript", "figure3.jpeg"), plot = figure3,
-       device = "jpeg", dpi = 300, height = 7.25, width = 13, units = "in")
+ggsave(here("Manuscript", "figure3.eps"), plot = figure3,
+       device = "eps", dpi = 300, height = 7.25, width = 13, units = "in")
 
 #---- eFigure 1 ----
 #(a)
@@ -285,7 +286,8 @@ female_cp_survival <-
         mean_results_C1[variable_names$cp_alive_females_varnames[1:num_tests]], 
         mean_results_C2[variable_names$cp_alive_females_varnames[1:num_tests]],
         female_life_US$CP[-1]) %>% as.data.frame() %>%
-  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", "Lifetable")
+  set_colnames(c("No Selective Survival", "HOM1", "HOM2", "HET1", "HET2", 
+                 "Lifetable")
                ) %>% mutate("Age" = seq(55, 95, by = 5)) %>% 
   pivot_longer(cols = -Age, names_to = "Scenario", values_to = "prob") %>% 
   mutate("Sex/Gender" = "Women")
